@@ -1,6 +1,16 @@
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	<string.h>
+/*****************************************************************************
+* Vector Mame Menu - MakeINI
+*
+* Generate a vmmenu.ini file containing all the vector games
+* listed in your mame.xml file
+*
+* Author:  Chad Gray
+* Created: 10/11/09
+*
+*****************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 char * searchfor(char*, char*, int, char*);
 void printhelp(void);
@@ -70,7 +80,7 @@ void printhelp()
 	printf("============================\n\n");
 	printf("Usage:\nmakeini.exe >vmmenu.ini\n\n");
 	printf("This utility should be run from the same directory as your mame.xml file\n");
-	printf("to create the vmmenuini file required by vmenu.exe\n\n");
+	printf("to create the vmmenu.ini file required by vmenu.exe\n\n");
 	printf("You can create the mame.xml file by running:\n");
 	printf("mame.exe -listxml >mame.xml\n\n");
 	printf("Substitute mame.exe with the name of your mame variant if necessary.\n\n");
