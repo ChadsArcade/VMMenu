@@ -7,8 +7,8 @@
 #include "vmmstddef.h"
 #include "zvgFrame.h"
 
-union REGS in, out;
-int  LEDstate=0;
+union 	REGS in, out;
+int  	LEDstate=0;
 int	mousexmick=0, mouseymick=0;
 int	optz[15];
 int	f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
@@ -24,8 +24,8 @@ void startZVG(void)
 	error = zvgFrameOpen();			// initialize everything
 	if (error)
 	{
-		zvgError(error);				// print error
-		exit(0);							// return to DOS
+		zvgError(error);		// print error
+		exit(0);			// return to DOS
 	}
 }
 
@@ -34,14 +34,14 @@ Check for a keypress, return code of key (or modifier)
 *******************************************************************/
 int getkey(void)
 {
-   int key=0, shift=0;
-   if (bioskey(1))
-   {
-    	key=bioskey(0);
-   	return key;
-   }
-   shift=bioskey(2) & 15;      // only want bits 0-3 so mask off higher 4 bits
-   if (shift)	key=shift;
+	int key=0, shift=0;
+	if (bioskey(1))
+	{
+ 		key=bioskey(0);
+		return key;
+	}
+	shift=bioskey(2) & 15;      // only want bits 0-3 so mask off higher 4 bits
+	if (shift)	key=shift;
 	// Disable autorepeat of modifiers
 	if (key==FIRE)						//LCTRL
 		if (f1_press==1) key=0;
@@ -68,9 +68,9 @@ Check whether a mouse driver is installed
 *******************************************************************/
 int initmouse()
 {
-   in.x.ax = 0;
-   int86 (0X33,&in,&out);
-   return out.x.ax;
+	in.x.ax = 0;
+	int86 (0X33,&in,&out);
+	return out.x.ax;
 }
 
 
@@ -81,22 +81,22 @@ Get the amount by which the mouse has been moved since last check
 *******************************************************************/
 void mousemick()
 {
-   int tempaxis;
-   in.x.ax = 0x0b;
-   int86 (0x33, &in, &out);
-   mousexmick = out.x.cx;     // read X axis
-   mouseymick = out.x.dx;     // Read Y axis
-   if (mousexmick > 32768) mousexmick -= 65536;
-   if (mouseymick > 32768) mouseymick -= 65536;
-   if (optz[o_mswapXY] == 1) // swap x and y axes
-   {
-      tempaxis = mousexmick;
-      mousexmick = mouseymick;
-      mouseymick = tempaxis;
-   }
-   if (optz[o_mrevX]) mousexmick = -mousexmick;
-   if (optz[o_mrevY]) mouseymick = -mouseymick;
-   if (optz[o_mouse] == 1) mouseymick = 0;
+	int tempaxis;
+	in.x.ax = 0x0b;
+	int86 (0x33, &in, &out);
+	mousexmick = out.x.cx;     // read X axis
+	mouseymick = out.x.dx;     // Read Y axis
+	if (mousexmick > 32768) mousexmick -= 65536;
+	if (mouseymick > 32768) mouseymick -= 65536;
+	if (optz[o_mswapXY] == 1) // swap x and y axes
+	{
+		tempaxis = mousexmick;
+		mousexmick = mouseymick;
+		mouseymick = tempaxis;
+	}
+	if (optz[o_mrevX]) mousexmick = -mousexmick;
+	if (optz[o_mrevY]) mouseymick = -mouseymick;
+	if (optz[o_mouse] == 1) mouseymick = 0;
 }
 
 
@@ -125,7 +125,7 @@ void setLEDs(int value)
 {
 	if (LEDstate != value)
 	{
-	   LEDstate = value;
+		LEDstate = value;
 		asm("movb $0xed, %al\n\t"
 		"out %al, $0x60\n\t"
 		"nop\n\t"
@@ -214,13 +214,13 @@ void RunGame(char *gameargs)
 
 	printf("Launching: [%s]\n", command);
 	err = system(command);
-	if (optz[o_redozvg] && ZVGPresent)	// Re-open the ZVG if MAME closed it
+	if (optz[o_redozvg] && ZVGPresent)			// Re-open the ZVG if MAME closed it
 	{
 		err = zvgFrameOpen();				// initialize everything
 		if (err)
 		{
-			zvgError( err);					// if it went wrong print error
-			exit(0);								// and return to OS
+			zvgError( err);				// if it went wrong print error
+			exit(0);				// and return to OS
 		}
 	}
 }
