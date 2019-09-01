@@ -8,8 +8,8 @@
 *
 * 22/6/11	Ported to SDL/Linux and pulled out common source
 * 13/3/11	Added keyboard LEDs
-*				Added Mouse/Trackball support
-*				Press a key for menu message in screen saver
+*			Added Mouse/Trackball support
+*			Press a key for menu message in screen saver
 * 12/3/11	Added Spinner Support
 *
 *
@@ -38,36 +38,36 @@
 #endif 
 
 /****Function declarations***/
-void		PrintString(char*, int, int, int, float, float, int); // prints a string of characters
-point		fnrotate(int, float, float, float, float);				// rotate a point given number of degrees
+void		PrintString(char*, int, int, int, float, float, int);			// prints a string of characters
+point		fnrotate(int, float, float, float, float);						// rotate a point given number of degrees
 void		drawshape(vObject);												// draw shape pointed to by vObject
-vObject	updateobject(vObject);											// update position and rotation of a vector object
-void		drawborders(int, int, int, int, int, int, int);			// draw borders around edge of screen
-char*		ucase(char*);														// convert string to uppercase
-vObject	intro(void);														// Intro logo animation
-vObject	make_asteroid(void);												// define an asteroid
-vObject	make_sega(void);													// define sega logo
-vObject	make_cinematronics(void);										// define cinematronics logo
-vObject	make_atari(void);													// define atari logo
-vObject	make_centuri(void);												// define centuri logo
-vObject	make_vbeam(void);													// define vectorbeam logo
-vObject	make_midway(void);												// define midway logo
-int		reallyescape(void);												// See if you really want to quit
-void		author(int);														// Print author info
-void		setcolour(int, int);												// set colour and brightness
-int		credits(void);														// print credits
-vStar		make_star(void);													// define a star
+vObject		updateobject(vObject);											// update position and rotation of a vector object
+void		drawborders(int, int, int, int, int, int, int);					// draw borders around edge of screen
+char*		ucase(char*);													// convert string to uppercase
+vObject		intro(void);													// Intro logo animation
+vObject		make_asteroid(void);											// define an asteroid
+vObject		make_sega(void);												// define sega logo
+vObject		make_cinematronics(void);										// define cinematronics logo
+vObject		make_atari(void);												// define atari logo
+vObject		make_centuri(void);												// define centuri logo
+vObject		make_vbeam(void);												// define vectorbeam logo
+vObject		make_midway(void);												// define midway logo
+int			reallyescape(void);												// See if you really want to quit
+void		author(int);													// Print author info
+void		setcolour(int, int);											// set colour and brightness
+int			credits(void);													// print credits
+vStar		make_star(void);												// define a star
 vStar		updatestar(vStar);												// update a star object
-void		drawstar(vStar);													// Draw a star
-void		showstars();														// Display all the stars on screen
+void		drawstar(vStar);												// Draw a star
+void		showstars();													// Display all the stars on screen
 void		getsettings(void);												// get settings from ini file
-void		writeinival(char*, int, int, int);							// write a value to the cfg file
+void		writeinival(char*, int, int, int);								// write a value to the cfg file
 void		writecfg(void);													// write the cfg file
-int		getcolour(char*);													// Get colour value from cfg as an int
-void		pressakey(int, int);												// Message to escape from screen saver to menu
-void		GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B components of a passed colour
-g_node*	GetRandomGame(m_node *);										// Selects a random game from the list
-void		PlayAttractGame(m_node *gameslist);							// get a random game name and add attract mode args
+int			getcolour(char*);												// Get colour value from cfg as an int
+void		pressakey(int, int);											// Message to escape from screen saver to menu
+void		GetRGBfromColour(int, int*, int*, int*);						// Get R, G and B components of a passed colour
+g_node*		GetRandomGame(m_node *);										// Selects a random game from the list
+void		PlayAttractGame(m_node *gameslist);								// get a random game name and add attract mode args
 void		PrintPointer(int mx, int my);									// Print mouse pointer at current mouse position
 void		SetOptions(void);
 
@@ -75,13 +75,13 @@ void		SetOptions(void);
 
 // Global variables (sorry - there's quite a few...)
 
-vObject	asteroid[NUM_ASTEROIDS];
+vObject		asteroid[NUM_ASTEROIDS];
 vStar		starz[NUM_STARS];
 static int	xmax=X_MAX, ymax=Y_MAX;
 
-extern int	optz[15];			// array of user defined menu preferences
-static int	keyz[11];			// array of key press codes
-static int	colours[2][7];		// array of [colours][7] and [intensities][7]
+extern int	optz[15];						// array of user defined menu preferences
+static int	keyz[11];						// array of key press codes
+static int	colours[2][7];					// array of [colours][7] and [intensities][7]
 
 static char	attractargs[30];
 extern char	zvgargs[30];
@@ -89,9 +89,9 @@ static int	totalnumgames=0;
 
 static dictionary* ini;
 
-extern int 		mousexmick, mouseymick;
+extern int 	mousexmick, mouseymick;
 int	ZVGPresent = 1;
-int	SDL_VC, SDL_VB;				// colour and brightness for SDL vectors
+int	SDL_VC, SDL_VB;							// colour and brightness for SDL vectors
 int	mousefound=0;
 
 char	auth1[] = "VMMenu 1.3, Chad Gray 2011";
@@ -99,18 +99,18 @@ char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
 {
-	uint		err, man_menu;
+	uint	err, man_menu;
 	int		count, top, timeout = 0, ticks = 0, gamesize;
 	int		pressx=0, pressy=0;
 	int		cc;
-	float		width=0.0;
-	char		mytext[100];
+	float	width=0.0;
+	char	mytext[100];
 	int		mpx = 0, mpy = 0;
 	vObject	mame, sega, cinematronics, atari, centuri, vbeam, midway;
 	m_node	*vectorgames;
 	g_node	*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
-	FILE		*inifp;
-	char		* ini_name = "vmmenu.cfg";
+	FILE	*inifp;
+	char	* ini_name = "vmmenu.cfg";
 
 	vectorgames = createlist();
 	totalnumgames=printlist(vectorgames);
@@ -191,12 +191,12 @@ int main( void) //int argc, char *argv[])
 		starz[count] = make_star();
 	}
 
-	sega = make_sega();
-	cinematronics = make_cinematronics();
-	atari = make_atari();
-	centuri = make_centuri();
-	vbeam = make_vbeam();
-	midway = make_midway();
+	sega			= make_sega();
+	cinematronics	= make_cinematronics();
+	atari			= make_atari();
+	centuri			= make_centuri();
+	vbeam			= make_vbeam();
+	midway			= make_midway();
 
 	if (ZVGPresent)
 	{
@@ -214,7 +214,7 @@ int main( void) //int argc, char *argv[])
 		//if (mousefound && optz[o_mouse] && (timeout%optz[o_msamp] == 0))
 		if (mousefound && (timeout%optz[o_msamp] == 0))	// mousefound only set if optz[o_mouse] is true
 		{
-			mousemick();			 // update mousexmick and mouseymick
+			mousemick();			 		// update mousexmick and mouseymick
 		}
 		else
 		{
@@ -228,7 +228,7 @@ int main( void) //int argc, char *argv[])
 		if (timeout > 1800)		// ############## screensaver mode 1800 * 1/60 = 30 seconds ##############
 		{
 			//if ((ticks%60 == 5) || (ticks%60 == 35)) setLEDs(ticks%60 <30 ? N_LED : C_LED); // flash LEDs
-			if ((ticks%360) == 0)   setLEDs(0);
+			if ((ticks%360) == 0)	setLEDs(0);
 			if ((ticks%360) == 60)  setLEDs(S_LED);
 			if ((ticks%360) == 120) setLEDs(S_LED | N_LED);
 			if ((ticks%360) == 180) setLEDs(S_LED | N_LED | C_LED);
@@ -250,7 +250,7 @@ int main( void) //int argc, char *argv[])
 			if ((timeout % 300) > 150)		pressakey(pressx, pressy);
 			if ((timeout % 1800) > 1500)
 				author(37.5-(abs(((timeout % 1800)-1650)/4)));
-			if (cc || (abs(mousexmick) > optz[o_msens]))					// if you've hit a key exit screensaver
+			if (cc || (abs(mousexmick) > optz[o_msens]))							// if you've hit a key exit screensaver
 			{
 				timeout = 0;
 				mame.inc.x = ((NewXYInc() * NewDir() ) / 4) + 0.25;	// choose a new angle for mame logo to move in
@@ -260,7 +260,7 @@ int main( void) //int argc, char *argv[])
 					asteroid[count] = make_asteroid();
 				}
 			}
-			if ((timeout%18000 == 0) && (timeout > 0))					// show credits every 5 mins of screensaver time
+			if ((timeout%18000 == 0) && (timeout > 0))								// show credits every 5 mins of screensaver time
 			{
 				if (credits()>0) timeout=0;
 				else timeout++;
@@ -284,16 +284,16 @@ int main( void) //int argc, char *argv[])
 				if ((ticks%60 == 5) || (ticks%60 == 35)) setLEDs(ticks%60 <30 ? 0 : N_LED);
 			}
 			else	setLEDs(0);
-			if (cc || (abs(mousexmick) > optz[o_msens]) || (abs(mouseymick) > optz[o_msens]))  // if you've hit a key process it...
+			if (cc || (abs(mousexmick) > optz[o_msens]) || (abs(mouseymick) > optz[o_msens]))	// if you've hit a key process it...
 			{
-				timeout = 0;														// reset screensaver timer
+				timeout = 0;																	// reset screensaver timer
 				/*** Keys when in any menu ***/
 				if (cc == keyz[k_options]) SetOptions();
 				if (cc == keyz[k_menu])			man_menu = !man_menu;	// Toggle between manufacturer and game menus
 				if (cc == keyz[k_random]) RunGame(GetRandomGame(vectorgames)->clone);
 				if (cc == keyz[k_quit])
 				{
-					if (reallyescape()) break;									// if ESC confirmed, exit menu
+					if (reallyescape()) break;													// if ESC confirmed, exit menu
 				}
 
 				// ############## Keys when in manufacturer menu ##############
@@ -351,7 +351,7 @@ int main( void) //int argc, char *argv[])
 						sel_game = sel_game->prev;
 						sel_clone = sel_game;
 					}
-					if ((cc == keyz[k_ngame]) || ((mousexmick > optz[o_msens]) && (optz[o_mouse] ==1)) || ((mouseymick > optz[o_msens])))		// go to next game
+					if ((cc == keyz[k_ngame]) || ((mousexmick > optz[o_msens]) && (optz[o_mouse] ==1)) || ((mouseymick > optz[o_msens])))	// go to next game
 					{
 						sel_game = sel_game->next;
 						sel_clone = sel_game;
@@ -360,12 +360,12 @@ int main( void) //int argc, char *argv[])
 					{
 						RunGame(sel_clone->clone);
 					}
-					if ((cc == keyz[k_nclone]) || (mousexmick > optz[o_msens] && (optz[o_mouse] == 2)))		  // go to next clone
+					if ((cc == keyz[k_nclone]) || (mousexmick > optz[o_msens] && (optz[o_mouse] == 2)))		// go to next clone
 					{
 						if		(sel_clone->nclone == NULL) sel_clone = sel_game;
 						else	sel_clone = sel_clone->nclone;
 					}
-					if ((cc == keyz[k_pclone]) || (mousexmick < -optz[o_msens] && (optz[o_mouse] == 2)))			// go to previous clone
+					if ((cc == keyz[k_pclone]) || (mousexmick < -optz[o_msens] && (optz[o_mouse] == 2)))	// go to previous clone
 					{
 						if		(sel_clone == sel_game) sel_clone = gotolastclone(sel_game);
 						else	sel_clone = sel_clone->pclone;
@@ -374,7 +374,7 @@ int main( void) //int argc, char *argv[])
 				}
 			}
 
-			drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 3, vwhite);					// Draw frame around the edge of the screen
+			drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 3, vwhite);						// Draw frame around the edge of the screen
 
 			// print the manufacturer name
 			strcpy(mytext, vectorgames->name);
@@ -382,7 +382,7 @@ int main( void) //int argc, char *argv[])
 				setcolour(colours[c_col][c_sman], colours[c_int][c_sman]);
 			else
 				setcolour(colours[c_col][c_man], colours[c_int][c_man]);
-			if (!optz[o_togpnm]) PrintString(mytext, 0, 300, 0, 12, 12, 0);					  // manufacturer name
+			if (!optz[o_togpnm]) PrintString(mytext, 0, 300, 0, 12, 12, 0);					// manufacturer name
 			else PrintString(mytext, 0, 300, 0, 8+(4*(1-man_menu)), 8+(4*(1-man_menu)), 0);
 
 			setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
@@ -486,12 +486,12 @@ int main( void) //int argc, char *argv[])
 			gamelist_root = vectorgames->firstgame;										// point to game list for current manufacturer
 			do
 			{
-				strcpy(mytext, gamelist_root->name);										// mytext = name of parent game
+				strcpy(mytext, gamelist_root->name);									// mytext = name of parent game
 				gamesize = 4;																		// fontsize for gamelist
 				if (!man_menu && (sel_game == gamelist_root))							// if we're at the selected game...
 				{
 					gamesize = 5;
-					if (sel_game != sel_clone) strcpy(mytext, sel_clone->name);		// change to clone name if different
+					if (sel_game != sel_clone) strcpy(mytext, sel_clone->name);			// change to clone name if different
 					if (sel_game->nclone)
 					{
 						setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
@@ -558,8 +558,8 @@ void PrintString(char *text, int xpos, int ypos, int charangle, float xScale, fl
 
 	// Calculate the start and endpoints of the line we are writing on
 	// and then rotate the line about the centre point.
-	line_start = fnrotate(lineangle, xpos - halfstring, ypos, xpos, ypos);
-	line_end   = fnrotate(lineangle, xpos + halfstring, ypos, xpos, ypos);
+	line_start	= fnrotate(lineangle, xpos - halfstring, ypos, xpos, ypos);
+	line_end	= fnrotate(lineangle, xpos + halfstring, ypos, xpos, ypos);
 
 	// The difference between start and end X and Y values divided by the number of chars
 	// gives us the increment in x and y to the print position of the next character
@@ -708,11 +708,11 @@ vObject updateobject(vObject shape)
 		shape.pos.x += shape.inc.x;
 		switch (shape.edge)
 		{
-		case 1:		// wrap around edge
+		case 1:			// wrap around edge
 			if (shape.pos.x < -xmax) shape.pos.x = xmax;
 			if (shape.pos.x > xmax) shape.pos.x = -xmax;
 			break;
-		case -1:		//bounce at edge
+		case -1:		// bounce at edge
 			if ((shape.pos.x + shape.cent.x) > xmax || (shape.pos.x - shape.cent.x) < -xmax)
 				shape.inc.x = -shape.inc.x;
 			break;
@@ -726,11 +726,11 @@ vObject updateobject(vObject shape)
 		shape.pos.y += shape.inc.y;
 		switch (shape.edge)
 		{
-		case 1:		// wrap around edge
+		case 1:			// wrap around edge
 			if (shape.pos.y < -ymax) shape.pos.y = ymax;
 			if (shape.pos.y > ymax) shape.pos.y = -ymax;
 			break;
-		case -1:		//bounce at edge
+		case -1:		// bounce at edge
 			if ((shape.pos.y + shape.cent.y) > ymax || (shape.pos.y - shape.cent.y) < -ymax)
 				shape.inc.y = -shape.inc.y;
 			break;
@@ -770,19 +770,19 @@ vObject intro(void)
 
 	static int mamelogo[] = {
 	0,27,81,108,		81,108,81,73,		81,73,117,109,		117,109,117,51,							// M
-	117,51,174,109,	174,109,174,44,																			// A
-	174,44,239,109,	239,109,239,73,	239,73,275,109,	275,109,275,54,							// M
-	275,54,328,107,	328,107,390,107,	390,107,371,88,	371,88,340,88,		340,88,330,78,
-	330,78,346,78,		346,78,325,57,		325,57,310,57,		310,57,299,47,		299,47,353,47,		// E
-	353,47,333,27,		333,27,249,27,		249,27,254,33,
-	254,33,254,55,		254,55,224,25,		224,25,224,60,		224,60,190,27,		190,27,154,27,		// M
-	154,27,154,55,		154,55,98,0,		98,0,65,0,			65,0,96,31,									// A
-	96,31,96,55,		96,55,66,25,		66,25,66,60,		66,60,32,27,		32,27,0,27,			// M
-	154,20,154,0,		154,0,174,20,																				// V
-	198,20,183,20,		183,20,163,0,		163,0,183,0,		173,10,183,10,								// E
-	223,20,208,20,		208,20,188,0,		188,0,208,0,														// C
-	228,20,248,20,		238,20,218,0,																				// T
-	253,20,268,20,		268,20,248,0,		248,0,233,0,		233,0,253,20,								// O
+	117,51,174,109,		174,109,174,44,																	// A
+	174,44,239,109,		239,109,239,73,		239,73,275,109,		275,109,275,54,							// M
+	275,54,328,107,		328,107,390,107,	390,107,371,88,		371,88,340,88,		340,88,330,78,		// E
+	330,78,346,78,		346,78,325,57,		325,57,310,57,		310,57,299,47,		299,47,353,47,		// L
+	353,47,333,27,		333,27,249,27,		249,27,254,33,												// O
+	254,33,254,55,		254,55,224,25,		224,25,224,60,		224,60,190,27,		190,27,154,27,		// G
+	154,27,154,55,		154,55,98,0,		98,0,65,0,			65,0,96,31,								// O
+	96,31,96,55,		96,55,66,25,		66,25,66,60,		66,60,32,27,		32,27,0,27,			// 
+	154,20,154,0,		154,0,174,20,																	// V
+	198,20,183,20,		183,20,163,0,		163,0,183,0,		173,10,183,10,							// E
+	223,20,208,20,		208,20,188,0,		188,0,208,0,												// C
+	228,20,248,20,		238,20,218,0,																	// T
+	253,20,268,20,		268,20,248,0,		248,0,233,0,		233,0,253,20,							// O
 	253,0,273,20,		273,20,288,20,		288,20,278,10,		278,10,273,10,		273,10,273,0		// R
 	};
 
@@ -793,13 +793,13 @@ vObject intro(void)
 	mame.inc.x = 0;			// don't move
 	mame.inc.y = 0;			// don't move
 	mame.angle = 0;			// normal orientation
-	mame.theta = -3;			// rotate clockwise 3 degrees per increment
+	mame.theta = -3;		// rotate clockwise 3 degrees per increment
 	mame.cent.x = 195;		// defines centre of logo
-	mame.cent.y = 55;			// centre of logo (rotation origin)
+	mame.cent.y = 55;		// centre of logo (rotation origin)
 	mame.colour = vcyan;
 	mame.bright = EDGE_NRM;
-	mame.edge  = -1;			// bounce on edge contact
-	mame.scale.x = 0.01;		//starting scale factor
+	mame.edge  = -1;		// bounce on edge contact
+	mame.scale.x = 0.01;	//starting scale factor
 	mame.scale.y = mame.scale.x;
 
 	// Zoom from 0 to x1.5 whilst rotating clockwise through 720 degrees
@@ -860,14 +860,14 @@ vObject make_asteroid(void)
 	vObject	asteroid;
 	int ast_type = NewAst();
 	//printf("Ast Type: %d\n", ast_type);
-	static int ast1[] = { 2,0,5,1, 5,1,6,0, 6,0,8,2, 8,2,5,4, 5,4,8,5, 8,5,8,6,
-								 8,6,5,8, 5,8,2,8, 2,8,3,6, 3,6,0,6, 0,6,0,3, 0,3,2,0 };
-	static int ast2[] = { 2,0,3,1, 3,1,6,0, 6,0,8,3, 8,3,6,5, 6,5,8,6, 8,6,6,8,
-								 6,8,4,7, 4,7,2,8, 2,8,0,6, 0,6,1,4, 1,4,0,2, 0,2,2,0 };
-	static int ast3[] = { 2,0,4,3, 4,3,4,0, 4,0,6,0, 6,0,8,3, 8,3,8,5, 8,5,6,8,
-								 6,8,3,8, 3,8,0,5, 0,5,2,4, 2,4,0,3, 0,3,2,0 };
-	static int ast4[] = { 2,0,5,0, 5,0,8,2, 8,2,7,4, 7,4,8,6, 8,6,6,8, 6,8,4,6,
-								 4,6,2,8, 2,8,0,6, 0,6,0,2, 0,2,2,0 };
+	static int ast1[] = {	2,0,5,1, 5,1,6,0, 6,0,8,2, 8,2,5,4, 5,4,8,5, 8,5,8,6,
+							8,6,5,8, 5,8,2,8, 2,8,3,6, 3,6,0,6, 0,6,0,3, 0,3,2,0 };
+	static int ast2[] = { 	2,0,3,1, 3,1,6,0, 6,0,8,3, 8,3,6,5, 6,5,8,6, 8,6,6,8,
+							6,8,4,7, 4,7,2,8, 2,8,0,6, 0,6,1,4, 1,4,0,2, 0,2,2,0 };
+	static int ast3[] = { 	2,0,4,3, 4,3,4,0, 4,0,6,0, 6,0,8,3, 8,3,8,5, 8,5,6,8,
+							6,8,3,8, 3,8,0,5, 0,5,2,4, 2,4,0,3, 0,3,2,0 };
+	static int ast4[] = { 	2,0,5,0, 5,0,8,2, 8,2,7,4, 7,4,8,6, 8,6,6,8, 6,8,4,6,
+							4,6,2,8, 2,8,0,6, 0,6,0,2, 0,2,2,0 };
 
 	switch (ast_type)
 	{
@@ -1485,9 +1485,9 @@ void getsettings(void)
 	optz[o_ucase]		= iniparser_getboolean(ini, "interface:caps", 0);
 	optz[o_togpnm]		= iniparser_getboolean(ini, "interface:showpnm", 0);
 	optz[o_smenu]		= iniparser_getboolean(ini, "interface:smartmenu", 1);
-	optz[o_redozvg]	= iniparser_getboolean(ini, "interface:reopenzvg", 1);
+	optz[o_redozvg]		= iniparser_getboolean(ini, "interface:reopenzvg", 1);
 	optz[o_dovga]		= iniparser_getboolean(ini, "interface:rendervga", 0);
-	optz[o_attmode]	= iniparser_getboolean(ini, "interface:attractmode", 0);
+	optz[o_attmode]		= iniparser_getboolean(ini, "interface:attractmode", 0);
 	
 	strcpy(attractargs, iniparser_getstring(ini, "interface:attractargs", "-attract -str 30"));
 	strcpy(zvgargs, iniparser_getstring(ini, "interface:zvgargs", "-video zvg"));
@@ -1495,7 +1495,7 @@ void getsettings(void)
 	// controllers
 	optz[o_mouse]		= iniparser_getint(ini, "controls:spinnertype", 0);
 	optz[o_mouse]		= abs(optz[o_mouse]%3);
-	optz[o_mswapXY]	= iniparser_getboolean(ini, "controls:swapaxes", 0);
+	optz[o_mswapXY]		= iniparser_getboolean(ini, "controls:swapaxes", 0);
 	optz[o_msens] 		= iniparser_getint(ini, "controls:spinsens", 30);
 	optz[o_msens] 		= abs(optz[o_msens]%100);
 	optz[o_msamp] 		= iniparser_getint(ini, "controls:spinsamp", 6);
@@ -1507,21 +1507,21 @@ void getsettings(void)
 	if (optz[o_msamp] < 1) optz[o_msamp] = 1;
 
 	// key bindings - global keys
-	keyz[k_menu]	= iniparser_getint(ini, "keys:k_togglemenu", HYPSPACE);
-	keyz[k_quit]	= iniparser_getint(ini, "keys:k_quit", ESC);
-	keyz[k_random]	= iniparser_getint(ini, "keys:k_random", 127);
-	keyz[k_options]= iniparser_getint(ini, "keys:k_options", TILDE);
+	keyz[k_menu]		= iniparser_getint(ini, "keys:k_togglemenu", HYPSPACE);
+	keyz[k_quit]		= iniparser_getint(ini, "keys:k_quit", ESC);
+	keyz[k_random]		= iniparser_getint(ini, "keys:k_random", 127);
+	keyz[k_options]		= iniparser_getint(ini, "keys:k_options", TILDE);
 
 	// Manufacturer menu keys
-	keyz[k_pman]	= iniparser_getint(ini, "keys:k_prevman", LEFT);
-	keyz[k_nman]	= iniparser_getint(ini, "keys:k_nextman", RIGHT);
+	keyz[k_pman]		= iniparser_getint(ini, "keys:k_prevman", LEFT);
+	keyz[k_nman]		= iniparser_getint(ini, "keys:k_nextman", RIGHT);
 
 	// Game list menu keys
-	keyz[k_pgame]	= iniparser_getint(ini, "keys:k_prevgame", LEFT);
-	keyz[k_ngame]	= iniparser_getint(ini, "keys:k_nextgame", RIGHT);
-	keyz[k_pclone] = iniparser_getint(ini, "keys:k_prevclone", THRUST);
-	keyz[k_nclone] = iniparser_getint(ini, "keys:k_nextclone", FIRE);
-	keyz[k_start]	= iniparser_getint(ini, "keys:k_startgame", START1);
+	keyz[k_pgame]		= iniparser_getint(ini, "keys:k_prevgame", LEFT);
+	keyz[k_ngame]		= iniparser_getint(ini, "keys:k_nextgame", RIGHT);
+	keyz[k_pclone] 		= iniparser_getint(ini, "keys:k_prevclone", THRUST);
+	keyz[k_nclone] 		= iniparser_getint(ini, "keys:k_nextclone", FIRE);
+	keyz[k_start]		= iniparser_getint(ini, "keys:k_startgame", START1);
 
 	// now the colour and brightness values
 	colours[c_col][c_glist]	= getcolour(iniparser_getstring(ini, "colours:c_gamelist", "green"));
@@ -1594,54 +1594,54 @@ void writecfg()
 	if (!iniparser_find_entry(ini, "colours")) iniparser_set(ini, "colours", NULL);
 
 	// write the interface settings
-	writeinival("interface:rotation",	optz[o_rot], 1, 0);
-	writeinival("interface:stars",		optz[o_stars], 1, 3);
+	writeinival("interface:rotation",		optz[o_rot], 1, 0);
+	writeinival("interface:stars",			optz[o_stars], 1, 3);
 	writeinival("interface:caps",			optz[o_ucase], 1, 3);
 	writeinival("interface:showpnm",		optz[o_togpnm], 1, 3);
-	writeinival("interface:smartmenu",	optz[o_smenu], 1, 3);
-	writeinival("interface:reopenzvg",	optz[o_redozvg], 1, 3);
-	writeinival("interface:rendervga", 	optz[o_dovga], 0, 3);
-	writeinival("interface:attractmode",optz[o_attmode], 0, 3);
+	writeinival("interface:smartmenu",		optz[o_smenu], 1, 3);
+	writeinival("interface:reopenzvg",		optz[o_redozvg], 1, 3);
+	writeinival("interface:rendervga", 		optz[o_dovga], 0, 3);
+	writeinival("interface:attractmode",	optz[o_attmode], 0, 3);
 	iniparser_set(ini, "interface:attractargs", attractargs);
 	iniparser_set(ini, "interface:zvgargs", zvgargs);
 
 	// write the spinner/mouse settings
 	writeinival("controls:spinnertype",		optz[o_mouse], 1, 0);
-	writeinival("controls:swapaxes",			optz[o_mswapXY], optz[o_mouse], 3);
-	writeinival("controls:spinsens",			optz[o_msens], optz[o_mouse], 0);
-	writeinival("controls:spinsamp",			optz[o_msamp], optz[o_mouse], 0);
+	writeinival("controls:swapaxes",		optz[o_mswapXY], optz[o_mouse], 3);
+	writeinival("controls:spinsens",		optz[o_msens], optz[o_mouse], 0);
+	writeinival("controls:spinsamp",		optz[o_msamp], optz[o_mouse], 0);
 	writeinival("controls:reversexaxis",	optz[o_mrevX], optz[o_mouse], 3);
 	writeinival("controls:reverseyaxis",	optz[o_mrevY], optz[o_mouse], 3);
 	writeinival("controls:pointer",			optz[o_mpoint], 0, 3);
 
 	// write the key bindings
-	writeinival("keys:k_togglemenu",	keyz[k_menu], 1, 1);
-	writeinival("keys:k_quit",			keyz[k_quit], 1, 1);
-	writeinival("keys:k_options",		keyz[k_options], 1, 1);
-	writeinival("keys:k_random",		keyz[k_random], 0, 1);
-	writeinival("keys:k_prevman",		keyz[k_pman], 1, 1);
-	writeinival("keys:k_nextman",		keyz[k_nman], 1, 1);
-	writeinival("keys:k_prevgame",	keyz[k_pgame], 1, 1);
-	writeinival("keys:k_nextgame",	keyz[k_ngame], 1, 1);
-	writeinival("keys:k_prevclone",	keyz[k_pclone], 1, 1);
-	writeinival("keys:k_nextclone",	keyz[k_nclone], 1, 1);
-	writeinival("keys:k_startgame",	keyz[k_start], 1, 1);
+	writeinival("keys:k_togglemenu",		keyz[k_menu], 1, 1);
+	writeinival("keys:k_quit",				keyz[k_quit], 1, 1);
+	writeinival("keys:k_options",			keyz[k_options], 1, 1);
+	writeinival("keys:k_random",			keyz[k_random], 0, 1);
+	writeinival("keys:k_prevman",			keyz[k_pman], 1, 1);
+	writeinival("keys:k_nextman",			keyz[k_nman], 1, 1);
+	writeinival("keys:k_prevgame",			keyz[k_pgame], 1, 1);
+	writeinival("keys:k_nextgame",			keyz[k_ngame], 1, 1);
+	writeinival("keys:k_prevclone",			keyz[k_pclone], 1, 1);
+	writeinival("keys:k_nextclone",			keyz[k_nclone], 1, 1);
+	writeinival("keys:k_startgame",			keyz[k_start], 1, 1);
 
 	// write the colour settings
-	writeinival("colours:c_gamelist",	colours[c_col][c_glist], 1, 2);
-	writeinival("colours:i_gamelist",	colours[c_int][c_glist], 1, 0);
+	writeinival("colours:c_gamelist",		colours[c_col][c_glist], 1, 2);
+	writeinival("colours:i_gamelist",		colours[c_int][c_glist], 1, 0);
 	writeinival("colours:c_selgame",		colours[c_col][c_sgame], 1, 2);
 	writeinival("colours:i_selgame",		colours[c_int][c_sgame], 1, 0);
-	writeinival("colours:c_selman",		colours[c_col][c_sman], 1, 2);
-	writeinival("colours:i_selman",		colours[c_int][c_sman], 1, 0);
+	writeinival("colours:c_selman",			colours[c_col][c_sman], 1, 2);
+	writeinival("colours:i_selman",			colours[c_int][c_sman], 1, 0);
 	writeinival("colours:c_man",			colours[c_col][c_man], 1, 2);
 	writeinival("colours:i_man",			colours[c_int][c_man], 1, 0);
-	writeinival("colours:c_pnman",		colours[c_col][c_pnman], 1, 2);
-	writeinival("colours:i_pnman",		colours[c_int][c_pnman], 1, 0);
-	writeinival("colours:c_arrow",		colours[c_col][c_arrow], 1, 2);
-	writeinival("colours:i_arrow",		colours[c_int][c_arrow], 1, 0);
-	writeinival("colours:c_asteroids",	colours[c_col][c_asts], 0, 2);
-	writeinival("colours:i_asteroids",	colours[c_int][c_asts], 0, 0);
+	writeinival("colours:c_pnman",			colours[c_col][c_pnman], 1, 2);
+	writeinival("colours:i_pnman",			colours[c_int][c_pnman], 1, 0);
+	writeinival("colours:c_arrow",			colours[c_col][c_arrow], 1, 2);
+	writeinival("colours:i_arrow",			colours[c_int][c_arrow], 1, 0);
+	writeinival("colours:c_asteroids",		colours[c_col][c_asts], 0, 2);
+	writeinival("colours:i_asteroids",		colours[c_int][c_asts], 0, 0);
 }
 
 
@@ -1731,8 +1731,8 @@ void PlayAttractGame(m_node *gameslist)
 void PrintPointer(int mx, int my)
 {
 	//printf("mousex: %d mousey: %d\n", mx, my);
-   setcolour(6, 25); // white, EDGE_BRI
-   PrintString(">", mx, my, 135, 8, 4, 0);
+	setcolour(6, 25); // white, EDGE_BRI
+	PrintString(">", mx, my, 135, 8, 4, 0);
 }
 
 /******************************************************************
