@@ -44,6 +44,8 @@ As you've probably gathered, I'm also new to Git so please be patient whilst I g
 I've included a make file and sample compile batch file, but you will need to edit the paths in these to reflect your own environment. I originally edited and compiled the files within a Windows XP environment, later I created a Linux port with common source and edit on Linux, moving to an XP Virtualbox PC which grabbed the source from the Linux host and compiled for DOS under the XP machine. You could probably set up cross compiling for a simpler setup. The compile.bat file will reflect this environment.
 >>>>>>> 897da7d290cb5e1622b399c5716a2b8f1745cf53
 
+The Linux port has the advantage of being able to mirror the vector screen to the PC monitor, this greatly aids with development as you can test code without needing the ZVG or a vector monitor attached, 
+
 In the Utils folder you can find some utilities:
 
  - **Makeini** can be used to generate a template ini file for VMMenu. It
@@ -56,5 +58,5 @@ Vector Mame Menu will build a list of games from your vmmenu.ini file and group 
 
 I'll flesh this out with more detail in due course.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTcxMTU3MzI3NF19
+eyJoaXN0b3J5IjpbLTI1OTkyMjg3MiwtNzExNTczMjc0XX0=
 -->
