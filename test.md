@@ -1,11 +1,10 @@
 
 # VMMenu
-<<<<<<< HEAD
-Vector Mame Menu (VMMenu)
+
+## Vector Mame Menu (VMMenu)
 
 A menu system vector games running on a real vector monitor for DOS Mame with a ZVG card
-=======
->>>>>>> 897da7d290cb5e1622b399c5716a2b8f1745cf53
+
 
 ## Vector Mame Menu (VMMenu)
 
@@ -26,9 +25,8 @@ It will query your version of Mame and generate an entry for each vector game it
 BiosKey can be used to display the keycode of a pressed key.
 Use this if you are customising the keyboard inputs
 
-
 Vector Mame Memu will build a list of games from your vmmenu.ini file and group them by manufacturer. The vmmenu.ini file is just a plain text file so you can edit it to change the grouping of games, remove games etc.
-=======
+
 A menu system vector games running on a real vector monitor for DOS Mame with a ZVG card
 
  - Requires iniparser from Nicolas Devillard, at
@@ -62,5 +60,5 @@ I'll flesh this out with more detail in due course.
 eyJoaXN0b3J5IjpbLTI1OTkyMjg3MiwtNzExNTczMjc0XX0=
 -->
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTU4MTQwOTAwXX0=
+eyJoaXN0b3J5IjpbNjM1Mzk2ODM3XX0=
 -->
