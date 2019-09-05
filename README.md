@@ -29,7 +29,7 @@ Vector Mame Menu will build a list of games from your vmmenu.ini file and group 
 - Download the ZVG SDK files from https://github.com/rhew/zvg-linux
 
 - Copy the dictionary and iniparser .h and .c files into the VMMenu/iniparser directory
-- Copy the ZVG files from the inc and shared folders into the VMMenu/Linux directory
+- Copy the ZVG files from the inc and shared folders into the VMMenu/Linux/zvg directory
 
 You will need the SDLLib1.2-dev and -gfx files:
 `sudo apt install libsdl1.2-dev libsdl-gfx1.2-dev`
@@ -45,6 +45,7 @@ Optionally you can install upx and use the compile.sh script in the VMMenu/Linux
 This works even on a raspberry pi, obviously you won't be able to hook up a ZVG board... but you can develop and test the code and simulate how it will look on a vector monitor.
 
 
-# Building on DOS
+## Building on DOS
+
 
 I'll flesh this document out with more detail in due course.

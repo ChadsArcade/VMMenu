@@ -31,7 +31,9 @@ all: ./$(NAME)
 clean:
 	-rm ./$(NAME)
 	-rm *.o
-	-rm ../zvg/*.o
+	-rm ../Linux/*.o
+	-rm ../Linux/zvg/*.o
+	-rm ../iniparser/*.o
 
 # Flags for linker
 #

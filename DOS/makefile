@@ -1,27 +1,30 @@
 #
-# Basic MAKEFILE
+# MAKEFILE for DOS VMMenu
 #
 # For use with GNU Make, calls DJGPP
+#
+# Chad Gray, sometime in 2009
 
 CC = GCC
 LINK = GCC
 ASM = NASM
-INC = ..\zvg
+INC = -I.\DOS\zvg -I.\DOS -I.\iniparser
 #LIBS	= -lalleg
 
 NAME = vmmenu
+
 OBJS = $(NAME).o \
-		$(INC)\vchars.o \
-		$(INC)\gamelist.o \
-		$(INC)\zvgFrame.o \
-		$(INC)\zvgPort.o \
-		$(INC)\timer.o \
-		$(INC)\zvgEnc.o \
-		$(INC)\zvgError.o \
-		$(INC)\zvgBan.o \
-		$(INC)\iniparser.o \
-		$(INC)\dictionary.o \
-		$(INC)\DOSvmm.o
+		.\vchars.o \
+		.\gamelist.o \
+		.\DOS\zvg\zvgFrame.o \
+		.\DOS\zvg\zvgPort.o \
+		.\DOS\zvg\timer.o \
+		.\DOS\zvg\zvgEnc.o \
+		.\DOS\zvg\zvgError.o \
+		.\DOS\zvg\zvgBan.o \
+		.\iniparser\iniparser.o \
+		.\iniparser\dictionary.o \
+		.\DOS\DOSvmm.o
 
 all: .\$(NAME).exe
 
@@ -29,8 +32,10 @@ all: .\$(NAME).exe
 
 clean:
 	-del .\$(NAME).exe
-	-del *.o
-	-del $(INC)\*.o
+	-del .\*.o
+	-del .\DOS\*.o
+	-del .\DOS\zvg\*.o
+	-del .\iniparser\*.o
 
 # Flags for linker
 #
