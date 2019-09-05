@@ -1,12 +1,12 @@
 #
-# Basic MAKEFILE
+# VMMenu MAKEFILE for Linux
 #
-# For use with GNU Make, calls DJGPP
+# Chad Gray, sometime in 2011
 
 CC = gcc
 LINK = gcc
 ASM = NASM
-INC = `sdl-config --cflags` -I./Linux -I./Linux/zvg -I./iniparser
+INC = `sdl-config --cflags` -I./ -I./Linux -I./Linux/zvg -I./iniparser
 LIBS= `sdl-config --libs` -lSDL -lGL -lSDL_gfx -lm -lX11
 
 NAME = vmmenu
