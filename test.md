@@ -5,7 +5,6 @@
 
 A menu system vector games running on a real vector monitor for DOS Mame with a ZVG card
 
-
 ## Vector Mame Menu (VMMenu)
 
 <<<<<<< HEAD
@@ -60,5 +59,5 @@ I'll flesh this out with more detail in due course.
 eyJoaXN0b3J5IjpbLTI1OTkyMjg3MiwtNzExNTczMjc0XX0=
 -->
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNjM1Mzk2ODM3XX0=
+eyJoaXN0b3J5IjpbLTE3ODkwNzUyNDVdfQ==
 -->
