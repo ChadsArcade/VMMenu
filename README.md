@@ -24,20 +24,20 @@ Vector Mame Menu will build a list of games from your vmmenu.ini file and group 
 
 ## Building on Linux:
 
-Download and unzip the VMMenu files
-Download the iniparser files from https://github.com/ndevilla/iniparser
-Download the ZVG SDK files from https://github.com/rhew/zvg-linux
+- Download and unzip the VMMenu files
+- Download the iniparser files from https://github.com/ndevilla/iniparser
+- Download the ZVG SDK files from https://github.com/rhew/zvg-linux
 
-Copy the dictionary and iniparser .h and .c files into the VMMenu/iniparser directory
-Copy the ZVG files from the inc and shared folders into the VMMenu/Linux directory
+- Copy the dictionary and iniparser .h and .c files into the VMMenu/iniparser directory
+- Copy the ZVG files from the inc and shared folders into the VMMenu/Linux directory
 
 You will need the SDLLib1.2-dev and -gfx files:
-sudo apt install libsdl1.2-dev libsdl-gfx1.2-dev
+`sudo apt install libsdl1.2-dev libsdl-gfx1.2-dev`
 
 Copy the makefile from the VMMenu/Linux directory to VMMenu
 
 Then run:
-make
+`make`
 which will create the vmmenu file in the current directory
 
 Optionally you can install upx and use the compile.sh script in the VMMenu/Linux directory to compile and compress the resulting vmmenu file.
