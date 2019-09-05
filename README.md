@@ -1,5 +1,5 @@
 # VMMenu
-<<<<<<< HEAD
+
 Vector Mame Menu (VMMenu)
 
 A menu system vector games running on a real vector monitor for DOS Mame with a ZVG card
@@ -58,5 +58,6 @@ Vector Mame Menu will build a list of games from your vmmenu.ini file and group 
 
 I'll flesh this out with more detail in due course.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTI1OTkyMjg3MiwtNzExNTczMjc0XX0=
+eyJoaXN0b3J5IjpbMTQyNjY5MjM5OSwtMjU5OTIyODcyLC03MT
+E1NzMyNzRdfQ==
 -->
