@@ -1,9 +1,10 @@
 # VMMenu
-Vector Mame Menu (VMMenu) for DOS Mame with a ZVG card
+## Vector Mame Menu (VMMenu) for DOS Mame with a ZVG card
 
-Requires iniparser from Nicolas Devillard, at https://github.com/ndevilla/iniparser
+ - Requires iniparser from Nicolas Devillard, at
+   https://github.com/ndevilla/iniparser
+ - Requires ZVG Dos SDK
 
-Requires ZVG Dos SDK
 Requires a DJGPP compile environment under DOS, I used the same version as used for DOS MAME circa .104
 
 I'm no C coder, please be gentle. This was my first attempt at C.
@@ -17,3 +18,6 @@ Vector Mame Memu is a frontend for Vector cabs running DOS MAME on a vector moni
 
 I'll flesh this out with more detail in due course.
 
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbMTk1MTg2MDA2XX0=
+-->
