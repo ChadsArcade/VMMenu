@@ -2,7 +2,12 @@
 
 A menu system vector games running on a real vector monitor for DOS Mame with a ZVG card
 
+<<<<<<< HEAD
  - Requires iniparser from Nicolas Devillard, at https://github.com/ndevilla/iniparser
+=======
+ - Requires iniparser from Nicolas Devillard, at
+   https://github.com/ndevilla/iniparser
+>>>>>>> b4f0e953c59b3d535db295aad2c001f25433a2fe
  - Requires the ZVG DOS SDK
  - Requires a DJGPP compile environment under DOS, I used the same version as used for DOS MAME circa .104
 
@@ -23,4 +28,11 @@ In the Utils folder you can find some utilities:
 Vector Mame Menu will build a list of games from your vmmenu.ini file and group them by manufacturer. The vmmenu.ini file is just a plain text file so you can edit it to change the grouping of games, remove games etc.
 
 I'll flesh this out with more detail in due course.
+<<<<<<< HEAD
 
+=======
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbMTg1NzYzNDI5MSwtMjU5OTIyODcyLC03MT
+E1NzMyNzRdfQ==
+-->
+>>>>>>> b4f0e953c59b3d535db295aad2c001f25433a2fe
