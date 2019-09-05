@@ -6,23 +6,23 @@
 CC = gcc
 LINK = gcc
 ASM = NASM
-INC = 	`sdl-config --cflags` -I../zvg
+INC = `sdl-config --cflags` -I./Linux -I./Linux/zvg -I./iniparser
 LIBS= `sdl-config --libs` -lSDL -lGL -lSDL_gfx -lm -lX11
 
 NAME = vmmenu
 
 OBJS = ./$(NAME).o \
-       ../zvg/vchars.o \
-       ../zvg/gamelist.o \
-       ../zvg/zvgFrame.o \
-       ../zvg/zvgPort.o \
-       ../zvg/timer.o \
-       ../zvg/zvgEnc.o \
-       ../zvg/zvgError.o \
-       ../zvg/zvgBan.o \
-       ../zvg/iniparser.o \
-       ../zvg/dictionary.o \
-       ../zvg/LinuxVMM.o
+       ./vchars.o \
+       ./gamelist.o \
+       ./Linux/zvg/zvgFrame.o \
+       ./Linux/zvg/zvgPort.o \
+       ./Linux/zvg/timer.o \
+       ./Linux/zvg/zvgEnc.o \
+       ./Linux/zvg/zvgError.o \
+       ./Linux/zvg/zvgBan.o \
+       ./iniparser/iniparser.o \
+       ./iniparser/dictionary.o \
+       ./Linux/LinuxVMM.o
 
 all: ./$(NAME)
 
