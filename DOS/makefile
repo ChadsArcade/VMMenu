@@ -11,7 +11,7 @@
 CC = GCC
 LINK = GCC
 ASM = NASM
-INC = -I.\DOS\zvg -I.\DOS -I.\iniparser
+INC = -I.\DOS\zvg -I.\DOS -I.\iniparser -I.\VMMSrc
 #LIBS	= -lalleg
 
 NAME = vmmenu
