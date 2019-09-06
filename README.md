@@ -3,7 +3,7 @@
 A menu system vector games running on a real vector monitor for DOS Mame with a ZVG card
 
  - Requires iniparser from Nicolas Devillard, at https://github.com/ndevilla/iniparser
- - Requires the ZVG DOS SDK
+ - Requires the ZVG DOS and/or Linux SDK
  - Requires a DJGPP compile environment under DOS, I used the same version as used for DOS MAME circa .104
 
 You can find a walk-through of setting up such an environment here: http://mamedev.emulab.it/haze/reallyoldstuff/compile036dos.html
@@ -13,15 +13,17 @@ As you've probably gathered, I'm also new to Git so please be patient whilst I g
 
 ## History
 
-VMMenu was created as I'd had an unused ZVG for a couple of years with the intention of fitting it to a dedicated cab. I was aware of the initial menu written by fellow UKVACcer Ian Boffin, sadly Ian lost the source code in a hard drive crash so there was no chance of it being updated to address any issues and suggested improvements. I found myself in a converted farm building Scotland during a long, cold and dark winter. I had no cabs with me, but I did have a Vectrex... so a plan was formed. I contacted Ian and told him I intended to write a new menu, and Ian very kindly sent me the remaining files he did have - vector objects for the Mame logo and some of the manufacturer logos. This would save a lot of work! With the vectrex connected to the ZVG and a Win98 DOS PC, I began coding.
+VMMenu was created as I'd had an unused ZVG for a couple of years with the intention of fitting it to a dedicated cab. I was aware of the initial menu written by fellow UKVACcer Ian Boffin, sadly Ian lost the source code in a hard drive crash so there was no chance of it being updated to address any issues and suggested improvements. I found myself in a converted farm building in the North East of Scotland during a long, cold and dark winter. I had no cabs with me, but I did have a Vectrex... so a plan was formed. I contacted Ian and told him I intended to write a new menu, and Ian very kindly sent me the remaining files he did have - vector co-ordinates for the Mame logo and some of the manufacturer logos. This would save a lot of work! With the vectrex connected to the ZVG and a Win98 DOS PC to hand, I began coding.
 
-After a while I was able to move my Asteroids Deluxe Cabaret home and testing moved from the Vectrex to the Arcade Cabinet.
+After a while I was able to move my Asteroids Deluxe Cabaret home and testing moved from the Vectrex to the Arcade Cabinet. Still black and white, but it was good to be able to play vector mame on a proper cab.
 
 I soon had a working system which I was happy with, so I contacted Zonn at Zektor and told him about my work. The menu was included in subsequent releases of the ZVG CD.
 
-A year or two later the ZVG drivers were ported to Linux, and I ported the menu over too. I moved development to the Linux PC and created a Windows XP VirtualBox PC to handle the DOS compilation from the same source code. You could maybe set up cross compiling for a simpler setup but doing so is beyond my skillset. The Linux port has the advantage of being able to mirror the vector screen to the PC monitor, this greatly aids with development as you can test code without needing the ZVG or a vector monitor attached, and see what the colours will look like should you only have a B&W monitor. I originally developed using a vectrex as a monitor, so the original colour work was done "blind".
+A couple of years later the ZVG drivers were ported to Linux, and I ported the menu over too. I moved development to the Linux PC and created a Windows XP VirtualBox PC to handle the DOS compilation from the same source code. You could maybe set up cross compiling for a simpler setup but doing so is beyond my skillset. The Linux port has the advantage of being able to mirror the vector screen to the PC monitor, this greatly aids with development as you can test code without needing the ZVG or a vector monitor attached, and see what the colours will look like should you only have a B&W monitor. I originally developed using a vectrex as a monitor, so the original colour work was done "blind".
 
 Today I have two ZVG cabs: the original Asteroids Deluxe Cabaret, and an upright Space Duel with a custom multivector control panel. Both have the ZVG fitted sympathetically, with the system plugging into the original wiring loom via the game board connector. The AR board handles the sound amplification so the volume control in the cabs still work too.
+
+I still get the odd qquery about the menu, so I decided that I'd put it up on GitHub rather than have it languish in a virtual PC. I hope somebody finds it useful... it wold be nice to see some new vector games written for DOS/Linux :-)
 
 ## Building on Linux:
 
@@ -216,6 +218,46 @@ goto end
 
 %1 represents the game name as passed from the menu to VMM.BAT. We test if this matches "barrier", "sundance" or "tacscan" and jump to the flipxy section if necessary, else mame is run with standard or default settings, as specified in the mame.ini file.
 
+## Food for thought
+
+Consider the following configuration options and you can see how flexible the menu can be:
+
+vmmenu.ini:
+
+```
+Utils|Shut Down PC|shutdown|shutdown
+Custom|My Custom Vector Game|mygame|mygame
+```
+
+VMM.BAT:
+
+```
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Process the selected game and run the appropriate exe::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+... code snippet:
+if %1 == shutdown  goto shutdown
+if %1 == mygame goto mygame
+ 
+... 
+
+... code snippet:
+:: Shut down the PC
+:shutdown
+c:\dos\shutdown.exe
+goto end
+
+:: Run My DOS vector game
+:mygame
+cd c:\mygame
+mygame.exe
+goto end
+
+:end
+```
+
+With some creativity, you can get the menu to launch pretty much anything.
+
 ## Utilities
 
 In the Utils folder you can find some utilities:
@@ -224,5 +266,3 @@ In the Utils folder you can find some utilities:
  - **BiosKey** can be used to display the keycode of a pressed key under DOS. Use this if you are customising the keyboard inputs and need the keycodes.
 
 
- 
-I'll flesh this document out with more detail in due course.
