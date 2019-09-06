@@ -69,6 +69,36 @@ which will create the vmmenu.exe file in the current directory
 
 Optionally you can install upx and use the compile.bat script in the VMMenu/DOS directory to compile and compress the resulting vmmenu.exe file. Note that this batch file will first attempt to copy the source files to the current location before compilation, this is because I tended to house the source on a Linux PC and compile from an XP virtual machine. You may with to edit out the file copy commands if you are working directly under XP/DOS.
 
+## Launching VMMenu (DOS)
+
+VMMenu should be launched toward the end of your AUTOEXEC.BAT file, after you have initialised your sound card and any other devices such as mice. Here is an example AUTOEXEC file:
+
+```
+@echo off
+SET PATH=C:\;C:\DOS;C:\drivers\sbpci\DOSDRV
+lh C:\DOS\dosed >NUL
+lh C:\DOS\ansi.com >NUL
+prompt $p$g
+
+lh C:\mouse\bin\CTMOUSE.EXE
+SET ZVGPORT=P378 D3 I7 M4
+
+SET SBPCI=C:\DOSDRV
+SET BLASTER=A220 I5 D1 H7 P330 T6
+SBLOAD
+SBINIT
+
+SMARTDRV /x
+cd \vmame
+vmmenu
+
+:: switch off when done
+shutdown -s 5
+```
+
+When VMMenu is quit, the AUTOEXEC.BAT file will continue from the next line, in this example it will run the shutdown command and turn off the PC.
+
+
 ## The vmmenu.ini file
 
 VMMenu creates the game list by reading the vmmenu.ini file. This file contains a list of all the vector games supported by your version of Mame and contains information such as the manufacturer, the name of the game, the "Mame" name for the game and the name of the parent game if it is a clone of another game. The fileis just a text file in the following format:
@@ -84,7 +114,7 @@ The name of the game is what gets passed back to DOS and on to mame when running
 
 For example:
 
-```
+```bash
 Atari|Asteroids (rev 2)|asteroid|asteroid
 Atari|Asteroids (rev 1)|asteroid|asteroi1
 Other|Asterock|asteroid|asterock
@@ -93,7 +123,7 @@ Other|Meteorites|asteroid|meteorts
 
 As the file is plain text, you are free to customise it to your taste. For example, in the example above there are 2 clones of Asteroids by "Other" manufaturers, and these will appear on a separate page to the Atari versions of Asteroids. Should you wish to bundle all the Asteroids variants together under Atari, simply edit the manufacturer field for these 2 games, changing "Other" to "Atari":
 
-```
+```bash
 Atari|Asteroids (rev 2)|asteroid|asteroid
 Atari|Asteroids (rev 1)|asteroid|asteroi1
 Atari|Asterock|asteroid|asterock
@@ -106,7 +136,7 @@ If you wish to remove a game from the menu, perhaps if the controls are not suit
 
 This would remove "Asteroids (rev 1)" from the menu but retain the other 3 games:
 
-```
+```bash
 Atari|Asteroids (rev 2)|asteroid|asteroid
 #Atari|Asteroids (rev 1)|asteroid|asteroi1
 Atari|Asterock|asteroid|asterock
@@ -115,7 +145,7 @@ Atari|Meteorites|asteroid|meteorts
 
 You can also edit the display name if you wish, but do not alter the clone name or parent game name or the game may not run.
 
-## VMM.BAT
+## The VMM.BAT file
 
 When a game is selected from the menu, the name of the game gets passed to the file VMM.BAT for processing. This allows us to perform some customisation if necessary, which would not be possible if the menu launched  mame directly.
 
@@ -144,7 +174,7 @@ cd ..
 goto end
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::      Flip X and Y axes for barrier and sundance      ::
+::  Flip X and Y axes for barrier,sundance and tacscan  ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :flipxy
 cd mame104
@@ -155,7 +185,7 @@ goto end
 :end
 ```
 
-%1 represents the game name as passed from the menu to VMM.BAT. We test if this matches "barrier", "sundance" or "tacscan" and jump to the flipxy section if necessary, else mame is run with standard default settings.
+%1 represents the game name as passed from the menu to VMM.BAT. We test if this matches "barrier", "sundance" or "tacscan" and jump to the flipxy section if necessary, else mame is run with standard or default settings, as specified in the mame.ini file.
 
 
 

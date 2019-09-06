@@ -28,7 +28,7 @@ goto end
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::      Flip X and Y axes for barrier and sundance      ::
+::  Flip X and Y axes for barrier,sundance and tacscan  ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :flipxy
 cd mame104
