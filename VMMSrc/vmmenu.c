@@ -96,7 +96,7 @@ int	ZVGPresent = 1;
 int	SDL_VC, SDL_VB;							// colour and brightness for SDL vectors
 int	mousefound=0;
 
-char	auth1[] = "VMMenu 1.31, Chad Gray 2009-19";
+char	auth1[] = "VMMenu 1.31, Chad Gray 2019";
 char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
@@ -533,7 +533,7 @@ int main( void) //int argc, char *argv[])
 	iniparser_freedict(ini);
 	printf("Quitting to OS...\n");
 	cc=credits();
-	printf("\n%s, (c) 2009-2011\n", auth1);
+	printf("\n%s, (c) 2009-2019\n", auth1);
 	ShutdownAll();
 	return (0);
 }
