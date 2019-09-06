@@ -11,16 +11,17 @@ You can find a walk-through of setting up such an environment here: http://mamed
 I'm no C coder, please be gentle. This was my first attempt at C, I'm sure my code is far from optimal and inefficient in places.
 As you've probably gathered, I'm also new to Git so please be patient whilst I get to grips with things and get the files more orderly to aid compilation. 
 
-I've included a make file and sample compile batch file, but you will need to edit the paths in these to reflect your own environment. I originally edited and compiled the files within a Windows XP environment, later I created a Linux port with common source and edit on Linux, moving to an XP Virtualbox PC which grabbed the source from the Linux host and compiled for DOS under the XP machine. The compile.bat file will reflect this environment. You could probably set up cross compiling for a simpler setup.
+## History
 
-The Linux port has the advantage of being able to mirror the vector screen to the PC monitor, this greatly aids with development as you can test code without needing the ZVG or a vector monitor attached, and see what the colours will look like should you only have a B&W monitor. I originally developed using a vectrex as a monitor as I didn't have access to my cabs at the time, so the original colour work was done "blind".
+VMMenu was created as I'd had an unused ZVG for a couple of years with the intention of fitting it to a dedicated cab. I was aware of the initial menu written by fellow UKVACcer Ian Boffin, sadly Ian lost the source code in a hard drive crash so there was no chance of it being updated to address any issues and suggested improvements. I found myself in a converted farm building Scotland during a long, cold and dark winter. I had no cabs with me, but I did have a Vectrex... so a plan was formed. I contacted Ian and told him I intended to write a new menu, and Ian very kindly sent me the remaining files he did have - vector objects for the Mame logo and some of the manufacturer logos. This would save a lot of work! With the vectrex connected to the ZVG and a Win98 DOS PC, I began coding.
 
-In the Utils folder you can find some utilities:
+After a while I was able to move my Asteroids Deluxe Cabaret home and testing moved from the Vectrex to the Arcade Cabinet.
 
- - **Makeini** can be used to generate a template ini file for VMMenu. It will query your version of Mame and generate an entry for each vector game it finds.
- - **BiosKey** can be used to display the keycode of a pressed key under DOS. Use this if you are customising the keyboard inputs
+I soon had a working system which I was happy with, so I contacted Zonn at Zektor and told him about my work. The menu was included in subsequent releases of the ZVG CD.
 
-Vector Mame Menu will build a list of games from your vmmenu.ini file and group them by manufacturer. The vmmenu.ini file is just a plain text file so you can edit it to change the grouping of games, remove games etc.
+A year or two later the ZVG drivers were ported to Linux, and I ported the menu over too. I moved development to the Linux PC and created a Windows XP VirtualBox PC to handle the DOS compilation from the same source code. You could maybe set up cross compiling for a simpler setup but doing so is beyond my skillset. The Linux port has the advantage of being able to mirror the vector screen to the PC monitor, this greatly aids with development as you can test code without needing the ZVG or a vector monitor attached, and see what the colours will look like should you only have a B&W monitor. I originally developed using a vectrex as a monitor, so the original colour work was done "blind".
+
+Today I have two ZVG cabs: the original Asteroids Deluxe Cabaret, and an upright Space Duel with a custom multivector control panel. Both have the ZVG fitted sympathetically, with the system plugging into the original wiring loom via the game board connector. The AR board handles the sound amplification so the volume control in the cabs still work too.
 
 ## Building on Linux:
 
@@ -215,6 +216,12 @@ goto end
 
 %1 represents the game name as passed from the menu to VMM.BAT. We test if this matches "barrier", "sundance" or "tacscan" and jump to the flipxy section if necessary, else mame is run with standard or default settings, as specified in the mame.ini file.
 
+## Utilities
+
+In the Utils folder you can find some utilities:
+
+ - **Makeini** can be used to generate a template ini file for VMMenu. It will query your version of Mame and generate an entry for each vector game it finds.
+ - **BiosKey** can be used to display the keycode of a pressed key under DOS. Use this if you are customising the keyboard inputs and need the keycodes.
 
 
  
