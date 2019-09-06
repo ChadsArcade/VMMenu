@@ -114,7 +114,7 @@ One interface option worthy of some explanation is "smartmenu". This allows you 
 
 [controls]
 
-This section will be populated by the in game settings enu, which allows you to set up a mouse or spinner and change/swap the axes, change the sample rate etc.
+This section will be populated by the in game settings menu, which allows you to set up a mouse or spinner and change/swap the axes, alter the sample rate etc.
 
 [keys]
 
@@ -122,14 +122,16 @@ This section binds the controls to your preferred key presses. For DOS users, yo
 
 [colours]
 
-Here is where you can define the colours and intensities of various elements of the menu. Colour values are prefixed fith c_ and intensities with i_
+Here is where you can define the colours and intensities of various elements of the menu. Colour values are prefixed with `c_` and intensities with `i_`
 Valid colour values are red, magenta, cyan, blue, yellow, green and white. Intensity values range from 0 to 25, dimmest to brightest.
 
 ## The vmmenu.ini file
 
 VMMenu creates the game list by reading the vmmenu.ini file. This file contains a list of all the vector games supported by your version of Mame and contains information such as the manufacturer, the name of the game, the "Mame" name for the game and the name of the parent game if it is a clone of another game. The fileis just a text file in the following format:
 
+```bash
 Manufacturer name|Display name|name of parent game|name of game
+```
 
 There are 4 fields, delimited by the | character:
 
