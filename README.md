@@ -112,23 +112,25 @@ When first run, VMMenu will create a vmmenu.cfg file with various default settin
 - [keys], defines which keys are bound to which menu functions
 - [colours], defines the colours and intensities of various elements on screen
 
-[interface]
+**[interface]**
 
 Most of the interface options can be set via the in game settings menu, which by default is accessed by pressing the backtick ` key, usually found below the escape key. Tip: It can be useful to bind this function to the test or service switch in your cabinet!
 
-One interface option worthy of some explanation is "smartmenu". This allows you to control the menu in a more intuitive manner using a joystick, with direct navigation in the up, down, left and right directions. As not all vector cabs have a joystick (e.g. Asteroids), this option defaults to `off` and menu navigation is setup to use the rotation keys, with Hyperspace toggling between the games list and manufacturer list. If switching this option `on`, remember you will also need to specify the keys used to navigate between manufacturers, games and clones. If you switch smartmenu `on` without specifying suitable keys, the option will be switched off again as you would not be able to control the menu correctly. 
+One interface option worthy of some explanation is "smartmenu". This allows you to control the menu in a more intuitive manner using a joystick, with direct navigation in the up, down, left and right directions. As not all vector cabs have a joystick (e.g. Asteroids, Tempest), this option defaults to `off` and menu navigation is setup to use the rotation keys, with Hyperspace toggling between the games list and manufacturer list. If switching this option `on`, remember you will also need to specify the keys used to navigate between manufacturers, games and clones. If you switch smartmenu `on` without specifying suitable keys, the option will be switched off again as you would not be able to control the menu correctly.
 
-[controls]
+**New for v1.32** - SmartMenu Navigation can now be selected from the settings page. Default key values from the vmmstddef.h file are used (see [keys] section below), you can change these manually in the vmmenu.cfg file if you want to customise them. 
+
+**[controls]**
 
 This section will be populated by the in game settings menu, which allows you to set up a mouse or spinner and change/swap the axes, alter the sample rate etc.
 
-[keys]
+**[keys]**
 
 This section binds the controls to your preferred key presses. For DOS users, you can use the supplied keycode.exe to display the keycode of a key pressed. Simply change the value against the desired function. The default values and the keycodes for both Linux and DOS are listed in the vmmstddef.h file.
 
 **New for v1.31** - The value of the last keycode pressed is displayed at the top of the screen whilst in the settings page.
 
-[colours]
+**[colours]**
 
 Here is where you can define the colours and intensities of various elements of the menu. Colour values are prefixed with `c_` and intensities with `i_`
 Valid colour values are red, magenta, cyan, blue, yellow, green and white. Intensity values range from 0 to 25, dimmest to brightest.

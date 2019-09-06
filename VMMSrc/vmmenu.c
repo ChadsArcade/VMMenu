@@ -7,13 +7,13 @@
 * History:
 *
 * 22/6/11	Ported to SDL/Linux and pulled out common source
-* 13/3/11	v1.1 -Added keyboard LEDs
+* 13/3/11	v1.1  Added keyboard LEDs
 *						Added Mouse/Trackball support
 *						Press a key for menu message in screen saver
-* 12/3/11	v1.2 -Added Spinner Support
-*  ?/ ? /11 v1.3 -Added settings page
-* 06 Sep 19	v1.31-Added keycode display in Settings
-*
+* 12/3/11	v1.2  Added Spinner Support
+*  ?/ ? /11 v1.3  Added settings page
+* 06 Sep 19	v1.31 Added keycode display in Settings
+*				v1.32	Added SmartMenu Navigation option to settings page
 *
 *****************************************************************************/
 #include <stdio.h>
@@ -96,7 +96,7 @@ int	ZVGPresent = 1;
 int	SDL_VC, SDL_VB;							// colour and brightness for SDL vectors
 int	mousefound=0;
 
-char	auth1[] = "VMMenu 1.31, Chad Gray 2019";
+char	auth1[] = "VMMenu 1.32, Chad Gray 2019";
 char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
@@ -1744,7 +1744,7 @@ void SetOptions(void)
 {
 	int cc = 0, top = 250, cursor = 0, options;
 	int optx = 0, opty = 0, timer = 0;
-	int lastkey = 0;
+	int lastkey = 0, line = 0;
 	point p1, p2;
 	char angle[10];
 	while ((cc != keyz[k_options]) && (cc != keyz[k_quit]) && timer < 1800)
@@ -1825,6 +1825,7 @@ void SetOptions(void)
 		sprintf(angle,"0x%04x",lastkey);
 		PrintString(angle, 440, top + 90, 0, 4, 5, 0);
 
+		line=0;
 		if (cursor == 0)	setcolour(vwhite, 25);
 		PrintString("Rotation       ", -150, top, 0, 6, 6, 0);
 		if (optz[o_rot] == 0) strcpy(angle,"0      ");
@@ -1833,70 +1834,87 @@ void SetOptions(void)
 		if (optz[o_rot] == 3) strcpy(angle,"270    ");
 		PrintString(angle, 250, top, 0, 6, 6, 0);
 		
+		line+=50;
 		setcolour(vwhite, 15);
 		if (cursor == 1)	setcolour(vwhite, 25);
-		PrintString("Stars          ", -150, top - 50, 0, 6, 6, 0);
-		PrintString(optz[o_stars] == 1 ? "yes    " : "no     ", 250, top - 50, 0, 6, 6, 0);
+		PrintString("Stars          ", -150, (top - line), 0, 6, 6, 0);
+		PrintString(optz[o_stars] == 1 ? "yes    " : "no     ", 250, (top - line), 0, 6, 6, 0);
 		
+		line+=50;
 		setcolour(vwhite, 15);
 		if (cursor == 2)	setcolour(vwhite, 25);
-		PrintString("All Caps       ", -150, top - 100, 0, 6, 6, 0);
-		PrintString((optz[o_ucase] == 1 ? "yes    " : "no     "), 250, top - 100, 0, 6, 6, 0);
+		PrintString("All Caps       ", -150, top - line, 0, 6, 6, 0);
+		PrintString((optz[o_ucase] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
 
+		line+=50;
 		setcolour(vwhite, 15);
 		if (cursor == 3)	setcolour(vwhite, 25);
-		PrintString("Show Prev/next ", -150, top - 150, 0, 6, 6, 0);
-		PrintString((optz[o_togpnm] == 1 ? "yes    " : "no     "), 250, top - 150, 0, 6, 6, 0);
+		PrintString("Show Prev/next ", -150, top - line, 0, 6, 6, 0);
+		PrintString((optz[o_togpnm] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
 
+		//Smart Menu lives here
+		line+=50;
 		setcolour(vwhite, 15);
 		if (cursor == 4)	setcolour(vwhite, 25);
-		PrintString("Reopen ZVG     ", -150, top - 200, 0, 6, 6, 0);
-		PrintString((optz[o_redozvg] == 1 ? "yes    " : "no     "), 250, top - 200, 0, 6, 6, 0);
+		PrintString("Smart Menu     ", -150, top - line, 0, 6, 6, 0);
+		PrintString((optz[o_smenu] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+
+		line+=50;
+		setcolour(vwhite, 15);
+		if (cursor == 5)	setcolour(vwhite, 25);
+		PrintString("Reopen ZVG     ", -150, top - line, 0, 6, 6, 0);
+		PrintString((optz[o_redozvg] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
 
 		if (mousefound)
 		{
+			line+=50;
 			setcolour(vwhite, 15);
-			if (cursor == 5)	setcolour(vwhite, 25);
-			PrintString("Optical Control", -150, top - 250, 0, 6, 6, 0);
+			if (cursor == 6)	setcolour(vwhite, 25);
+			PrintString("Optical Control", -150, top - line, 0, 6, 6, 0);
 			if (optz[o_mouse] == 0) strcpy(angle,"None   ");
 			if (optz[o_mouse] == 1) strcpy(angle,"Spinner");
 			if (optz[o_mouse] == 2) strcpy(angle,"Mouse  ");
-			PrintString(angle, 250, top - 250, 0, 6, 6, 0);
+			PrintString(angle, 250, top - line, 0, 6, 6, 0);
 
 			if (optz[o_mouse])
 			{
-				options = 11;
+				options = 12;	// increase total options available to 12 as there are lots of mouse settings
+				line+=50;
 				setcolour(vwhite, 15);
 				p1.x = -275;
-				p1.y = top - 280;
+				p1.y = top - 330;
 				p2.x = p1.x;
-				p2.y = top - 500;
+				p2.y = top - 550;
 				drawvector(p1, p2, 0, 0);
-				if (cursor == 6)	setcolour(vwhite, 25);
-				PrintString("- Swap X/Y Axes ", -133, top - 300, 0, 6, 6, 0);
-				PrintString((optz[o_mswapXY] == 1 ? "yes    " : "no     "), 250, top - 300, 0, 6, 6, 0);
-
-				setcolour(vwhite, 15);
 				if (cursor == 7)	setcolour(vwhite, 25);
-				PrintString("- Reverse X Axis", -133, top - 350, 0, 6, 6, 0);
-				PrintString((optz[o_mrevX] == 1 ? "yes    " : "no     "), 250, top - 350, 0, 6, 6, 0);
-		
+				PrintString("- Swap X/Y Axes ", -133, top - line, 0, 6, 6, 0);
+				PrintString((optz[o_mswapXY] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+
+				line+=50;
 				setcolour(vwhite, 15);
 				if (cursor == 8)	setcolour(vwhite, 25);
-				PrintString("- Reverse Y Axis", -133, top - 400, 0, 6, 6, 0);
-				PrintString((optz[o_mrevY] == 1 ? "yes    " : "no     "), 250, top - 400, 0, 6, 6, 0);
-
+				PrintString("- Reverse X Axis", -133, top - line, 0, 6, 6, 0);
+				PrintString((optz[o_mrevX] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+		
+				line+=50;
 				setcolour(vwhite, 15);
 				if (cursor == 9)	setcolour(vwhite, 25);
-				PrintString("- Sample Rate   ", -133, top - 450, 0, 6, 6, 0);
-				itoa(optz[o_msamp], angle, 10);
-				PrintString(angle, 199 + (optz[o_msamp] > 9 ? 6 : 0), top - 450, 0, 6, 6, 0);
+				PrintString("- Reverse Y Axis", -133, top - line, 0, 6, 6, 0);
+				PrintString((optz[o_mrevY] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
 
+				line+=50;
 				setcolour(vwhite, 15);
 				if (cursor == 10)	setcolour(vwhite, 25);
-				PrintString("- Sensitivity   ", -133, top - 500, 0, 6, 6, 0);
+				PrintString("- Sample Rate   ", -133, top - line, 0, 6, 6, 0);
+				itoa(optz[o_msamp], angle, 10);
+				PrintString(angle, 199 + (optz[o_msamp] > 9 ? 6 : 0), top - line, 0, 6, 6, 0);
+
+				line+=50;
+				setcolour(vwhite, 15);
+				if (cursor == 11)	setcolour(vwhite, 25);
+				PrintString("- Sensitivity   ", -133, top - line, 0, 6, 6, 0);
 				itoa(optz[o_msens], angle, 10);
-				PrintString(angle, 199 + (optz[o_msens] > 9 ? 6 : 0), top - 500, 0, 6, 6, 0);
+				PrintString(angle, 199 + (optz[o_msens] > 9 ? 6 : 0), top - line, 0, 6, 6, 0);
 
 				setcolour(vyellow, 25);
 				PrintString("X", optx, ymax-12, 0, 10, 5, 0);
@@ -1904,9 +1922,9 @@ void SetOptions(void)
 				PrintString("X", xmax-12, opty, 0, 10, 5, 0);
 				PrintString("X", -xmax+12, opty, 0, 10, 5, 0);
 			}
-			else options = 6;
+			else options = 7;
 		}
-		else options = 5;
+		else options = 6;
 		
 		cc=getkey();
 		if (cc)
@@ -1965,14 +1983,39 @@ void SetOptions(void)
 				break;
 			}
 			
-			case 4:	// re-open ZVG
+			case 4:	// Smart Menu Navigation
+			{
+				if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_smenu] = !optz[o_smenu];
+				if (cc == keyz[k_start]) optz[o_smenu] = 0;
+				if (optz[o_smenu])
+				{
+					keyz[k_pman]	 = LEFT;
+					keyz[k_nman]	 = RIGHT;
+					keyz[k_pclone]	 = LEFT;
+					keyz[k_nclone]	 = RIGHT;
+					keyz[k_pgame]	 = UP;
+					keyz[k_ngame]	 = DOWN;
+				}
+				else
+				{
+					keyz[k_pman]	 = LEFT;
+					keyz[k_nman]	 = RIGHT;
+					keyz[k_pclone]	 = THRUST;
+					keyz[k_nclone]	 = FIRE;
+					keyz[k_pgame]	 = LEFT;
+					keyz[k_ngame]	 = RIGHT;
+				}
+				break;
+			}
+			
+			case 5:	// re-open ZVG
 			{
 				if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_redozvg] = !optz[o_redozvg];
 				if (cc == keyz[k_start]) optz[o_redozvg] = 0;
 				break;
 			}
 			
-			case 5:	// Optical controller
+			case 6:	// Optical controller
 			{
 				if (cc == keyz[k_nclone]) optz[o_mouse] = ((optz[o_mouse]+1)%3);
 				if (cc == keyz[k_pclone])
@@ -1984,28 +2027,28 @@ void SetOptions(void)
 				break;
 			}
 
-			case 6:	// swap mouse axes
+			case 7:	// swap mouse axes
 			{
 				if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_mswapXY] = !optz[o_mswapXY];
 				if (cc == keyz[k_start]) optz[o_mswapXY] = 0;
 				break;
 			}
 			
-			case 7:	// reverse X axis
+			case 8:	// reverse X axis
 			{
 				if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_mrevX] = !optz[o_mrevX];
 				if (cc == keyz[k_start]) optz[o_mrevX] = 0;
 				break;
 			}
 			
-			case 8:	// reverse Y axis
+			case 9:	// reverse Y axis
 			{
 				if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_mrevY] = !optz[o_mrevY];
 				if (cc == keyz[k_start]) optz[o_mrevY] = 0;
 				break;
 			}
 
-			case 9:	// Mouse sample rate
+			case 10:	// Mouse sample rate
 			{			
 				if (cc == keyz[k_pclone])
 				{
@@ -2021,7 +2064,7 @@ void SetOptions(void)
 				break;
 			}
 
-			case 10:	// Mouse sensitivity
+			case 11:	// Mouse sensitivity
 			{
 				if (cc == keyz[k_pclone])
 				{
