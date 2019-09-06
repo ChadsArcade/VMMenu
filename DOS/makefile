@@ -16,18 +16,18 @@ INC = -I.\DOS\zvg -I.\DOS -I.\iniparser
 
 NAME = vmmenu
 
-OBJS = $(NAME).o \
-		.\DOS\zvg\zvgFrame.o \
-		.\DOS\zvg\zvgPort.o \
-		.\DOS\zvg\timer.o \
-		.\DOS\zvg\zvgEnc.o \
-		.\DOS\zvg\zvgError.o \
-		.\DOS\zvg\zvgBan.o \
-		.\iniparser\iniparser.o \
-		.\iniparser\dictionary.o \
-		.\DOS\DOSvmm.o \
-		.\VMMSrc\vchars.o \
-		.\VMMSrc\gamelist.o
+OBJS =  .\VMMSrc\$(NAME).o \
+	.\DOS\zvg\zvgFrame.o \
+	.\DOS\zvg\zvgPort.o \
+	.\DOS\zvg\timer.o \
+	.\DOS\zvg\zvgEnc.o \
+	.\DOS\zvg\zvgError.o \
+	.\DOS\zvg\zvgBan.o \
+	.\iniparser\iniparser.o \
+	.\iniparser\dictionary.o \
+	.\DOS\DOSvmm.o \
+	.\VMMSrc\vchars.o \
+	.\VMMSrc\gamelist.o
 
 all: .\$(NAME).exe
 

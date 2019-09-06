@@ -16,7 +16,7 @@ LIBS= `sdl-config --libs` -lSDL -lGL -lSDL_gfx -lm -lX11
 
 NAME = vmmenu
 
-OBJS = ./$(NAME).o \
+OBJS = ./VMMSrc/$(NAME).o \
        ./Linux/zvg/zvgFrame.o \
        ./Linux/zvg/zvgPort.o \
        ./Linux/zvg/timer.o \
