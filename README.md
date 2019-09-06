@@ -84,17 +84,21 @@ The name of the game is what gets passed back to DOS and on to mame when running
 
 For example:
 
+```
 Atari|Asteroids (rev 2)|asteroid|asteroid
 Atari|Asteroids (rev 1)|asteroid|asteroi1
 Other|Asterock|asteroid|asterock
 Other|Meteorites|asteroid|meteorts
+```
 
 As the file is plain text, you are free to customise it to your taste. For example, in the example above there are 2 clones of Asteroids by "Other" manufaturers, and these will appear on a separate page to the Atari versions of Asteroids. Should you wish to bundle all the Asteroids variants together under Atari, simply edit the manufacturer field for these 2 games, changing "Other" to "Atari":
 
+```
 Atari|Asteroids (rev 2)|asteroid|asteroid
 Atari|Asteroids (rev 1)|asteroid|asteroi1
 Atari|Asterock|asteroid|asterock
 Atari|Meteorites|asteroid|meteorts
+```
 
 When you next start the menu, it will group all of these titles together under Atari -> Asteroids.
 
@@ -102,10 +106,12 @@ If you wish to remove a game from the menu, perhaps if the controls are not suit
 
 This would remove "Asteroids (rev 1)" from the menu but retain the other 3 games:
 
+```
 Atari|Asteroids (rev 2)|asteroid|asteroid
 #Atari|Asteroids (rev 1)|asteroid|asteroi1
 Atari|Asterock|asteroid|asterock
 Atari|Meteorites|asteroid|meteorts
+```
 
 You can also edit the display name if you wish, but do not alter the clone name or parent game name or the game may not run.
 
@@ -120,33 +126,34 @@ Examples of such customisation are:
 
 If you look at the example VMM.BAT file provided, you will see that the display is rotated when running Barrier, Sundance and Tacscan:
 
-`::::::::::::::::::::::::::::::::::::::::::::::::::::::::::`
-`:: Process the selected game and run the appropriate exe::`
-`::::::::::::::::::::::::::::::::::::::::::::::::::::::::::`
-`if %1 == barrier  goto flipxy`
-`if %1 == sundance goto flipxy`
-`if %1 == tacscan  goto flipxy`
-`::if %1 == bwidow goto fskip2`
-` ` 
-`::::::::::::::::::::::::::::::::::::::::::::::::::::::::::`
-`::             Default is to use Mame 0.104             ::`
-`::::::::::::::::::::::::::::::::::::::::::::::::::::::::::`
-`cd mame104`
-`dvm104.exe %1 -zvg 3`
-`cd ..`
-`goto end`
-` `
-`::::::::::::::::::::::::::::::::::::::::::::::::::::::::::`
-`::      Flip X and Y axes for barrier and sundance      ::`
-`::::::::::::::::::::::::::::::::::::::::::::::::::::::::::`
-`:flipxy`
-`cd mame104`
-`dvm104.exe %1 -zvg 3 -flipx -flipy`
-`cd ..`
-`goto end`
-` `
-`:end`
+```
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Process the selected game and run the appropriate exe::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if %1 == barrier  goto flipxy
+if %1 == sundance goto flipxy
+if %1 == tacscan  goto flipxy
+::if %1 == bwidow goto fskip2
+ 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::             Default is to use Mame 0.104             ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+cd mame104
+dvm104.exe %1 -zvg 3
+cd ..
+goto end
 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::      Flip X and Y axes for barrier and sundance      ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:flipxy
+cd mame104
+dvm104.exe %1 -zvg 3 -flipx -flipy
+cd ..
+goto end
+
+:end
+```
 
 %1 represents the game name as passed from the menu to VMM.BAT. We test if this matches "barrier", "sundance" or "tacscan" and jump to the flipxy section if necessary, else mame is run with standard default settings.
 
