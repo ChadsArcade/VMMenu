@@ -7,12 +7,12 @@
 #include "vmmstddef.h"
 #include "zvgFrame.h"
 
-union 	REGS in, out;
-int  	LEDstate=0;
-int	mousexmick=0, mouseymick=0;
-int	optz[15];
-int	f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
-char	zvgargs[30];
+union		REGS in, out;
+int		LEDstate=0;
+int		mousexmick=0, mouseymick=0;
+int		optz[15];
+int		f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
+char		zvgargs[30];
 extern	int ZVGPresent;
 
 /******************************************************************
@@ -40,7 +40,7 @@ int getkey(void)
  		key=bioskey(0);
 		return key;
 	}
-	shift=bioskey(2) & 15;      // only want bits 0-3 so mask off higher 4 bits
+	shift=bioskey(2) & 15;			// only want bits 0-3 so mask off higher 4 bits
 	if (shift)	key=shift;
 	// Disable autorepeat of modifiers
 	if (key==FIRE)						//LCTRL
@@ -84,11 +84,11 @@ void mousemick()
 	int tempaxis;
 	in.x.ax = 0x0b;
 	int86 (0x33, &in, &out);
-	mousexmick = out.x.cx;     // read X axis
-	mouseymick = out.x.dx;     // Read Y axis
+	mousexmick = out.x.cx;		// read X axis
+	mouseymick = out.x.dx;		// Read Y axis
 	if (mousexmick > 32768) mousexmick -= 65536;
 	if (mouseymick > 32768) mouseymick -= 65536;
-	if (optz[o_mswapXY] == 1) // swap x and y axes
+	if (optz[o_mswapXY] == 1)	// swap x and y axes
 	{
 		tempaxis = mousexmick;
 		mousexmick = mouseymick;
@@ -214,13 +214,13 @@ void RunGame(char *gameargs)
 
 	printf("Launching: [%s]\n", command);
 	err = system(command);
-	if (optz[o_redozvg] && ZVGPresent)			// Re-open the ZVG if MAME closed it
+	if (optz[o_redozvg] && ZVGPresent)	// Re-open the ZVG if MAME closed it
 	{
 		err = zvgFrameOpen();				// initialize everything
 		if (err)
 		{
-			zvgError( err);				// if it went wrong print error
-			exit(0);				// and return to OS
+			zvgError( err);					// if it went wrong print error
+			exit(0);								// and return to OS
 		}
 	}
 }

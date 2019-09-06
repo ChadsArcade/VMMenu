@@ -1,9 +1,12 @@
-#
-# MAKEFILE for DOS VMMenu
-#
-# For use with GNU Make, calls DJGPP
-#
-# Chad Gray, sometime in 2009
+##################################
+#											#
+#   VMMenu MAKEFILE for Linux		#
+#											#
+#     For use with GNU Make		#
+#											#
+#  Chad Gray, sometime in 2009	#
+#											#
+##################################
 
 CC = GCC
 LINK = GCC
@@ -14,8 +17,6 @@ INC = -I.\DOS\zvg -I.\DOS -I.\iniparser
 NAME = vmmenu
 
 OBJS = $(NAME).o \
-		.\vchars.o \
-		.\gamelist.o \
 		.\DOS\zvg\zvgFrame.o \
 		.\DOS\zvg\zvgPort.o \
 		.\DOS\zvg\timer.o \
@@ -24,7 +25,9 @@ OBJS = $(NAME).o \
 		.\DOS\zvg\zvgBan.o \
 		.\iniparser\iniparser.o \
 		.\iniparser\dictionary.o \
-		.\DOS\DOSvmm.o
+		.\DOS\DOSvmm.o \
+		.\VMMSrc\vchars.o \
+		.\VMMSrc\gamelist.o
 
 all: .\$(NAME).exe
 
@@ -32,7 +35,7 @@ all: .\$(NAME).exe
 
 clean:
 	-del .\$(NAME).exe
-	-del .\*.o
+	-del .\VMMSrc\*.o
 	-del .\DOS\*.o
 	-del .\DOS\zvg\*.o
 	-del .\iniparser\*.o
@@ -59,3 +62,4 @@ clean:
 
 %.o : %.asm
 	$(ASM) -f coff -I$(INC) $<
+

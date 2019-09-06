@@ -1,19 +1,22 @@
-#
-# VMMenu MAKEFILE for Linux
-#
-# Chad Gray, sometime in 2011
+##################################
+#											#
+#   VMMenu MAKEFILE for Linux		#
+#											#
+#     For use with GNU Make		#
+#											#
+#  Chad Gray, sometime in 2011	#
+#											#
+##################################
 
 CC = gcc
 LINK = gcc
 ASM = NASM
-INC = `sdl-config --cflags` -I./ -I./Linux -I./Linux/zvg -I./iniparser
+INC = `sdl-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser
 LIBS= `sdl-config --libs` -lSDL -lGL -lSDL_gfx -lm -lX11
 
 NAME = vmmenu
 
 OBJS = ./$(NAME).o \
-       ./vchars.o \
-       ./gamelist.o \
        ./Linux/zvg/zvgFrame.o \
        ./Linux/zvg/zvgPort.o \
        ./Linux/zvg/timer.o \
@@ -22,7 +25,9 @@ OBJS = ./$(NAME).o \
        ./Linux/zvg/zvgBan.o \
        ./iniparser/iniparser.o \
        ./iniparser/dictionary.o \
-       ./Linux/LinuxVMM.o
+       ./Linux/LinuxVMM.o \
+       ./VMMSrc/vchars.o \
+       ./VMMSrc/gamelist.o
 
 all: ./$(NAME)
 
@@ -30,10 +35,10 @@ all: ./$(NAME)
 
 clean:
 	-rm ./$(NAME)
-	-rm *.o
-	-rm ../Linux/*.o
-	-rm ../Linux/zvg/*.o
-	-rm ../iniparser/*.o
+	-rm ./VMMSrc/*.o
+	-rm ./Linux/*.o
+	-rm ./Linux/zvg/*.o
+	-rm ./iniparser/*.o
 
 # Flags for linker
 #
@@ -58,3 +63,4 @@ clean:
 
 %.o : %.asm
 	$(ASM) -f coff -I$(INC) $<
+
