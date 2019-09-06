@@ -101,18 +101,18 @@ char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
 {
-	uint	err, man_menu;
+	uint		err, man_menu;
 	int		count, top, timeout = 0, ticks = 0, gamesize;
 	int		pressx=0, pressy=0;
 	int		cc;
-	float	width=0.0;
-	char	mytext[100];
+	float		width=0.0;
+	char		mytext[100];
 	int		mpx = 0, mpy = 0;
 	vObject	mame, sega, cinematronics, atari, centuri, vbeam, midway;
 	m_node	*vectorgames;
 	g_node	*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
-	FILE	*inifp;
-	char	* ini_name = "vmmenu.cfg";
+	FILE		*inifp;
+	char		* ini_name = "vmmenu.cfg";
 
 	vectorgames = createlist();
 	totalnumgames=printlist(vectorgames);
@@ -1821,9 +1821,9 @@ void SetOptions(void)
 
 		setcolour(vwhite, 15);
 
-		PrintString("Keycode ", 350, top + 90, 0, 4, 5, 0);
+		PrintString("Keycode ", xmax-150, ymax - 40, 0, 4, 5, 0);
 		sprintf(angle,"0x%04x",lastkey);
-		PrintString(angle, 440, top + 90, 0, 4, 5, 0);
+		PrintString(angle, xmax-65, ymax - 40, 0, 4, 5, 0);
 
 		line=0;
 		if (cursor == 0)	setcolour(vwhite, 25);
