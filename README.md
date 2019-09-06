@@ -124,7 +124,9 @@ This section will be populated by the in game settings menu, which allows you to
 
 [keys]
 
-This section binds the controls to your preferred key presses. For DOS users, you can use the supplied keycode.exe to display the keycode of a key pressed. Simply change the value against the desired function. The default values and the keycodes for both Linux and DOS are listed in the vmmstddef.h file
+This section binds the controls to your preferred key presses. For DOS users, you can use the supplied keycode.exe to display the keycode of a key pressed. Simply change the value against the desired function. The default values and the keycodes for both Linux and DOS are listed in the vmmstddef.h file.
+
+**New for v1.31** - The value of the last keycode pressed is displayed at the top of the screen whilst in the settings page.
 
 [colours]
 

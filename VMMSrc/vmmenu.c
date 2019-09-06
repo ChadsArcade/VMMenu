@@ -7,10 +7,12 @@
 * History:
 *
 * 22/6/11	Ported to SDL/Linux and pulled out common source
-* 13/3/11	Added keyboard LEDs
-*			Added Mouse/Trackball support
-*			Press a key for menu message in screen saver
-* 12/3/11	Added Spinner Support
+* 13/3/11	v1.1 -Added keyboard LEDs
+*						Added Mouse/Trackball support
+*						Press a key for menu message in screen saver
+* 12/3/11	v1.2 -Added Spinner Support
+*  ?/ ? /11 v1.3 -Added settings page
+* 06 Sep 19	v1.31-Added keycode display in Settings
 *
 *
 *****************************************************************************/
@@ -38,45 +40,45 @@
 #endif 
 
 /****Function declarations***/
-void		PrintString(char*, int, int, int, float, float, int);			// prints a string of characters
-point		fnrotate(int, float, float, float, float);						// rotate a point given number of degrees
+void		PrintString(char*, int, int, int, float, float, int);	// prints a string of characters
+point		fnrotate(int, float, float, float, float);				// rotate a point given number of degrees
 void		drawshape(vObject);												// draw shape pointed to by vObject
-vObject		updateobject(vObject);											// update position and rotation of a vector object
-void		drawborders(int, int, int, int, int, int, int);					// draw borders around edge of screen
-char*		ucase(char*);													// convert string to uppercase
-vObject		intro(void);													// Intro logo animation
-vObject		make_asteroid(void);											// define an asteroid
-vObject		make_sega(void);												// define sega logo
-vObject		make_cinematronics(void);										// define cinematronics logo
-vObject		make_atari(void);												// define atari logo
-vObject		make_centuri(void);												// define centuri logo
-vObject		make_vbeam(void);												// define vectorbeam logo
-vObject		make_midway(void);												// define midway logo
-int			reallyescape(void);												// See if you really want to quit
-void		author(int);													// Print author info
-void		setcolour(int, int);											// set colour and brightness
-int			credits(void);													// print credits
-vStar		make_star(void);												// define a star
+vObject	updateobject(vObject);											// update position and rotation of a vector object
+void		drawborders(int, int, int, int, int, int, int);			// draw borders around edge of screen
+char*		ucase(char*);														// convert string to uppercase
+vObject	intro(void);														// Intro logo animation
+vObject	make_asteroid(void);												// define an asteroid
+vObject	make_sega(void);													// define sega logo
+vObject	make_cinematronics(void);										// define cinematronics logo
+vObject	make_atari(void);													// define atari logo
+vObject	make_centuri(void);												// define centuri logo
+vObject	make_vbeam(void);													// define vectorbeam logo
+vObject	make_midway(void);												// define midway logo
+int		reallyescape(void);												// See if you really want to quit
+void		author(int);														// Print author info
+void		setcolour(int, int);												// set colour and brightness
+int		credits(void);														// print credits
+vStar		make_star(void);													// define a star
 vStar		updatestar(vStar);												// update a star object
-void		drawstar(vStar);												// Draw a star
-void		showstars();													// Display all the stars on screen
+void		drawstar(vStar);													// Draw a star
+void		showstars();														// Display all the stars on screen
 void		getsettings(void);												// get settings from ini file
-void		writeinival(char*, int, int, int);								// write a value to the cfg file
+void		writeinival(char*, int, int, int);							// write a value to the cfg file
 void		writecfg(void);													// write the cfg file
-int			getcolour(char*);												// Get colour value from cfg as an int
-void		pressakey(int, int);											// Message to escape from screen saver to menu
-void		GetRGBfromColour(int, int*, int*, int*);						// Get R, G and B components of a passed colour
-g_node*		GetRandomGame(m_node *);										// Selects a random game from the list
-void		PlayAttractGame(m_node *gameslist);								// get a random game name and add attract mode args
+int		getcolour(char*);													// Get colour value from cfg as an int
+void		pressakey(int, int);												// Message to escape from screen saver to menu
+void		GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B components of a passed colour
+g_node*	GetRandomGame(m_node *);										// Selects a random game from the list
+void		PlayAttractGame(m_node *gameslist);							// get a random game name and add attract mode args
 void		PrintPointer(int mx, int my);									// Print mouse pointer at current mouse position
 void		SetOptions(void);
 
 //#define	DEBUG							// comment out to suppress debug output
 
-// Global variables (sorry - there's quite a few...)
+// Global variables (sorry - there are quite a few...)
 
 vObject		asteroid[NUM_ASTEROIDS];
-vStar		starz[NUM_STARS];
+vStar			starz[NUM_STARS];
 static int	xmax=X_MAX, ymax=Y_MAX;
 
 extern int	optz[15];						// array of user defined menu preferences
@@ -94,7 +96,7 @@ int	ZVGPresent = 1;
 int	SDL_VC, SDL_VB;							// colour and brightness for SDL vectors
 int	mousefound=0;
 
-char	auth1[] = "VMMenu 1.3, Chad Gray 2011";
+char	auth1[] = "VMMenu 1.31, Chad Gray 2009-19";
 char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
@@ -1742,6 +1744,7 @@ void SetOptions(void)
 {
 	int cc = 0, top = 250, cursor = 0, options;
 	int optx = 0, opty = 0, timer = 0;
+	int lastkey = 0;
 	point p1, p2;
 	char angle[10];
 	while ((cc != keyz[k_options]) && (cc != keyz[k_quit]) && timer < 1800)
@@ -1817,6 +1820,11 @@ void SetOptions(void)
 		if (optz[o_stars]) showstars();
 
 		setcolour(vwhite, 15);
+
+		PrintString("Keycode ", 350, top + 90, 0, 4, 5, 0);
+		sprintf(angle,"0x%04x",lastkey);
+		PrintString(angle, 440, top + 90, 0, 4, 5, 0);
+
 		if (cursor == 0)	setcolour(vwhite, 25);
 		PrintString("Rotation       ", -150, top, 0, 6, 6, 0);
 		if (optz[o_rot] == 0) strcpy(angle,"0      ");
@@ -1899,10 +1907,13 @@ void SetOptions(void)
 			else options = 6;
 		}
 		else options = 5;
-
 		
 		cc=getkey();
-		if (cc) timer = 0;
+		if (cc)
+		{
+			lastkey = cc;
+			timer = 0;
+		}
 		if (cc == keyz[k_ngame]) cursor = (cursor + 1) % options;
 		if (cc == keyz[k_pgame])
 		{
