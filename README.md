@@ -98,6 +98,32 @@ shutdown -s 5
 
 When VMMenu is quit, the AUTOEXEC.BAT file will continue from the next line, in this example it will run the shutdown command and turn off the PC.
 
+## The vmmenu.cfg file
+
+When first run, VMMenu will create a vmmenu.cfg file with various default settings for the colours, controls and menu options. There are 4 sections to the file:
+- [interface], customises how the menu behaves
+- [controls], this is for mouse/spinner options
+- [keys], defines which keys are bound to which menu functions
+- [colours], defines the colours and intensities of various elements on screen
+
+[interface]
+
+Most of the interface options can be set via the in game settings menu, which by default is accessed by pressing the backtick ` key, usually found below the escape key. Tip: It can be useful to bind this function to the test or service switch in your cabinet!
+
+One interface option worthy of some explanation is "smartmenu". This allows you to control the menu in a more intuitive manner using a joystick, with direct navigation in the up, down, left and right directions. As not all vector cabs have a joystick (e.g. Asteroids), this option defaults to `off` and menu navigation is setup to use the rotation keys, with Hyperspace toggling between the games list and manufacturer list. If switching this option `on`, remember you will also need to specify the keys used to navigate between manufacturers, games and clones. If you switch smartmenu `on` without specifying suitable keys, the option will be switched off again as you would not be able to control the menu correctly. 
+
+[controls]
+
+This section will be populated by the in game settings enu, which allows you to set up a mouse or spinner and change/swap the axes, change the sample rate etc.
+
+[keys]
+
+This section binds the controls to your preferred key presses. For DOS users, you can use the supplied keycode.exe to display the keycode of a key pressed. Simply change the value against the desired function. The default values and the keycodes for both Linux and DOS are listed in the vmmstddef.h file
+
+[colours]
+
+Here is where you can define the colours and intensities of various elements of the menu. Colour values are prefixed fith c_ and intensities with i_
+Valid colour values are red, magenta, cyan, blue, yellow, green and white. Intensity values range from 0 to 25, dimmest to brightest.
 
 ## The vmmenu.ini file
 
