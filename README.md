@@ -21,7 +21,7 @@ I soon had a working system which I was happy with, so I contacted Zonn at Zekto
 
 A couple of years later the ZVG drivers were ported to Linux, and I ported the menu over too. I moved development to the Linux PC and created a Windows XP VirtualBox PC to handle the DOS compilation from the same source code. You could maybe set up cross compiling for a simpler setup but doing so is beyond my skillset. The Linux port has the advantage of being able to mirror the vector screen to the PC monitor, this greatly aids with development as you can test code without needing the ZVG or a vector monitor attached, and see what the colours will look like should you only have a B&W monitor. I originally developed using a vectrex as a monitor, so the original colour work was done "blind".
 
-![alt text](https://github.com/chadsarcade/VMMenu/pics/LinuxVMMenu2.jpg "Linux VMMenu with no ZVG")
+![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/LinuxVMMenu2.jpg "Linux VMMenu with no ZVG")
 
 Today I have two ZVG cabs: the original Asteroids Deluxe Cabaret, and an upright Space Duel with a custom multivector control panel. Both have the ZVG fitted sympathetically, with the system plugging into the original wiring loom via the game board connector. The AR board handles the sound amplification so the volume control in the cabs still work too.
 
@@ -52,7 +52,7 @@ Optionally you can install upx and use the compile.sh script in the VMMenu/Linux
 
 This works even on a raspberry pi, obviously you won't be able to hook up a ZVG board... but you can develop and test the code and simulate how it will look on a vector monitor.
 
-![alt text](https://github.com/chadsarcade/VMMenu/pics/LinuxVMMenu1.jpg "Linux VMMenu in a window")
+![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/LinuxVMMenu1.jpg "Linux VMMenu in a window")
 
 ## Building on DOS
 
