@@ -205,7 +205,6 @@ If you look at the example VMM.BAT file provided, you will see that the display 
 if %1 == barrier  goto flipxy
 if %1 == sundance goto flipxy
 if %1 == tacscan  goto flipxy
-::if %1 == bwidow goto fskip2
  
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::             Default is to use Mame 0.104             ::
