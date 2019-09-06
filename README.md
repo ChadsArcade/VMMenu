@@ -25,7 +25,11 @@ A couple of years later the ZVG drivers were ported to Linux, and I ported the m
 
 Today I have two ZVG cabs: the original Asteroids Deluxe Cabaret, and an upright Space Duel with a custom multivector control panel. Both have the ZVG fitted sympathetically, with the system plugging into the original wiring loom via the game board connector. The AR board handles the sound amplification so the volume control in the cabs still work too.
 
-I still get the odd qquery about the menu, so I decided that I'd put it up on GitHub rather than have it languish in a virtual PC. I hope somebody finds it useful... it wold be nice to see some new vector games written for DOS/Linux :-)
+![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/SDCab1.jpg "Linux VMMenu in a Space Duel Cab")
+![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/SDCab2.jpg "Linux VMMenu in a Space Duel Cab")
+
+
+I still get the odd query about the menu, so I decided that I'd put it up on GitHub rather than have it languish in a virtual PC. I hope somebody finds it useful... it wold be nice to see some new vector games written for DOS/Linux :-)
 
 ## Building on Linux:
 
