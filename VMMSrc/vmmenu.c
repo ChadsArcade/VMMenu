@@ -71,7 +71,8 @@ void		GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B components 
 g_node*	GetRandomGame(m_node *);										// Selects a random game from the list
 void		PlayAttractGame(m_node *gameslist);							// get a random game name and add attract mode args
 void		PrintPointer(int mx, int my);									// Print mouse pointer at current mouse position
-void		SetOptions(void);
+void		SetOptions(void);													// Lets user edit various in-menu options
+void		EditGamesList(void);												// Enable or disable games from the vmmenu.ini file
 
 //#define	DEBUG							// comment out to suppress debug output
 
@@ -193,11 +194,11 @@ int main( void) //int argc, char *argv[])
 		starz[count] = make_star();
 	}
 
-	sega			= make_sega();
+	sega				= make_sega();
 	cinematronics	= make_cinematronics();
-	atari			= make_atari();
+	atari				= make_atari();
 	centuri			= make_centuri();
-	vbeam			= make_vbeam();
+	vbeam				= make_vbeam();
 	midway			= make_midway();
 
 	if (ZVGPresent)
@@ -454,7 +455,7 @@ int main( void) //int argc, char *argv[])
 			else if (!strcmp(mytext, "ATARI"))
 			{
 				atari.pos.x = -(xmax-130);
-				atari.scale.x = width;
+				atari.scale.x = width*1.5;
 				drawshape(atari);
 				atari.pos.x = xmax-130;
 				drawshape(atari);
@@ -485,12 +486,12 @@ int main( void) //int argc, char *argv[])
 
 			// Now print the games list menu
 			top = 150;
-			gamelist_root = vectorgames->firstgame;										// point to game list for current manufacturer
+			gamelist_root = vectorgames->firstgame;											// point to game list for current manufacturer
 			do
 			{
-				strcpy(mytext, gamelist_root->name);									// mytext = name of parent game
-				gamesize = 4;																		// fontsize for gamelist
-				if (!man_menu && (sel_game == gamelist_root))							// if we're at the selected game...
+				strcpy(mytext, gamelist_root->name);											// mytext = name of parent game
+				gamesize = 4;																			// fontsize for gamelist
+				if (!man_menu && (sel_game == gamelist_root))								// if we're at the selected game...
 				{
 					gamesize = 5;
 					if (sel_game != sel_clone) strcpy(mytext, sel_clone->name);			// change to clone name if different
@@ -506,7 +507,7 @@ int main( void) //int argc, char *argv[])
 				{
 					setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
 					if (strstr(mytext, " (") != NULL)
-						mytext[strstr(mytext, " (") - mytext] = 0;						// ... and strip off version info
+						mytext[strstr(mytext, " (") - mytext] = 0;							// ... and strip off version info
 				}
 				PrintString(mytext, 0, top, 0, gamesize, gamesize, 0);
 				gamelist_root = gamelist_root->next;
@@ -1117,8 +1118,8 @@ vObject make_atari(void)
 	atari.pos.y = 0;
 	atari.inc.x = 0;
 	atari.inc.y = 0;
-	atari.scale.x = 1;
-	atari.scale.y = 1;
+	atari.scale.x = 1.5;
+	atari.scale.y = 1.5;
 	atari.angle = 0;
 	atari.theta = 0;
 	atari.cent.x = 57;
@@ -1598,8 +1599,8 @@ void writecfg()
 	// write the interface settings
 	writeinival("interface:rotation",		optz[o_rot], 1, 0);
 	writeinival("interface:stars",			optz[o_stars], 1, 3);
-	writeinival("interface:caps",			optz[o_ucase], 1, 3);
-	writeinival("interface:showpnm",		optz[o_togpnm], 1, 3);
+	writeinival("interface:caps",				optz[o_ucase], 1, 3);
+	writeinival("interface:showpnm",			optz[o_togpnm], 1, 3);
 	writeinival("interface:smartmenu",		optz[o_smenu], 1, 3);
 	writeinival("interface:reopenzvg",		optz[o_redozvg], 1, 3);
 	writeinival("interface:rendervga", 		optz[o_dovga], 0, 3);
@@ -1609,20 +1610,20 @@ void writecfg()
 
 	// write the spinner/mouse settings
 	writeinival("controls:spinnertype",		optz[o_mouse], 1, 0);
-	writeinival("controls:swapaxes",		optz[o_mswapXY], optz[o_mouse], 3);
-	writeinival("controls:spinsens",		optz[o_msens], optz[o_mouse], 0);
-	writeinival("controls:spinsamp",		optz[o_msamp], optz[o_mouse], 0);
+	writeinival("controls:swapaxes",			optz[o_mswapXY], optz[o_mouse], 3);
+	writeinival("controls:spinsens",			optz[o_msens], optz[o_mouse], 0);
+	writeinival("controls:spinsamp",			optz[o_msamp], optz[o_mouse], 0);
 	writeinival("controls:reversexaxis",	optz[o_mrevX], optz[o_mouse], 3);
 	writeinival("controls:reverseyaxis",	optz[o_mrevY], optz[o_mouse], 3);
 	writeinival("controls:pointer",			optz[o_mpoint], 0, 3);
 
 	// write the key bindings
-	writeinival("keys:k_togglemenu",		keyz[k_menu], 1, 1);
-	writeinival("keys:k_quit",				keyz[k_quit], 1, 1);
-	writeinival("keys:k_options",			keyz[k_options], 1, 1);
-	writeinival("keys:k_random",			keyz[k_random], 0, 1);
-	writeinival("keys:k_prevman",			keyz[k_pman], 1, 1);
-	writeinival("keys:k_nextman",			keyz[k_nman], 1, 1);
+	writeinival("keys:k_togglemenu",			keyz[k_menu], 1, 1);
+	writeinival("keys:k_quit",					keyz[k_quit], 1, 1);
+	writeinival("keys:k_options",				keyz[k_options], 1, 1);
+	writeinival("keys:k_random",				keyz[k_random], 0, 1);
+	writeinival("keys:k_prevman",				keyz[k_pman], 1, 1);
+	writeinival("keys:k_nextman",				keyz[k_nman], 1, 1);
 	writeinival("keys:k_prevgame",			keyz[k_pgame], 1, 1);
 	writeinival("keys:k_nextgame",			keyz[k_ngame], 1, 1);
 	writeinival("keys:k_prevclone",			keyz[k_pclone], 1, 1);
@@ -1742,9 +1743,9 @@ void PrintPointer(int mx, int my)
 *******************************************************************/
 void SetOptions(void)
 {
-	int cc = 0, top = 250, cursor = 0, options;
+	int cc = 0, top, cursor = 0, options;
 	int optx = 0, opty = 0, timer = 0;
-	int lastkey = 0, line = 0;
+	int lastkey = keyz[k_options], spacing = 42;
 	point p1, p2;
 	char angle[10];
 	while ((cc != keyz[k_options]) && (cc != keyz[k_quit]) && timer < 1800)
@@ -1819,13 +1820,12 @@ void SetOptions(void)
 
 		if (optz[o_stars]) showstars();
 
+		top = 300;
+		options = 6;
+
+		// Screen rotation
+		top-=spacing;
 		setcolour(vwhite, 15);
-
-		PrintString("Keycode ", xmax-150, ymax - 40, 0, 4, 5, 0);
-		sprintf(angle,"0x%04x",lastkey);
-		PrintString(angle, xmax-65, ymax - 40, 0, 4, 5, 0);
-
-		line=0;
 		if (cursor == 0)	setcolour(vwhite, 25);
 		PrintString("Rotation       ", -150, top, 0, 6, 6, 0);
 		if (optz[o_rot] == 0) strcpy(angle,"0      ");
@@ -1833,88 +1833,93 @@ void SetOptions(void)
 		if (optz[o_rot] == 2) strcpy(angle,"180    ");
 		if (optz[o_rot] == 3) strcpy(angle,"270    ");
 		PrintString(angle, 250, top, 0, 6, 6, 0);
-		
-		line+=50;
+
+		// Stars
+		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 1)	setcolour(vwhite, 25);
-		PrintString("Stars          ", -150, (top - line), 0, 6, 6, 0);
-		PrintString(optz[o_stars] == 1 ? "yes    " : "no     ", 250, (top - line), 0, 6, 6, 0);
-		
-		line+=50;
+		PrintString("Stars          ", -150, top, 0, 6, 6, 0);
+		PrintString(optz[o_stars] == 1 ? "yes    " : "no     ", 250, top, 0, 6, 6, 0);
+
+		// Caps
+		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 2)	setcolour(vwhite, 25);
-		PrintString("All Caps       ", -150, top - line, 0, 6, 6, 0);
-		PrintString((optz[o_ucase] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+		PrintString("All Caps       ", -150, top, 0, 6, 6, 0);
+		PrintString((optz[o_ucase] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
-		line+=50;
+		// Show Prev and Next
+		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 3)	setcolour(vwhite, 25);
-		PrintString("Show Prev/next ", -150, top - line, 0, 6, 6, 0);
-		PrintString((optz[o_togpnm] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+		PrintString("Show Prev/next ", -150, top, 0, 6, 6, 0);
+		PrintString((optz[o_togpnm] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
-		//Smart Menu lives here
-		line+=50;
+		// Smart Menu
+		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 4)	setcolour(vwhite, 25);
-		PrintString("Smart Menu     ", -150, top - line, 0, 6, 6, 0);
-		PrintString((optz[o_smenu] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+		PrintString("Smart Menu     ", -150, top, 0, 6, 6, 0);
+		PrintString((optz[o_smenu] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
-		line+=50;
+		// Reopen ZVG
+		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 5)	setcolour(vwhite, 25);
-		PrintString("Reopen ZVG     ", -150, top - line, 0, 6, 6, 0);
-		PrintString((optz[o_redozvg] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+		PrintString("Reopen ZVG     ", -150, top, 0, 6, 6, 0);
+		PrintString((optz[o_redozvg] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
 		if (mousefound)
 		{
-			line+=50;
+			options+=1;						// Mouse found so we have an extra option to consider
+			top-=spacing;
 			setcolour(vwhite, 15);
 			if (cursor == 6)	setcolour(vwhite, 25);
-			PrintString("Optical Control", -150, top - line, 0, 6, 6, 0);
+			PrintString("Optical Control", -150, top, 0, 6, 6, 0);
 			if (optz[o_mouse] == 0) strcpy(angle,"None   ");
 			if (optz[o_mouse] == 1) strcpy(angle,"Spinner");
 			if (optz[o_mouse] == 2) strcpy(angle,"Mouse  ");
-			PrintString(angle, 250, top - line, 0, 6, 6, 0);
+			PrintString(angle, 250, top, 0, 6, 6, 0);
 
 			if (optz[o_mouse])
 			{
-				options = 12;	// increase total options available to 12 as there are lots of mouse settings
-				line+=50;
+				options+=5;					// Mouse set to true so there are 5 more mouse settings
+				top-=spacing;
 				setcolour(vwhite, 15);
 				p1.x = -275;
-				p1.y = top - 330;
+				p1.y = top + 20;
 				p2.x = p1.x;
-				p2.y = top - 550;
+				p2.y = top - (4*spacing);
 				drawvector(p1, p2, 0, 0);
 				if (cursor == 7)	setcolour(vwhite, 25);
-				PrintString("- Swap X/Y Axes ", -133, top - line, 0, 6, 6, 0);
-				PrintString((optz[o_mswapXY] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+				PrintString("- Swap X/Y Axes ", -133, top, 0, 6, 6, 0);
+				PrintString((optz[o_mswapXY] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
-				line+=50;
+				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 8)	setcolour(vwhite, 25);
-				PrintString("- Reverse X Axis", -133, top - line, 0, 6, 6, 0);
-				PrintString((optz[o_mrevX] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+				PrintString("- Reverse X Axis", -133, top, 0, 6, 6, 0);
+				PrintString((optz[o_mrevX] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 		
-				line+=50;
+				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 9)	setcolour(vwhite, 25);
-				PrintString("- Reverse Y Axis", -133, top - line, 0, 6, 6, 0);
-				PrintString((optz[o_mrevY] == 1 ? "yes    " : "no     "), 250, top - line, 0, 6, 6, 0);
+				PrintString("- Reverse Y Axis", -133, top, 0, 6, 6, 0);
+				PrintString((optz[o_mrevY] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
-				line+=50;
+				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 10)	setcolour(vwhite, 25);
-				PrintString("- Sample Rate   ", -133, top - line, 0, 6, 6, 0);
+				PrintString("- Sample Rate   ", -133, top, 0, 6, 6, 0);
 				itoa(optz[o_msamp], angle, 10);
-				PrintString(angle, 199 + (optz[o_msamp] > 9 ? 6 : 0), top - line, 0, 6, 6, 0);
+				PrintString(angle, 199 + (optz[o_msamp] > 9 ? 6 : 0), top, 0, 6, 6, 0);
 
-				line+=50;
+				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 11)	setcolour(vwhite, 25);
-				PrintString("- Sensitivity   ", -133, top - line, 0, 6, 6, 0);
+				PrintString("- Sensitivity   ", -133, top, 0, 6, 6, 0);
 				itoa(optz[o_msens], angle, 10);
-				PrintString(angle, 199 + (optz[o_msens] > 9 ? 6 : 0), top - line, 0, 6, 6, 0);
+				PrintString(angle, 199 + (optz[o_msens] > 9 ? 6 : 0), top, 0, 6, 6, 0);
 
 				setcolour(vyellow, 25);
 				PrintString("X", optx, ymax-12, 0, 10, 5, 0);
@@ -1922,9 +1927,22 @@ void SetOptions(void)
 				PrintString("X", xmax-12, opty, 0, 10, 5, 0);
 				PrintString("X", -xmax+12, opty, 0, 10, 5, 0);
 			}
-			else options = 7;
 		}
-		else options = 6;
+
+		// Print Keycode
+		top=-300;//spacing;
+		//top-=spacing;
+		setcolour(vgreen, 20);
+		PrintString("Keycode        ", -150, top, 0, 6, 6, 0);
+		sprintf(angle,"0x%04x ",lastkey);
+		PrintString(angle, 250, top, 0, 6, 6, 0);
+
+		// Edit Games List
+		//top-=spacing;
+		//setcolour(vwhite, 15);
+		//if (cursor == options - 1)	setcolour(vwhite, 25);
+		//PrintString("Edit Games List", -150, top, 0, 6, 6, 0);
+		//PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 		
 		cc=getkey();
 		if (cc)
@@ -1938,7 +1956,6 @@ void SetOptions(void)
 			cursor--;
 			if (cursor < 0) cursor = (options - 1);
 		}
-
 		switch (cursor)
 		{
 			case 0:													// rotate screen through 90 degrees
@@ -2079,6 +2096,14 @@ void SetOptions(void)
 				if (cc == keyz[k_start]) optz[o_msens] = 30;
 			}
 		}
+		// The "Edit Games List" option number can change depending on whether mouse settings are active, so we can't use switch/case...
+		//if (cursor == options-1)	// Edit Games List
+		//{
+		//	if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) edit = !edit;
+		//	if (cc == keyz[k_start]) edit = 0;
+		//}
+
 		sendframe();
 	}
 }
+

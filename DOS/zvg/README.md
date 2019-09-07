@@ -1,4 +1,4 @@
-Drop the Linux ZVG SDK files in here:
+Drop the DOS ZVG SDK files in here:
 
 - pic.h
 - timer.h
@@ -14,4 +14,4 @@ Drop the Linux ZVG SDK files in here:
 - zvgFrame.c
 - zvgPort.c
 
-Get them from: https://github.com/rhew/zvg-linux
+(They were on the Zektor site...)

@@ -13,7 +13,7 @@ As you've probably gathered, I'm also new to Git so please be patient whilst I g
 
 ## History
 
-VMMenu was created as I'd had an unused ZVG for a couple of years with the intention of fitting it to a dedicated cab. I was aware of the initial menu written by fellow UKVACcer Ian Boffin, sadly Ian lost the source code in a hard drive crash so there was no chance of it being updated to address any issues and suggested improvements. I found myself in a converted farm building in the North East of Scotland during a long, cold and dark winter. I had no cabs with me, but I did have a Vectrex... so a plan was formed. I contacted Ian and told him I intended to write a new menu, and Ian very kindly sent me the remaining files he did have - vector co-ordinates for the Mame logo and some of the manufacturer logos. This would save a lot of work! With the vectrex connected to the ZVG and a Win98 DOS PC to hand, I began coding.
+VMMenu was created as I'd had an unused ZVG for a number of years with the intention of fitting it to a dedicated cab. I was aware of the initial menu written by fellow UKVACcer Ian Boffin, sadly Ian lost the source code in a hard drive crash so there was no chance of it being updated to address any issues and suggested improvements. I found myself in a converted farm building in the North East of Scotland during a long, cold and dark winter. I had no cabs with me, but I did have a Vectrex... so a plan was formed. I contacted Ian and told him I intended to write a new menu, and Ian very kindly sent me the remaining files he did have - vector co-ordinates for the Mame logo and some of the manufacturer logos. This would save a lot of work! With the vectrex connected to the ZVG and a Win98 DOS PC to hand, I began coding.
 
 After a while I was able to move my Asteroids Deluxe Cabaret home and testing moved from the Vectrex to the Arcade Cabinet. Still black and white, but it was good to be able to play vector mame on a proper cab.
 
@@ -25,8 +25,8 @@ A couple of years later the ZVG drivers were ported to Linux, and I ported the m
 
 Today I have two ZVG cabs: the original Asteroids Deluxe Cabaret, and an upright Space Duel with a custom multivector control panel. Both have the ZVG fitted sympathetically, with the system plugging into the original wiring loom via the game board connector. The AR board handles the sound amplification so the volume control in the cabs still work too.
 
-![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/SDCab1.jpg "Linux VMMenu in a Space Duel Cab")
-![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/SDCab2.jpg "Linux VMMenu in a Space Duel Cab")
+![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/SDCab1.jpg "DOS VMMenu in a Space Duel Cab")
+![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/SDCab2.jpg "DOS VMMenu in a Space Duel Cab")
 
 
 I still get the odd query about the menu, so I decided that I'd put it up on GitHub rather than have it languish in a virtual PC. I hope somebody finds it useful... it wold be nice to see some new vector games written for DOS/Linux :-)
@@ -54,7 +54,7 @@ which will create the vmmenu file in the current directory
 
 Optionally you can install upx and use the compile.sh script in the VMMenu/Linux directory to compile and compress the resulting vmmenu file.
 
-This works even on a raspberry pi, obviously you won't be able to hook up a ZVG board... but you can develop and test the code and simulate how it will look on a vector monitor.
+This works even on a Raspberry Pi, obviously you won't be able to hook up a ZVG board to a Pi... but you can develop and test the code and simulate how it will look on a vector monitor.
 
 ![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/LinuxVMMenu1.jpg "Linux VMMenu in a window")
 
@@ -77,7 +77,7 @@ Then run:
 
 which will create the vmmenu.exe file in the current directory
 
-Optionally you can install upx and use the compile.bat script in the VMMenu/DOS directory to compile and compress the resulting vmmenu.exe file. Note that this batch file will first attempt to copy the source files to the current location before compilation, this is because I tended to house the source on a Linux PC and compile from an XP virtual machine. You may with to edit out the file copy commands if you are working directly under XP/DOS.
+Optionally you can install upx and use the compile.bat script in the VMMenu/DOS directory to compile and compress the resulting vmmenu.exe file. Note that this batch file will first attempt to copy the source files to the current location before compilation, this is because I tended to house the source on a Linux PC and compile from an XP virtual machine. You may wish to edit out the file copy commands if you are working directly under XP/DOS.
 
 ## Launching VMMenu (DOS)
 
@@ -141,7 +141,7 @@ Valid colour values are red, magenta, cyan, blue, yellow, green and white. Inten
 
 ## The vmmenu.ini file
 
-VMMenu creates the game list by reading the vmmenu.ini file. This file contains a list of all the vector games supported by your version of Mame and contains information such as the manufacturer, the name of the game, the "Mame" name for the game and the name of the parent game if it is a clone of another game. The fileis just a text file in the following format:
+VMMenu creates the game list by reading the vmmenu.ini file. This file contains a list of all the vector games supported by your version of Mame and contains information such as the manufacturer, the name of the game, the "Mame" name for the game and the name of the parent game if it is a clone of another game. The file is just a text file in the following format:
 
 ```bash
 Manufacturer name|Display name|name of parent game|name of game
@@ -149,10 +149,10 @@ Manufacturer name|Display name|name of parent game|name of game
 
 There are 4 fields, delimited by the | character:
 
-The Manufacturer name is used to group the games together on separate pages of the menu
-The Display name is what is shown on screen
-The name of parent game is used to group clones of the same game together
-The name of the game is what gets passed back to DOS and on to mame when running a game
+- The Manufacturer name is used to group the games together on separate pages of the menu
+- The Display name is what is shown on screen
+- The name of parent game is used to group clones of the same game together
+- The name of the game is what gets passed back to DOS and on to mame when running a game
 
 For example:
 
@@ -163,7 +163,7 @@ Other|Asterock|asteroid|asterock
 Other|Meteorites|asteroid|meteorts
 ```
 
-As the file is plain text, you are free to customise it to your taste. For example, in the example above there are 2 clones of Asteroids by "Other" manufaturers, and these will appear on a separate page to the Atari versions of Asteroids. Should you wish to bundle all the Asteroids variants together under Atari, simply edit the manufacturer field for these 2 games, changing "Other" to "Atari":
+As the file is plain text, you are free to customise it to your taste. For example, in the example above there are 2 clones of Asteroids by "Other" manufacturers, and these will appear on a separate page to the Atari versions of Asteroids. Should you wish to bundle all the Asteroids variants together under Atari, simply edit the manufacturer field for these 2 games, changing "Other" to "Atari":
 
 ```bash
 Atari|Asteroids (rev 2)|asteroid|asteroid
@@ -176,7 +176,7 @@ When you next start the menu, it will group all of these titles together under A
 
 If you wish to remove a game from the menu, perhaps if the controls are not suitable or it does not work correctly, then you can either delete the line in question, or comment it out by placing a # character in the first column.
 
-This would remove "Asteroids (rev 1)" from the menu but retain the other 3 games:
+This example would remove "Asteroids (rev 1)" from the menu, but retain the other 3 games:
 
 ```bash
 Atari|Asteroids (rev 2)|asteroid|asteroid
@@ -246,7 +246,7 @@ VMM.BAT:
 :: Process the selected game and run the appropriate exe::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ... code snippet:
-if %1 == shutdown  goto shutdown
+if %1 == shutdown goto shutdown
 if %1 == mygame goto mygame
  
 ... 
@@ -273,6 +273,5 @@ With some creativity, you can get the menu to launch pretty much anything.
 In the Utils folder you can find some utilities:
 
  - **Makeini** can be used to generate a template ini file for VMMenu. It will query your version of Mame and generate an entry for each vector game it finds.
- - **BiosKey** can be used to display the keycode of a pressed key under DOS. Use this if you are customising the keyboard inputs and need the keycodes.
-
+ - **BiosKey** can be used to display the keycode of a pressed key under DOS. Use this if you are customising the keyboard inputs and need the keycodes. Keycodes are also displayed in the settings page from v1.3.1
 
