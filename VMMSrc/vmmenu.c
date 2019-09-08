@@ -15,6 +15,7 @@
 * 06 Sep 19	v1.31 Added keycode display in Settings
 *				v1.32	Added SmartMenu Navigation option to settings page
 *
+* 08 Sep 19     v1.33 Add support to autostart a game before running the menu (DanP)
 *****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,6 +91,11 @@ static char	attractargs[30];
 extern char	zvgargs[30];
 static int	totalnumgames=0;
 
+
+static char	autogame[30];
+extern int	autostart=0;						
+
+
 static dictionary* ini;
 
 extern int 	mousexmick, mouseymick;
@@ -97,7 +103,7 @@ int	ZVGPresent = 1;
 int	SDL_VC, SDL_VB;							// colour and brightness for SDL vectors
 int	mousefound=0;
 
-char	auth1[] = "VMMenu 1.32, Chad Gray 2019";
+char	auth1[] = "VMMenu 1.33, Chad Gray 2019";
 char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
@@ -138,6 +144,7 @@ int main( void) //int argc, char *argv[])
 		printf("Creating new CFG file.\n");
 	}
 	getsettings();
+
 	// Set up rotation
 	if ((optz[o_rot] == 1) || (optz[o_rot] == 3))
 	{
@@ -207,12 +214,22 @@ int main( void) //int argc, char *argv[])
 		zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
 	}
 
+    if (autostart)
+    {
+    printf("\n%s, Found so running auto start ", autogame);
+    RunGame(autogame);
+    }
+
+    // If we exit the auto started game or aren't autostarting lets go with the menu intro and loop
+
 	/*** At this point we have a blank screen. Run an intro with the mame logo ***/
 	mame = intro();
 
 	// Start main loop
 	while (1)
 	{
+
+
 		// Read mouse
 		//if (mousefound && optz[o_mouse] && (timeout%optz[o_msamp] == 0))
 		if (mousefound && (timeout%optz[o_msamp] == 0))	// mousefound only set if optz[o_mouse] is true
@@ -1495,6 +1512,12 @@ void getsettings(void)
 	strcpy(attractargs, iniparser_getstring(ini, "interface:attractargs", "-attract -str 30"));
 	strcpy(zvgargs, iniparser_getstring(ini, "interface:zvgargs", "-video zvg"));
 
+    // autostart settings
+	strcpy(autogame, iniparser_getstring(ini, "autostart:game", ""));
+	autostart		= iniparser_getboolean(ini, "autostart:start", 0);
+
+
+
 	// controllers
 	optz[o_mouse]		= iniparser_getint(ini, "controls:spinnertype", 0);
 	optz[o_mouse]		= abs(optz[o_mouse]%3);
@@ -1595,6 +1618,8 @@ void writecfg()
 	if (!iniparser_find_entry(ini, "controls")) iniparser_set(ini, "controls", NULL);
 	if (!iniparser_find_entry(ini, "keys")) iniparser_set(ini, "keys", NULL);
 	if (!iniparser_find_entry(ini, "colours")) iniparser_set(ini, "colours", NULL);
+	if (!iniparser_find_entry(ini, "autostart")) iniparser_set(ini, "autostart", NULL);
+
 
 	// write the interface settings
 	writeinival("interface:rotation",		optz[o_rot], 1, 0);
@@ -1607,6 +1632,11 @@ void writecfg()
 	writeinival("interface:attractmode",	optz[o_attmode], 0, 3);
 	iniparser_set(ini, "interface:attractargs", attractargs);
 	iniparser_set(ini, "interface:zvgargs", zvgargs);
+
+	// write the autostart settings, default is blank and autostart is off
+	iniparser_set(ini, "autostart:game", autogame);
+	writeinival("autostart:start",	     autostart, 1, 3);
+
 
 	// write the spinner/mouse settings
 	writeinival("controls:spinnertype",		optz[o_mouse], 1, 0);
