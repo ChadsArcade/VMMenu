@@ -15,7 +15,8 @@
 * 06 Sep 19	v1.31 Added keycode display in Settings
 *				v1.32	Added SmartMenu Navigation option to settings page
 *
-* 08 Sep 19     v1.33 Add support to autostart a game before running the menu (DanP)
+* 08 Sep 19 v1.33 Add support to autostart a game before running the menu (DanP)
+* 09 Sep 19 v1.4	Added game show/hide screen under settings menu
 *****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -2160,7 +2161,7 @@ void	EditGamesList(void)
 	int top=300, spacing=42;
 	char angle[50];
 	point p1, p2;
-	int c_hide, i_game=10, i_gameinc=2;
+	int c_hide, i_game=10, i_gameinc=2, startgame=0;
 
 	list_root = build_games_list();
 	list_cursor = list_root;
@@ -2213,6 +2214,7 @@ void	EditGamesList(void)
 			else
 				c_hide=vgreen;
 			strcpy(angle, list_print->desc);
+			if (!strcmp(list_print->clone, autogame)) startgame=1;
 			if (i==7)
 			{
 				setcolour(vwhite, 25);
@@ -2222,6 +2224,11 @@ void	EditGamesList(void)
 				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 5, 7, 0);
 				list_active=list_print;
 				i_gameinc=-i_gameinc;
+				if (startgame)
+				{
+					setcolour(vyellow, 25);
+					PrintString("       o", -300, top, 0, 4.5, 7, 0);
+				}
 			}
 			else
 			{
@@ -2230,9 +2237,15 @@ void	EditGamesList(void)
 				setcolour(c_hide, i_game);
 				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 4, 5, 0);
 				i_game+=i_gameinc;
+				if (startgame)
+				{
+					setcolour(vyellow, i_game);
+					PrintString("       o", -300, top, 0, 4, 5, 0);
+				}
 			}
 			list_print=list_print->next;
 			top-=spacing;
+			startgame=0;
 		}
 
 		cc=getkey();
@@ -2243,6 +2256,20 @@ void	EditGamesList(void)
 		if (cc == keyz[k_ngame]) list_cursor=list_cursor->next;
 		if (cc == keyz[k_pgame]) list_cursor=list_cursor->prev;
 		if (cc == keyz[k_nclone] || cc == keyz[k_pclone]) list_active->hidden=!list_active->hidden;
+		if (cc == START1)
+		{
+			if (!autostart)
+			{
+				autostart=1;
+				strcpy(autogame, list_active->clone);
+				printf("%s\n", autogame);
+			}
+			else
+			{
+				autostart=0;
+				strcpy(autogame,"\n");
+			}
+		}
 		sendframe();
 	}
 	//printf("Saving vmmenu.ini file...\n");
