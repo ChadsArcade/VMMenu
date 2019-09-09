@@ -2160,7 +2160,7 @@ void	EditGamesList(void)
 	int top=300, spacing=42;
 	char angle[50];
 	point p1, p2;
-	int c_hide;
+	int c_hide, i_game=10, i_gameinc=2;
 
 	list_root = build_games_list();
 	list_cursor = list_root;
@@ -2203,6 +2203,8 @@ void	EditGamesList(void)
 
 		// print up to 15 lines of the games list for user to navigate through
 		top=300;
+		i_game=5;
+		i_gameinc=2;
 		list_print=list_cursor;
 		for (i=0; i<15; i++)
 		{
@@ -2219,13 +2221,15 @@ void	EditGamesList(void)
 				setcolour(c_hide, 25);
 				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 5, 7, 0);
 				list_active=list_print;
+				i_gameinc=-i_gameinc;
 			}
 			else
 			{
-				setcolour(vyellow, 15);
+				setcolour(vyellow, i_game);
 				PrintString(angle, 60, top, 0, 4, 5, 0);
-				setcolour(c_hide, 15);
+				setcolour(c_hide, i_game);
 				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 4, 5, 0);
+				i_game+=i_gameinc;
 			}
 			list_print=list_print->next;
 			top-=spacing;
