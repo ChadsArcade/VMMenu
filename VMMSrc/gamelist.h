@@ -9,19 +9,19 @@ Function declarations
 
 typedef struct gamenode
 {
-	struct gamenode		*next, *prev;
-	struct gamenode		*nclone, *pclone;
-	char			name[50];
-	char			parent[10];
-	char			clone[10];
+	struct gamenode	*next, *prev;
+	struct gamenode	*nclone, *pclone;
+	char					name[50];
+	char					parent[10];
+	char					clone[10];
 } g_node;
 
 typedef struct manufnode
 {
 	struct manufnode	*nmanuf;
 	struct manufnode	*pmanuf;
-	struct gamenode		*firstgame;
-	char			name[20];
+	struct gamenode	*firstgame;
+	char					name[20];
 } m_node;
 
 m_node* createlist();

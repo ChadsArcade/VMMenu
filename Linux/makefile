@@ -27,7 +27,8 @@ OBJS = ./VMMSrc/$(NAME).o \
        ./iniparser/dictionary.o \
        ./Linux/LinuxVMM.o \
        ./VMMSrc/vchars.o \
-       ./VMMSrc/gamelist.o
+       ./VMMSrc/gamelist.o \
+       ./VMMSrc/editlist.o
 
 all: ./$(NAME)
 

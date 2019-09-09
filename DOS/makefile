@@ -1,6 +1,6 @@
 ##################################
 #											#
-#   VMMenu MAKEFILE for Linux		#
+#   VMMenu MAKEFILE for DOS		#
 #											#
 #     For use with GNU Make		#
 #											#
@@ -27,7 +27,9 @@ OBJS =  .\VMMSrc\$(NAME).o \
 	.\iniparser\dictionary.o \
 	.\DOS\DOSvmm.o \
 	.\VMMSrc\vchars.o \
-	.\VMMSrc\gamelist.o
+	.\VMMSrc\gamelist.o \
+   .\VMMSrc\editlist.o
+
 
 all: .\$(NAME).exe
 

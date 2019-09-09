@@ -32,6 +32,7 @@
 #include "iniparser.h"
 #include <time.h>
 #include "vmmstddef.h"
+#include "editlist.h"
 
 //OS Specific Headers
 #if defined(linux) || defined(__linux)
@@ -73,7 +74,7 @@ g_node*	GetRandomGame(m_node *);										// Selects a random game from the list
 void		PlayAttractGame(m_node *gameslist);							// get a random game name and add attract mode args
 void		PrintPointer(int mx, int my);									// Print mouse pointer at current mouse position
 void		SetOptions(void);													// Lets user edit various in-menu options
-void		EditGamesList(void);												// Enable or disable games from the vmmenu.ini file
+void		EditGamesList(void);
 
 //#define	DEBUG							// comment out to suppress debug output
 
@@ -91,24 +92,26 @@ static char	attractargs[30];
 extern char	zvgargs[30];
 static int	totalnumgames=0;
 
-
 static char	autogame[30];
 extern int	autostart=0;						
 
-
-static dictionary* ini;
+static 		dictionary* ini;
 
 extern int 	mousexmick, mouseymick;
-int	ZVGPresent = 1;
-int	SDL_VC, SDL_VB;							// colour and brightness for SDL vectors
-int	mousefound=0;
+int			ZVGPresent = 1;
+int			SDL_VC, SDL_VB;				// colour and brightness for SDL vectors
+int			mousefound=0;
 
-char	auth1[] = "VMMenu 1.33, Chad Gray 2019";
+m_node		*vectorgames;
+g_node		*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
+uint			man_menu;
+
+char	auth1[] = "VMMenu 1.4, Chad Gray 2019";
 char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
 {
-	uint		err, man_menu;
+	uint		err;
 	int		count, top, timeout = 0, ticks = 0, gamesize;
 	int		pressx=0, pressy=0;
 	int		cc;
@@ -116,8 +119,6 @@ int main( void) //int argc, char *argv[])
 	char		mytext[100];
 	int		mpx = 0, mpy = 0;
 	vObject	mame, sega, cinematronics, atari, centuri, vbeam, midway;
-	m_node	*vectorgames;
-	g_node	*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 	FILE		*inifp;
 	char		* ini_name = "vmmenu.cfg";
 
@@ -654,7 +655,12 @@ void drawshape(vObject shape)
 		// co-ords of "vector" in the Mame logo are found
 		// I did say colour was an afterthought... one day I'll implement
 		// a tandem colour array for each vector in a vObject
-		if ((shape.outline.array[ii + 0] == 154) && (shape.outline.array[ii + 1] == 20) && (shape.outline.array[ii + 2] == 154) && (shape.outline.array[ii + 3] == 0)) setcolour(vred, shape.bright);
+		if ((shape.outline.array[ii + 0] == 154) && (shape.outline.array[ii + 1] == 20) && (shape.outline.array[ii + 2] == 154) && (shape.outline.array[ii + 3] == 0))
+			setcolour(vred, shape.bright);
+		// Dark Blue inner "SEGA"
+		if ((shape.outline.array[ii + 0] == 0) && (shape.outline.array[ii + 1] == 12) && (shape.outline.array[ii + 2] == 40) && (shape.outline.array[ii + 3] == 12))
+			setcolour(vblue, shape.bright);
+
 		start_p	= fnrotate(shape.angle, x1 * shape.scale.x, y1 * shape.scale.y, 0, 0);
 		end_p		= fnrotate(shape.angle, x2 * shape.scale.x, y2 * shape.scale.y, 0, 0);
 		//printf("x: %f, y:%f\n", start_p.x, start_p.y);
@@ -990,22 +996,22 @@ vObject make_sega(void)
 	//S
 	0,1,49,1,		49,1,62,14,		62,14,62,34,	62,34,45,50,	45,50,19,50,	19,50,19,52,	19,52,61,52,	61,52,61,74,
 	61,74,13,74,	13,74,-1,60,	-1,60,-1,41,	-1,41,17,25,	17,25,39,25,	39,25,39,23,	39,23,0,23,		0,23,0,1,
-	//s
-	0,12,40,12,		40,12,49,20,	49,20,49,29,	49,29,41,37,	41,37,18,37,
-	18,37,11,43,	11,43,11,56,	11,56,18,64,	18,64,61,63,
 	//E
 	133,74,87,74,	87,74,72,62,	72,62,72,15,	72,15,86,1,		86,1,133,1,		133,1,133,23,	133,23,101,23, 101,23,101,26,
 	101,26,122,26, 122,26,122,50, 122,50,101,50, 101,50,101,53, 101,53,133,53, 133,53,133,74,
-	//e
-	133,64,95,64,	95,64,85,54,	85,54,85,21,	85,21,96,12,	96,12,133,12,	86,39,122,39,
 	//G
 	205,74,157,74, 157,74,143,61, 143,61,143,16, 143,16,161,1,	161,1,206,1,	206,1,206,47,	206,47,177,47, 177,47,177,25,
 	177,25,181,25, 181,25,181,21, 181,21,173,21, 173,21,173,52, 173,52,205,52, 205,52,205,74,
-	//g
-	205,64,166,64, 166,64,157,57, 157,57,157,20, 157,20,167,11, 167,11,194,11, 194,11,194,35, 194,35,177,35,
 	//A
 	210,1,239,65,	239,65,248,74, 248,74,257,74, 257,74,266,65, 266,65,297,1,	297,1,250,1,
 	250,1,250,26,	250,26,261,26, 261,26,254,39, 254,39,238,1,	238,1,210,1,
+	//s
+	0,12,40,12,		40,12,49,20,	49,20,49,29,	49,29,41,37,	41,37,18,37,
+	18,37,11,43,	11,43,11,56,	11,56,18,64,	18,64,61,63,
+	//e
+	133,64,95,64,	95,64,85,54,	85,54,85,21,	85,21,96,12,	96,12,133,12,	86,39,122,39,
+	//g
+	205,64,166,64, 166,64,157,57, 157,57,157,20, 157,20,167,11, 167,11,194,11, 194,11,194,35, 194,35,177,35,
 	//a
 	223,0,251,59,	251,59,257,59, 257,59,278,14, 278,14,251,14 };
 
@@ -1778,6 +1784,7 @@ void SetOptions(void)
 	int lastkey = keyz[k_options], spacing = 42;
 	point p1, p2;
 	char angle[10];
+	int edit=0;
 	while ((cc != keyz[k_options]) && (cc != keyz[k_quit]) && timer < 1800)
 	{
 		timer++;
@@ -1851,7 +1858,7 @@ void SetOptions(void)
 		if (optz[o_stars]) showstars();
 
 		top = 300;
-		options = 6;
+		options = 7;
 
 		// Screen rotation
 		top-=spacing;
@@ -1959,21 +1966,21 @@ void SetOptions(void)
 			}
 		}
 
+		// Edit Games List
+		top-=spacing;
+		setcolour(vwhite, 15);
+		if (cursor == options - 1)	setcolour(vwhite, 25);
+		PrintString("Show/Hide Games", -150, top, 0, 6, 6, 0);
+		PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
+		
 		// Print Keycode
-		top=-300;//spacing;
+		top=-ymax+80; //-300;//spacing;
 		//top-=spacing;
 		setcolour(vgreen, 20);
 		PrintString("Keycode        ", -150, top, 0, 6, 6, 0);
 		sprintf(angle,"0x%04x ",lastkey);
 		PrintString(angle, 250, top, 0, 6, 6, 0);
 
-		// Edit Games List
-		//top-=spacing;
-		//setcolour(vwhite, 15);
-		//if (cursor == options - 1)	setcolour(vwhite, 25);
-		//PrintString("Edit Games List", -150, top, 0, 6, 6, 0);
-		//PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
-		
 		cc=getkey();
 		if (cc)
 		{
@@ -2127,13 +2134,122 @@ void SetOptions(void)
 			}
 		}
 		// The "Edit Games List" option number can change depending on whether mouse settings are active, so we can't use switch/case...
-		//if (cursor == options-1)	// Edit Games List
-		//{
-		//	if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) edit = !edit;
-		//	if (cc == keyz[k_start]) edit = 0;
-		//}
+		if (cursor == options-1)	// Edit Games List
+		{
+			if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) edit = !edit;
+			if (cc == keyz[k_start]) edit = 0;
+			if (edit)
+			{
+				EditGamesList();
+				edit=0;
+			}
+		}
 
 		sendframe();
 	}
+}
+
+
+/******************************************************************
+	Edit Games List
+*******************************************************************/
+void	EditGamesList(void)
+{
+	list_node	*list_root=NULL, *list_cursor=NULL, *list_print=NULL, *list_active=NULL;
+	int cc=0, timer=0, i=0;
+	int top=300, spacing=42;
+	char angle[50];
+	point p1, p2;
+	int c_hide;
+
+	list_root = build_games_list();
+	list_cursor = list_root;
+	for (i=0; i<7; i++)							// rewind list so first game has focus in the centre
+	{
+		list_cursor = list_cursor->prev;
+	}
+	//dump_list(list_root);
+
+	while ((cc != keyz[k_quit] && cc != keyz[k_menu]) && timer < 1800)
+	{
+		timer++;
+		setcolour(vmagenta, 15);
+		p1.x = -xmax+24;
+		p1.y = 0;
+		p2.x = xmax-24;
+		p2.y = 0;
+		drawvector(p1, p2, 0, -ymax+24);
+		drawvector(p1, p2, 0, ymax-24);
+		p1.x = 0;
+		p1.y = -ymax+24;
+		p2.x = 0;
+		p2.y = ymax-24;
+		drawvector(p1, p2, -xmax+24, 0);
+		drawvector(p1, p2, xmax-24, 0);
+		p1.x = -xmax;
+		p1.y = 0;
+		p2.x = xmax;
+		p2.y = 0;
+		drawvector(p1, p2, 0, -ymax);
+		drawvector(p1, p2, 0, ymax);
+		p1.x = 0;
+		p1.y = -ymax;
+		p2.x = 0;
+		p2.y = ymax;
+		drawvector(p1, p2, -xmax, 0);
+		drawvector(p1, p2, xmax, 0);
+
+		if (optz[o_stars]) showstars();
+
+		// print up to 15 lines of the games list for user to navigate through
+		top=300;
+		list_print=list_cursor;
+		for (i=0; i<15; i++)
+		{
+			if (list_print->hidden==1)
+				c_hide=vred;
+			else
+				c_hide=vgreen;
+			strcpy(angle, list_print->desc);
+			if (i==7)
+			{
+				setcolour(vwhite, 25);
+				PrintString(angle, 60, top, 0, 4.5, 7, 0);
+				PrintString(">       ", -300, top, 0, 4.5, 7, 0);
+				setcolour(c_hide, 25);
+				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 5, 7, 0);
+				list_active=list_print;
+			}
+			else
+			{
+				setcolour(vyellow, 15);
+				PrintString(angle, 60, top, 0, 4, 5, 0);
+				setcolour(c_hide, 15);
+				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 4, 5, 0);
+			}
+			list_print=list_print->next;
+			top-=spacing;
+		}
+
+		cc=getkey();
+		if (cc)
+		{
+			timer = 0;
+		}
+		if (cc == keyz[k_ngame]) list_cursor=list_cursor->next;
+		if (cc == keyz[k_pgame]) list_cursor=list_cursor->prev;
+		if (cc == keyz[k_nclone] || cc == keyz[k_pclone]) list_active->hidden=!list_active->hidden;
+		sendframe();
+	}
+	//printf("Saving vmmenu.ini file...\n");
+	write_list(list_root);
+	// and build the new games list...
+	vectorgames=NULL;
+	vectorgames = createlist();
+	totalnumgames=printlist(vectorgames);
+	linklist(vectorgames);
+	sel_game = vectorgames->firstgame;
+	sel_clone = sel_game;
+	man_menu = zTrue;
 }
 
