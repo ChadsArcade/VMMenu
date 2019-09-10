@@ -216,13 +216,12 @@ int main( void) //int argc, char *argv[])
 		zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
 	}
 
-    if (autostart)
-    {
-    printf("\n%s, Found so running auto start ", autogame);
-    RunGame(autogame);
-    }
-
-    // If we exit the auto started game or aren't autostarting lets go with the menu intro and loop
+	if (autostart)
+	{
+		printf("\n%s, Found so running auto start ", autogame);
+		RunGame(autogame);
+	}
+	// If we exit the auto started game or aren't autostarting lets go with the menu intro and loop
 
 	/*** At this point we have a blank screen. Run an intro with the mame logo ***/
 	mame = intro();
@@ -2227,7 +2226,7 @@ void	EditGamesList(void)
 				if (startgame)
 				{
 					setcolour(vyellow, 25);
-					PrintString("       o", -300, top, 0, 4.5, 7, 0);
+					PrintString("       *", -300, top, 0, 4.5, 7, 0);
 				}
 			}
 			else
@@ -2240,7 +2239,7 @@ void	EditGamesList(void)
 				if (startgame)
 				{
 					setcolour(vyellow, i_game);
-					PrintString("       o", -300, top, 0, 4, 5, 0);
+					PrintString("       *", -300, top, 0, 4, 5, 0);
 				}
 			}
 			list_print=list_print->next;
@@ -2255,19 +2254,40 @@ void	EditGamesList(void)
 		}
 		if (cc == keyz[k_ngame]) list_cursor=list_cursor->next;
 		if (cc == keyz[k_pgame]) list_cursor=list_cursor->prev;
-		if (cc == keyz[k_nclone] || cc == keyz[k_pclone]) list_active->hidden=!list_active->hidden;
+		if (cc == keyz[k_nclone] || cc == keyz[k_pclone])
+		{
+			list_active->hidden=!list_active->hidden;
+			printf("Hidden: %i game: %s Autogame: %s Autostart: %i\n", list_active->hidden, list_active->clone, autogame, autostart);
+			if (list_active->hidden==1 && (!strcmp(list_active->clone, autogame)) && autostart)
+			{
+				autostart=0;
+				strcpy(autogame," ");
+			}
+		}
 		if (cc == START1)
 		{
 			if (!autostart)
 			{
 				autostart=1;
 				strcpy(autogame, list_active->clone);
+				list_active->hidden=0;
+#ifdef DEBUG
 				printf("%s\n", autogame);
+#endif
 			}
 			else
 			{
-				autostart=0;
-				strcpy(autogame,"\n");
+				if (strcmp(list_active->clone, autogame))
+				{
+					autostart=1;
+					strcpy(autogame,list_active->clone);
+					list_active->hidden=0;
+				}
+				else
+				{
+					autostart=0;
+					strcpy(autogame," ");
+				}
 			}
 		}
 		sendframe();
