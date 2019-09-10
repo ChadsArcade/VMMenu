@@ -2257,7 +2257,10 @@ void	EditGamesList(void)
 		if (cc == keyz[k_nclone] || cc == keyz[k_pclone])
 		{
 			list_active->hidden=!list_active->hidden;
+#ifdef DEBUG
 			printf("Hidden: %i game: %s Autogame: %s Autostart: %i\n", list_active->hidden, list_active->clone, autogame, autostart);
+#endif
+			// If we just hid the selected autostart game, we turn autostart off
 			if (list_active->hidden==1 && (!strcmp(list_active->clone, autogame)) && autostart)
 			{
 				autostart=0;
@@ -2266,7 +2269,7 @@ void	EditGamesList(void)
 		}
 		if (cc == START1)
 		{
-			if (!autostart)
+			if (!autostart)											// If autostart was off, ensure current game is visible and set it to autostart
 			{
 				autostart=1;
 				strcpy(autogame, list_active->clone);
@@ -2277,7 +2280,7 @@ void	EditGamesList(void)
 			}
 			else
 			{
-				if (strcmp(list_active->clone, autogame))
+				if (strcmp(list_active->clone, autogame))		// If autostart was on for a different game, make autostart this game
 				{
 					autostart=1;
 					strcpy(autogame,list_active->clone);
@@ -2285,7 +2288,7 @@ void	EditGamesList(void)
 				}
 				else
 				{
-					autostart=0;
+					autostart=0;										// If autostart was already set to this game, turn it off
 					strcpy(autogame," ");
 				}
 			}
