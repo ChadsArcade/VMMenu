@@ -179,6 +179,9 @@ vShape fnGetChar(char cEncode)
 	
 	static int char_z[] = {  0,2,2,2, 2,2,0,0, 0,0,2,0 };
 
+	static int char_backslash[] = { 0,0,2,0, 2,0,3,1, 3,1,3,3, 3,3,2,4, 2,4,0,4, 0,4,-1,3, -1,3,-1,1, -1,1,0,0, 0,1,0,3, 1,1,2,1, 2,1,2,3, 2,3,1,3, 1,3,1,1 };
+//	static int char_backslash[] = { 0,0,2,0, 2,0,3,1, 3,1,3,3, 3,3,2,4, 2,4,0,4, 0,4,-1,3, -1,3,-1,1, -1,1,0,0, 0,1,0,3, 2,1,1,1, 1,1,1,2, 1,2,2,2 };
+
 	switch (cEncode)
 	{
 	case 'A':
@@ -480,6 +483,10 @@ vShape fnGetChar(char cEncode)
 	case '*':
 		c.array = char_star;
 		c.size = sizeof(char_star)/sizeof(*char_star);
+		break;
+	case '|':
+		c.array = char_backslash;
+		c.size = sizeof(char_backslash)/sizeof(*char_backslash);
 		break;
 	default:
 		c.array = char_space;

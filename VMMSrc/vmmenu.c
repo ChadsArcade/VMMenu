@@ -2161,6 +2161,7 @@ void	EditGamesList(void)
 	char angle[50];
 	point p1, p2;
 	int c_hide, i_game=10, i_gameinc=2, startgame=0;
+	float width;
 
 	list_root = build_games_list();
 	list_cursor = list_root;
@@ -2206,6 +2207,8 @@ void	EditGamesList(void)
 		i_game=5;
 		i_gameinc=2;
 		list_print=list_cursor;
+		width = fabs(sin(((timer)*3)*M_PI/90)); // 2 sec rotation (120 frames) so we mult by 3 for 360 degrees
+
 		for (i=0; i<15; i++)
 		{
 			if (list_print->hidden==1)
@@ -2226,7 +2229,7 @@ void	EditGamesList(void)
 				if (startgame)
 				{
 					setcolour(vyellow, 25);
-					PrintString("       *", -300, top, 0, 4.5, 7, 0);
+					PrintString("|", -245, top, 0, 6*width, 6, 0);
 				}
 			}
 			else
@@ -2239,7 +2242,7 @@ void	EditGamesList(void)
 				if (startgame)
 				{
 					setcolour(vyellow, i_game);
-					PrintString("       *", -300, top, 0, 4, 5, 0);
+					PrintString("|", -245, top, 0, 5*width, 5, 0);
 				}
 			}
 			list_print=list_print->next;
