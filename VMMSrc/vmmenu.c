@@ -1313,7 +1313,7 @@ int credits(void)
 	strcpy(credits[3], "The MAME team");
 	strcpy(credits[4], "Ian Boffin for the original menu and artwork");
 	strcpy(credits[5], "Danny Pearson and Barry Shilmover for testing");
-	strcpy(credits[6], "and an endless stream of suggestions");
+	strcpy(credits[6], "Haywood for the additional logos");
 	strcpy(credits[7], "Atari, Sega, Cinematronics et al for the games");
 	strcpy(credits[8], "And all the vectorheads for keeping them alive");
 
@@ -1977,7 +1977,7 @@ void SetOptions(void)
 		top=-ymax+80; //-300;//spacing;
 		//top-=spacing;
 		setcolour(vgreen, 20);
-		PrintString("Keycode        ", -150, top, 0, 6, 6, 0);
+		PrintString("Last keycode   ", -150, top, 0, 6, 6, 0);
 		sprintf(angle,"0x%04x ",lastkey);
 		PrintString(angle, 250, top, 0, 6, 6, 0);
 
@@ -2228,8 +2228,8 @@ void	EditGamesList(void)
 				i_gameinc=-i_gameinc;
 				if (startgame)
 				{
-					setcolour(vyellow, 25);
-					PrintString("|", -245, top, 0, 6*width, 6, 0);
+					setcolour(vwhite, 20);
+					PrintString("|", -245, top-4, 0, 4*width, 4, 0); // | = coin graphic
 				}
 			}
 			else
@@ -2241,8 +2241,8 @@ void	EditGamesList(void)
 				i_game+=i_gameinc;
 				if (startgame)
 				{
-					setcolour(vyellow, i_game);
-					PrintString("|", -245, top, 0, 5*width, 5, 0);
+					setcolour(vwhite, i_game);
+					PrintString("|", -255, top-3, 0, 3*width, 3, 0); // | = coin graphic
 				}
 			}
 			list_print=list_print->next;
