@@ -90,11 +90,11 @@ static int	keyz[11];						// array of key press codes
 static int	colours[2][7];					// array of [colours][7] and [intensities][7]
 
 static char	attractargs[30];
-extern char	zvgargs[30];
+static char	zvgargs[30];
 static int	totalnumgames=0;
 
 static char	autogame[30];
-extern int	autostart=0;						
+static int	autostart=0;						
 
 static 		dictionary* ini;
 
@@ -218,7 +218,7 @@ int main( void) //int argc, char *argv[])
 
 	if (autostart)
 	{
-		printf("\n%s, Found so running auto start ", autogame);
+		printf("\nAutostart configured to run \"%s\"...\n", autogame);
 		RunGame(autogame);
 	}
 	// If we exit the auto started game or aren't autostarting lets go with the menu intro and loop
@@ -2156,16 +2156,17 @@ void SetOptions(void)
 void	EditGamesList(void)
 {
 	list_node	*list_root=NULL, *list_cursor=NULL, *list_print=NULL, *list_active=NULL;
-	int cc=0, timer=0, i=0;
-	int top=300, spacing=42;
-	char angle[50];
-	point p1, p2;
-	int c_hide, i_game=10, i_gameinc=2, startgame=0;
-	float width;
+	int 			cc=0, timer=0, i=0;
+	int			top=300, spacing=50; //42;
+	char			gamename[50];
+	point			p1, p2;
+	int			c_hide, i_game=10, i_gameinc=2, startgame=0, rows=11; // 15 rows caused too much flicker
+	float			width;
+	int			descindex=0, desclen, j=0, ticks=0;
 
 	list_root = build_games_list();
 	list_cursor = list_root;
-	for (i=0; i<7; i++)							// rewind list so first game has focus in the centre
+	for (i=0; i<(rows-1)/2; i++)										// rewind list so first game has focus in the centre
 	{
 		list_cursor = list_cursor->prev;
 	}
@@ -2174,6 +2175,7 @@ void	EditGamesList(void)
 	while ((cc != keyz[k_quit] && cc != keyz[k_menu]) && timer < 1800)
 	{
 		timer++;
+		ticks++;
 		setcolour(vmagenta, 15);
 		p1.x = -xmax+24;
 		p1.y = 0;
@@ -2202,42 +2204,73 @@ void	EditGamesList(void)
 
 		if (optz[o_stars]) showstars();
 
-		// print up to 15 lines of the games list for user to navigate through
+		// print [rows] lines of the games list for user to navigate through
 		top=300;
 		i_game=5;
 		i_gameinc=2;
 		list_print=list_cursor;
-		width = fabs(sin(((timer)*3)*M_PI/90)); // 2 sec rotation (120 frames) so we mult by 3 for 360 degrees
+		width = fabs(sin(((timer)*3)*M_PI/90)); // fake rotation, take abs value so we only show 1 side of the coin else text reversed
 
-		for (i=0; i<15; i++)
+		for (i=0; i<rows; i++)
 		{
 			if (list_print->hidden==1)
 				c_hide=vred;
 			else
 				c_hide=vgreen;
-			strcpy(angle, list_print->desc);
-			if (!strcmp(list_print->clone, autogame)) startgame=1;
-			if (i==7)
+			strcpy(gamename, list_print->desc);
+			gamename[35]=0;														// truncate if >35 chars just to keep things on screen
+			if (!strcmp(list_print->clone, autogame)) startgame=1;	// See if we are on the autostart game
+
+			if (i==(rows-1)/2)													// This is the selected record
 			{
+				desclen=strlen(list_print->desc);
+
+				if (desclen > 35 && (timer%10==0))							// If it's a long description then we'll scroll it everyb 1/3 sec
+				{
+					if (descindex < (desclen-34))								// If we're not at the end of the scroll...
+					{
+						if (descindex > 0)
+						{
+							descindex++;											// ...scroll another character
+							ticks=0;
+						}
+						if ((descindex == 0) && (ticks > 60))				// if we haven't started scrolling and we've waited for 60 ticks...
+						{
+							descindex++;											// ...then we start scrolling
+							ticks=0;
+						}
+					}
+					if ((descindex == (desclen-34)) && ticks == 60)		// If we're at the end of the scroll and have waited for 60 ticks...
+					{
+						descindex=0;												// ...reset scroll to start
+						ticks=0;
+					}
+
+				}
+
+				for (j=0; j<35; j++)												// Show 35 chars
+				{
+					gamename[j] = list_print->desc[j+descindex];
+				}
 				setcolour(vwhite, 25);
-				PrintString(angle, 60, top, 0, 4.5, 7, 0);
-				PrintString(">       ", -300, top, 0, 4.5, 7, 0);
+				PrintString(gamename, 60, top, 0, 5.5, 7, 0);
+				PrintString(">       ", -300, top, 0, 5, 7, 0);
 				setcolour(c_hide, 25);
-				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 5, 7, 0);
+				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 5.5, 7, 0);
 				list_active=list_print;
 				i_gameinc=-i_gameinc;
 				if (startgame)
 				{
 					setcolour(vwhite, 20);
-					PrintString("|", -245, top-4, 0, 4*width, 4, 0); // | = coin graphic
+					PrintString("|", -245, top-4, 0, 5*width, 5, 0); // | = coin graphic
 				}
 			}
 			else
 			{
 				setcolour(vyellow, i_game);
-				PrintString(angle, 60, top, 0, 4, 5, 0);
+				PrintString(gamename, 60, top, 0, 4, 5, 0);
 				setcolour(c_hide, i_game);
-				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -300, top, 0, 4, 5, 0);
+				PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 4, 5, 0);
 				i_game+=i_gameinc;
 				if (startgame)
 				{
@@ -2249,11 +2282,15 @@ void	EditGamesList(void)
 			top-=spacing;
 			startgame=0;
 		}
+		setcolour(vgreen, 20);
+		PrintString("Set/clear autorun game with 1P Start", 0, -ymax+80, 0, 6, 6, 0);
 
 		cc=getkey();
 		if (cc)
 		{
 			timer = 0;
+			descindex=0;
+			ticks=0;
 		}
 		if (cc == keyz[k_ngame]) list_cursor=list_cursor->next;
 		if (cc == keyz[k_pgame]) list_cursor=list_cursor->prev;

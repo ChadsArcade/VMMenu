@@ -43,13 +43,15 @@ list_node* build_games_list(void)
 		printf("Please run makeini.exe >vmmenu.ini\n");
 		exit(1) ;
 	}
+#ifdef DEBUG
 	printf("Building games list...\n");
+#endif
 	while (fgets(temp, 99, fp) != NULL)
 	{
 		total++;
 		if ((strlen(temp) > 1) && ((strchr(temp, '#') - temp) != 0 ))
 		{
-			hidden=0;		// Game is not commented out add it
+			hidden=0;		// Game is not commented out
 		}
 		else
 		{
@@ -88,7 +90,9 @@ list_node* build_games_list(void)
 	fclose(fp);
 	list_root->prev=list_cursor;							// link the last item to the first as the previous game
 	list_cursor->next=list_root;							// link the first item to the last as the next game
-	printf("There are %i games.\n", total);
+#ifdef DEBUG
+	printf("Show/Hide list: there are %i games.\n", total);
+#endif
 	//dump_list(list_root);
 	return list_root;
 }
