@@ -111,7 +111,7 @@ m_node		*vectorgames;
 g_node		*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 uint			man_menu;
 
-char		auth1[] = "VMMenu 1.4.1, Chad Gray";
+char		auth1[] = "VMMenu 1.4.2, Chad Gray";
 char		auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
@@ -1833,32 +1833,8 @@ void SetOptions(void)
 			opty = opty + 30;
 			if (opty > ymax) opty = -ymax;
 		}
-		setcolour(vcyan, 15);
-		p1.x = -xmax+24;
-		p1.y = 0;
-		p2.x = xmax-24;
-		p2.y = 0;
-		drawvector(p1, p2, 0, -ymax+24);
-		drawvector(p1, p2, 0, ymax-24);
-		p1.x = 0;
-		p1.y = -ymax+24;
-		p2.x = 0;
-		p2.y = ymax-24;
-		drawvector(p1, p2, -xmax+24, 0);
-		drawvector(p1, p2, xmax-24, 0);
-		p1.x = -xmax;
-		p1.y = 0;
-		p2.x = xmax;
-		p2.y = 0;
-		drawvector(p1, p2, 0, -ymax);
-		drawvector(p1, p2, 0, ymax);
-		p1.x = 0;
-		p1.y = -ymax;
-		p2.x = 0;
-		p2.y = ymax;
-		drawvector(p1, p2, -xmax, 0);
-		drawvector(p1, p2, xmax, 0);
-
+		drawbox(-xmax, -ymax, xmax, ymax, vcyan, 15);
+		drawbox(-xmax+24, -ymax+24, xmax-24, ymax-24, vcyan, 15);
 		if (optz[o_stars]) showstars();
 
 		top = 350;
@@ -2165,7 +2141,6 @@ void SetOptions(void)
 				editcols=0;
 			}
 		}
-
 		sendframe();
 	}
 }
@@ -2173,6 +2148,8 @@ void SetOptions(void)
 
 /******************************************************************
 	Edit Games List
+ 	Allows user to show or hide games by editing the vmmenu.cfg file
+	Also allows user to set a game to autorun on startup
 *******************************************************************/
 void	EditGamesList(void)
 {
@@ -2180,7 +2157,7 @@ void	EditGamesList(void)
 	int 			cc=0, timer=0, i=0;
 	int			top=300, spacing=50; //42;
 	char			gamename[50];
-	point			p1, p2;
+//	point			p1, p2;
 	int			c_hide, i_game=10, i_gameinc=2, startgame=0, rows=9; // 15 rows caused too much flicker
 	float			width;
 	int			descindex=0, desclen, j=0, ticks=0;
@@ -2195,36 +2172,11 @@ void	EditGamesList(void)
 	dump_list(list_root);
 #endif
 
-	while ((cc != keyz[k_quit] && cc != keyz[k_menu]) && timer < 1800)
+	while ((cc != keyz[k_quit] && cc != keyz[k_options]) && timer < 1800)
 	{
 		timer++;
 		ticks++;
-		setcolour(vmagenta, 15);
-		p1.x = -xmax+24;
-		p1.y = 0;
-		p2.x = xmax-24;
-		p2.y = 0;
-		drawvector(p1, p2, 0, -ymax+24);
-		drawvector(p1, p2, 0, ymax-24);
-		p1.x = 0;
-		p1.y = -ymax+24;
-		p2.x = 0;
-		p2.y = ymax-24;
-		drawvector(p1, p2, -xmax+24, 0);
-		drawvector(p1, p2, xmax-24, 0);
-		p1.x = -xmax;
-		p1.y = 0;
-		p2.x = xmax;
-		p2.y = 0;
-		drawvector(p1, p2, 0, -ymax);
-		drawvector(p1, p2, 0, ymax);
-		p1.x = 0;
-		p1.y = -ymax;
-		p2.x = 0;
-		p2.y = ymax;
-		drawvector(p1, p2, -xmax, 0);
-		drawvector(p1, p2, xmax, 0);
-
+//		drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 2, vgreen);						// Draw frame around the edge of the screen
 		if (optz[o_stars]) showstars();
 
 		// print [rows] lines of the games list for user to navigate through
@@ -2385,15 +2337,15 @@ c_asteroids, i_asteroids= asteroids
 *******************************************************************/
 void EditColours(void)
 {
-	int order[6] = {3, 2, 5, 4, 0, 1};
+	int order[6] = {3, 2, 5, 4, 0, 1};	// this is the order the colours are saved in the cols[array] vs how they are on screen
 	int timer=0, cc=0, top=150, games, index=0, curscol=5, cursinc=2;
 	int ci_toggle=0, item_col=0, item_int=0;
-	char colval[10], intval[10], desc[30];
+	char colval[10], intval[10], desc[50];
 
 	item_col=colours[c_col][c_man];
 	item_int=colours[c_int][c_man];
 
-	while ((cc != keyz[k_quit] && cc != keyz[k_menu]) && timer < 1800)
+	while ((cc != keyz[k_quit] && cc != keyz[k_options]) && timer < 1800)
 	{
 		timer++;
 		if (timer%2==0)
@@ -2402,6 +2354,7 @@ void EditColours(void)
 			if (curscol>20)	cursinc=-2;
 			if (curscol<5) 	cursinc=2;
 		}
+		if (optz[o_stars]) showstars();
 
 		if (index==1) 	setcolour(colours[c_col][c_sman], colours[c_int][c_sman]);
 		else				setcolour(colours[c_col][c_man], colours[c_int][c_man]);
@@ -2433,15 +2386,6 @@ void EditColours(void)
 			top -= 35;
 		}
 
-		setcolour(vgreen, 20);
-		PrintString("Colour value:     Intensity Value:", 0, -ymax+80, 0, 6, 6, 0);
-
-		sprintf(colval,"%i",item_col);
-		sprintf(intval,"%i",item_int);
-		setcolour(vwhite, 20);
-		PrintString(colval, -50, -ymax+80, 0, 6, 6, 0);
-		PrintString(intval, 330, -ymax+80, 0, 6, 6, 0);
-
 		cc=getkey();
 		if (cc)
 		{
@@ -2452,8 +2396,6 @@ void EditColours(void)
 		if (index > 5) index=0;
 		if (index<0) index=5;
 		if (cc == keyz[k_start]) ci_toggle=!ci_toggle;
-		if (!ci_toggle) drawbox(-350, -ymax+50, 0, -ymax+110, vwhite, curscol);
-		if (ci_toggle)	 drawbox(0, -ymax+50, 350, -ymax+110, vwhite, curscol);
 
 
 		if (cc == keyz[k_nclone])
@@ -2491,58 +2433,81 @@ void EditColours(void)
 		{
 			case 0:	// Manufacturer - Not Selected
 			{
-				drawbox(-100, 250, 100, 350, vwhite, curscol);
+				drawbox(-100-(curscol/3), 250-(curscol/3), 100+(curscol/3), 350+(curscol/3), vwhite, curscol);
 				item_col=colours[c_col][c_man];
 				item_int=colours[c_int][c_man];
-				strcpy(desc, "Manufacturer (Non selected)");
+				strcpy(desc, "Manufacturer (Non-selected) ");
 				break;
 			}
 			case 1:	// Manufacturer - Selected
 			{
-				drawbox(-100, 250, 100, 350, vwhite, curscol);
+				drawbox(-100-(curscol/3), 250-(curscol/3), 100+(curscol/3), 350+(curscol/3), vwhite, curscol);
 				item_col=colours[c_col][c_sman];
 				item_int=colours[c_int][c_sman];
-				strcpy(desc, "Manufacturer (Selected)");
+				strcpy(desc, "Manufacturer (Selected)     ");
 				break;
 			}
 			case 2:	// Arrows
 			{
-				drawbox(-35, 180, 35, 250, vwhite, curscol);
-				drawbox(-175, 265, -105, 335, vwhite, curscol);
-				drawbox(105, 265, 175, 335, vwhite, curscol);
+				drawbox(-35-(curscol/3), 180-(curscol/3), 35+(curscol/3), 250+(curscol/3), vwhite, curscol);
+				drawbox(-175-(curscol/3), 265-(curscol/3), -105+(curscol/3), 335+(curscol/3), vwhite, curscol);
+				drawbox(105-(curscol/3), 265-(curscol/3), 175+(curscol/3), 335+(curscol/3), vwhite, curscol);
 				item_col=colours[c_col][c_arrow];
 				item_int=colours[c_int][c_arrow];
-				strcpy(desc, "Arrows");
+				strcpy(desc, "Arrows                      ");
 				break;
 			}
 			case 3:	// Prev/Next
 			{
-				drawbox(xmax-30, 260, xmax-170, 340, vwhite, curscol);
-				drawbox(-(xmax-170), 260, -(xmax-30), 340, vwhite, curscol);
+				drawbox(xmax-30+(curscol/3), 260-(curscol/3), xmax-170-(curscol/3), 340+(curscol/3), vwhite, curscol);
+				drawbox(-(xmax-170)+(curscol/3), 260-(curscol/3), -(xmax-30)-(curscol/3), 340+(curscol/3), vwhite, curscol);
 				item_col=colours[c_col][c_pnman];
 				item_int=colours[c_int][c_pnman];
-				strcpy(desc, "Prev/Next Manufacturer");
+				strcpy(desc, "Prev/Next Manufacturer      ");
 				break;
 			}
 			case 4:	// Games List
 			{
-				drawbox(-130, 180, 130, -160, vwhite, curscol);
+				drawbox(-130+(curscol/3), 180-(curscol/3), 130-(curscol/3), -160+(curscol/3), vwhite, curscol);
 				item_col=colours[c_col][c_glist];
 				item_int=colours[c_int][c_glist];
-				strcpy(desc, "Games List (non selected)");
+				strcpy(desc, "Games List (Non-selected)   ");
 				break;
 			}
 			case 5:	// Selected Game
 			{
-				drawbox(-130, 27, 130, -13, vwhite, curscol);
+				drawbox(-130+(curscol/3), 30-(curscol/3), 130-(curscol/3), (curscol/3)-12, vwhite, curscol);
 				item_col=colours[c_col][c_sgame];
 				item_int=colours[c_int][c_sgame];
-				strcpy(desc, "Games List (Selected)");
+				strcpy(desc, "Games List (Selected)       ");
 			}
 		}
-		setcolour(vgreen, 20);
-		PrintString(desc, 0, -ymax+130, 0, 6, 6, 0);
-		
+
+		setcolour(vwhite, 20);
+		PrintString("Menu Item - ", -260, -ymax+170, 0, 6, 6, 0);
+		setcolour(vyellow, 25-curscol);
+		PrintString(desc, 100, -ymax+170, 0, 6, 6, 0);	// Print the name of the selected meni item
+		setcolour(vwhite, 20);
+		PrintString("P1 Start toggles editing colour/intensity", 0, -ymax+130, 0, 6, 6, 0);
+
+		sprintf(colval,"%i",item_col);
+		sprintf(intval,"%i",item_int);
+		setcolour(vwhite, 15);
+		drawbox(-200, -ymax+48, 200, -ymax+98, vwhite, curscol);
+		if (!ci_toggle)
+		{
+			setcolour(vgreen, 25);
+			PrintString("Colour value:      ", 0, -ymax+75, 0, 6, 6, 0);
+			setcolour(vwhite, 25);
+			PrintString(colval, 150, -ymax+75, 0, 6, 6, 0);
+		}
+		else
+		{
+			setcolour(vgreen, 25);
+			PrintString("Intensity value:   ", 0, -ymax+75, 0, 6, 6, 0);
+			setcolour(vwhite, 25);
+			PrintString(intval, 150, -ymax+75, 0, 6, 6, 0);
+		}
 		sendframe();
 	}
 }
