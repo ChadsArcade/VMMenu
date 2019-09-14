@@ -14,6 +14,7 @@ int		optz[15];
 int		f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
 char		zvgargs[30];
 extern	int ZVGPresent;
+extern	char auth1[], auth2[];
 
 /******************************************************************
 Try to open the ZVG
@@ -25,7 +26,7 @@ void startZVG(void)
 	if (error)
 	{
 		zvgError(error);				// print error
-		printf("\n%s, © 2009-2019\n", auth1);
+		printf("\n%s, (c) 2009-2019\n", auth1);
 		printf("%s\n", auth2);
 		exit(0);							// return to DOS
 	}

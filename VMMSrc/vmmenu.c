@@ -107,8 +107,8 @@ m_node		*vectorgames;
 g_node		*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 uint			man_menu;
 
-extern char	auth1[] = "VMMenu 1.4.1, Chad Gray";
-extern char	auth2[] = "ChadsArcade@Gmail.com";
+char		auth1[] = "VMMenu 1.4.1, Chad Gray";
+char		auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
 {
