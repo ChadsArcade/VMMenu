@@ -75,7 +75,11 @@ g_node*	GetRandomGame(m_node *);										// Selects a random game from the list
 void		PlayAttractGame(m_node *gameslist);							// get a random game name and add attract mode args
 void		PrintPointer(int mx, int my);									// Print mouse pointer at current mouse position
 void		SetOptions(void);													// Lets user edit various in-menu options
-void		EditGamesList(void);												// Show or hide games 
+void		EditGamesList(void);												// Show or hide games
+void		EditColours(void);
+void		drawbox(int, int, int, int, int, int);
+
+
 
 //#define	DEBUG							// uncomment out to enable debug output
 
@@ -402,7 +406,7 @@ int main( void) //int argc, char *argv[])
 				setcolour(colours[c_col][c_sman], colours[c_int][c_sman]);
 			else
 				setcolour(colours[c_col][c_man], colours[c_int][c_man]);
-			if (!optz[o_togpnm]) PrintString(mytext, 0, 300, 0, 12, 12, 0);					// manufacturer name
+			if (!optz[o_togpnm]) PrintString(mytext, 0, 300, 0, 12, 12, 0);					// manufacturer name, smaller if prev/next shown
 			else PrintString(mytext, 0, 300, 0, 8+(4*(1-man_menu)), 8+(4*(1-man_menu)), 0);
 
 			setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
@@ -796,19 +800,19 @@ vObject intro(void)
 
 	static int mamelogo[] = {
 	0,27,81,108,		81,108,81,73,		81,73,117,109,		117,109,117,51,							// M
-	117,51,174,109,		174,109,174,44,																	// A
-	174,44,239,109,		239,109,239,73,		239,73,275,109,		275,109,275,54,							// M
-	275,54,328,107,		328,107,390,107,	390,107,371,88,		371,88,340,88,		340,88,330,78,		// E
+	117,51,174,109,	174,109,174,44,																			// A
+	174,44,239,109,	239,109,239,73,	239,73,275,109,	275,109,275,54,							// M
+	275,54,328,107,	328,107,390,107,	390,107,371,88,	371,88,340,88,		340,88,330,78,		// E
 	330,78,346,78,		346,78,325,57,		325,57,310,57,		310,57,299,47,		299,47,353,47,		// L
-	353,47,333,27,		333,27,249,27,		249,27,254,33,												// O
+	353,47,333,27,		333,27,249,27,		249,27,254,33,														// O
 	254,33,254,55,		254,55,224,25,		224,25,224,60,		224,60,190,27,		190,27,154,27,		// G
-	154,27,154,55,		154,55,98,0,		98,0,65,0,			65,0,96,31,								// O
+	154,27,154,55,		154,55,98,0,		98,0,65,0,			65,0,96,31,									// O
 	96,31,96,55,		96,55,66,25,		66,25,66,60,		66,60,32,27,		32,27,0,27,			// 
-	154,20,154,0,		154,0,174,20,																	// V
-	198,20,183,20,		183,20,163,0,		163,0,183,0,		173,10,183,10,							// E
-	223,20,208,20,		208,20,188,0,		188,0,208,0,												// C
-	228,20,248,20,		238,20,218,0,																	// T
-	253,20,268,20,		268,20,248,0,		248,0,233,0,		233,0,253,20,							// O
+	154,20,154,0,		154,0,174,20,																				// V
+	198,20,183,20,		183,20,163,0,		163,0,183,0,		173,10,183,10,								// E
+	223,20,208,20,		208,20,188,0,		188,0,208,0,														// C
+	228,20,248,20,		238,20,218,0,																				// T
+	253,20,268,20,		268,20,248,0,		248,0,233,0,		233,0,253,20,								// O
 	253,0,273,20,		273,20,288,20,		288,20,278,10,		278,10,273,10,		273,10,273,0		// R
 	};
 
@@ -1784,7 +1788,7 @@ void SetOptions(void)
 	int lastkey = keyz[k_options], spacing = 42;
 	point p1, p2;
 	char angle[10];
-	int edit=0;
+	int edit=0, editcols=0;
 	while ((cc != keyz[k_options]) && (cc != keyz[k_quit]) && timer < 1800)
 	{
 		timer++;
@@ -1857,14 +1861,14 @@ void SetOptions(void)
 
 		if (optz[o_stars]) showstars();
 
-		top = 300;
-		options = 7;
+		top = 350;
+		options = 8;
 
 		// Screen rotation
 		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 0)	setcolour(vwhite, 25);
-		PrintString("Rotation       ", -150, top, 0, 6, 6, 0);
+		PrintString("Rotation         ", -150, top, 0, 6, 6, 0);
 		if (optz[o_rot] == 0) strcpy(angle,"0      ");
 		if (optz[o_rot] == 1) strcpy(angle,"90     ");
 		if (optz[o_rot] == 2) strcpy(angle,"180    ");
@@ -1875,35 +1879,35 @@ void SetOptions(void)
 		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 1)	setcolour(vwhite, 25);
-		PrintString("Stars          ", -150, top, 0, 6, 6, 0);
+		PrintString("Stars            ", -150, top, 0, 6, 6, 0);
 		PrintString(optz[o_stars] == 1 ? "yes    " : "no     ", 250, top, 0, 6, 6, 0);
 
 		// Caps
 		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 2)	setcolour(vwhite, 25);
-		PrintString("All Caps       ", -150, top, 0, 6, 6, 0);
+		PrintString("All Caps         ", -150, top, 0, 6, 6, 0);
 		PrintString((optz[o_ucase] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
 		// Show Prev and Next
 		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 3)	setcolour(vwhite, 25);
-		PrintString("Show Prev/next ", -150, top, 0, 6, 6, 0);
+		PrintString("Show Prev/Next   ", -150, top, 0, 6, 6, 0);
 		PrintString((optz[o_togpnm] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
 		// Smart Menu
 		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 4)	setcolour(vwhite, 25);
-		PrintString("Smart Menu     ", -150, top, 0, 6, 6, 0);
+		PrintString("Smart Menu       ", -150, top, 0, 6, 6, 0);
 		PrintString((optz[o_smenu] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
 		// Reopen ZVG
 		top-=spacing;
 		setcolour(vwhite, 15);
 		if (cursor == 5)	setcolour(vwhite, 25);
-		PrintString("Reopen ZVG     ", -150, top, 0, 6, 6, 0);
+		PrintString("Reopen ZVG       ", -150, top, 0, 6, 6, 0);
 		PrintString((optz[o_redozvg] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
 		if (mousefound)
@@ -1912,10 +1916,10 @@ void SetOptions(void)
 			top-=spacing;
 			setcolour(vwhite, 15);
 			if (cursor == 6)	setcolour(vwhite, 25);
-			PrintString("Optical Control", -150, top, 0, 6, 6, 0);
-			if (optz[o_mouse] == 0) strcpy(angle,"None   ");
-			if (optz[o_mouse] == 1) strcpy(angle,"Spinner");
-			if (optz[o_mouse] == 2) strcpy(angle,"Mouse  ");
+			PrintString("Optical Control  ", -150, top, 0, 6, 6, 0);
+			if (optz[o_mouse] == 0) strcpy(angle,"none   ");
+			if (optz[o_mouse] == 1) strcpy(angle,"spinner");
+			if (optz[o_mouse] == 2) strcpy(angle,"mouse  ");
 			PrintString(angle, 250, top, 0, 6, 6, 0);
 
 			if (optz[o_mouse])
@@ -1923,38 +1927,38 @@ void SetOptions(void)
 				options+=5;					// Mouse set to true so there are 5 more mouse settings
 				top-=spacing;
 				setcolour(vwhite, 15);
-				p1.x = -275;
+				p1.x = -293;
 				p1.y = top + 20;
 				p2.x = p1.x;
 				p2.y = top - (4*spacing);
 				drawvector(p1, p2, 0, 0);
 				if (cursor == 7)	setcolour(vwhite, 25);
-				PrintString("- Swap X/Y Axes ", -133, top, 0, 6, 6, 0);
+				PrintString("- Swap X/Y Axes   ", -133, top, 0, 6, 6, 0);
 				PrintString((optz[o_mswapXY] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
 				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 8)	setcolour(vwhite, 25);
-				PrintString("- Reverse X Axis", -133, top, 0, 6, 6, 0);
+				PrintString("- Reverse X Axis  ", -133, top, 0, 6, 6, 0);
 				PrintString((optz[o_mrevX] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 		
 				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 9)	setcolour(vwhite, 25);
-				PrintString("- Reverse Y Axis", -133, top, 0, 6, 6, 0);
+				PrintString("- Reverse Y Axis  ", -133, top, 0, 6, 6, 0);
 				PrintString((optz[o_mrevY] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 
 				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 10)	setcolour(vwhite, 25);
-				PrintString("- Sample Rate   ", -133, top, 0, 6, 6, 0);
+				PrintString("- Sample Rate     ", -133, top, 0, 6, 6, 0);
 				itoa(optz[o_msamp], angle, 10);
 				PrintString(angle, 199 + (optz[o_msamp] > 9 ? 6 : 0), top, 0, 6, 6, 0);
 
 				top-=spacing;
 				setcolour(vwhite, 15);
 				if (cursor == 11)	setcolour(vwhite, 25);
-				PrintString("- Sensitivity   ", -133, top, 0, 6, 6, 0);
+				PrintString("- Sensitivity     ", -133, top, 0, 6, 6, 0);
 				itoa(optz[o_msens], angle, 10);
 				PrintString(angle, 199 + (optz[o_msens] > 9 ? 6 : 0), top, 0, 6, 6, 0);
 
@@ -1969,15 +1973,22 @@ void SetOptions(void)
 		// Edit Games List
 		top-=spacing;
 		setcolour(vwhite, 15);
+		if (cursor == options - 2)	setcolour(vwhite, 25);
+		PrintString("Show/Hide Games  ", -150, top, 0, 6, 6, 0);
+		PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
+
+		// Edit Menu Colours
+		top-=spacing;
+		setcolour(vwhite, 15);
 		if (cursor == options - 1)	setcolour(vwhite, 25);
-		PrintString("Show/Hide Games", -150, top, 0, 6, 6, 0);
+		PrintString("Edit Menu Colours", -150, top, 0, 6, 6, 0);
 		PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
 		
 		// Print Keycode
 		top=-ymax+80; //-300;//spacing;
 		//top-=spacing;
 		setcolour(vgreen, 20);
-		PrintString("Last keycode   ", -150, top, 0, 6, 6, 0);
+		PrintString("Last keycode     ", -150, top, 0, 6, 6, 0);
 		sprintf(angle,"0x%04x ",lastkey);
 		PrintString(angle, 250, top, 0, 6, 6, 0);
 
@@ -2134,7 +2145,7 @@ void SetOptions(void)
 			}
 		}
 		// The "Edit Games List" option number can change depending on whether mouse settings are active, so we can't use switch/case...
-		if (cursor == options-1)	// Edit Games List
+		if (cursor == options-2)	// Edit Games List
 		{
 			if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) edit = !edit;
 			if (cc == keyz[k_start]) edit = 0;
@@ -2142,6 +2153,16 @@ void SetOptions(void)
 			{
 				EditGamesList();
 				edit=0;
+			}
+		}
+		if (cursor == options-1)	// Edit Menu Colours
+		{
+			if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) editcols = !editcols;
+			if (cc == keyz[k_start]) editcols = 0;
+			if (editcols)
+			{
+				EditColours();
+				editcols=0;
 			}
 		}
 
@@ -2160,7 +2181,7 @@ void	EditGamesList(void)
 	int			top=300, spacing=50; //42;
 	char			gamename[50];
 	point			p1, p2;
-	int			c_hide, i_game=10, i_gameinc=2, startgame=0, rows=11; // 15 rows caused too much flicker
+	int			c_hide, i_game=10, i_gameinc=2, startgame=0, rows=9; // 15 rows caused too much flicker
 	float			width;
 	int			descindex=0, desclen, j=0, ticks=0;
 
@@ -2170,7 +2191,9 @@ void	EditGamesList(void)
 	{
 		list_cursor = list_cursor->prev;
 	}
-	//dump_list(list_root);
+#ifdef DEBUG
+	dump_list(list_root);
+#endif
 
 	while ((cc != keyz[k_quit] && cc != keyz[k_menu]) && timer < 1800)
 	{
@@ -2347,3 +2370,206 @@ void	EditGamesList(void)
 	man_menu = zTrue;
 }
 
+/******************************************************************
+	Edit Menu Colours
+
+colours and intensities are:
+c_gamelist, i_gamelist	= the games list
+c_selgame, i_selgame		= the selected game
+c_selman, i_selman		= the selected manufacturer
+c_man, i_man				= manufacturer
+c_pnman, i_pnman			= prev/next manufacturer
+c_arrow, i_arrow			= arrows
+c_asteroids, i_asteroids= asteroids
+
+*******************************************************************/
+void EditColours(void)
+{
+	int order[6] = {3, 2, 5, 4, 0, 1};
+	int timer=0, cc=0, top=150, games, index=0, curscol=5, cursinc=2;
+	int ci_toggle=0, item_col=0, item_int=0;
+	char colval[10], intval[10], desc[30];
+
+	item_col=colours[c_col][c_man];
+	item_int=colours[c_int][c_man];
+
+	while ((cc != keyz[k_quit] && cc != keyz[k_menu]) && timer < 1800)
+	{
+		timer++;
+		if (timer%2==0)
+		{
+			curscol=curscol+cursinc;
+			if (curscol>20)	cursinc=-2;
+			if (curscol<5) 	cursinc=2;
+		}
+
+		if (index==1) 	setcolour(colours[c_col][c_sman], colours[c_int][c_sman]);
+		else				setcolour(colours[c_col][c_man], colours[c_int][c_man]);
+		PrintString("Maker", 0, 300, 0, 12, 12, 0);
+	
+		setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
+		PrintString(">", 0, 220, 270, 6, 6, 0);
+		setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
+		PrintString("<", -150, 300, 0, 7, 7, 0);
+		PrintString(">", 125, 300, 0, 7, 7, 0);
+	
+		setcolour(colours[c_col][c_pnman], colours[c_int][c_pnman]);
+		PrintString("Prev", -(xmax-100), 300, 0, 6, 6, 0);
+		PrintString("Next", xmax-100, 300, 0, 6, 6, 0);
+
+		top=150;
+		for (games=1; games<10; games++)
+		{
+			if (games == 5)
+			{
+				setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
+				PrintString("Selected Game", 0, top, 0, 5, 5, 0);
+			}
+			else
+			{
+				setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
+				PrintString("Game List Item", 0, top, 0, 4, 4, 0);
+			}
+			top -= 35;
+		}
+
+		setcolour(vgreen, 20);
+		PrintString("Colour value:     Intensity Value:", 0, -ymax+80, 0, 6, 6, 0);
+
+		sprintf(colval,"%i",item_col);
+		sprintf(intval,"%i",item_int);
+		setcolour(vwhite, 20);
+		PrintString(colval, -50, -ymax+80, 0, 6, 6, 0);
+		PrintString(intval, 330, -ymax+80, 0, 6, 6, 0);
+
+		cc=getkey();
+		if (cc)
+		{
+			timer = 0;
+		}
+		if (cc == keyz[k_ngame]) index++;
+		if (cc == keyz[k_pgame]) index--;
+		if (index > 5) index=0;
+		if (index<0) index=5;
+		if (cc == keyz[k_start]) ci_toggle=!ci_toggle;
+		if (!ci_toggle) drawbox(-350, -ymax+50, 0, -ymax+110, vwhite, curscol);
+		if (ci_toggle)	 drawbox(0, -ymax+50, 350, -ymax+110, vwhite, curscol);
+
+
+		if (cc == keyz[k_nclone])
+		{
+			if (!ci_toggle)
+			{
+				item_col++;
+				if (item_col>6) item_col=6;
+				colours[c_col][order[index]]=item_col;
+			}
+			else
+			{
+				item_int++;
+				if (item_int>25) item_int=25;
+				colours[c_int][order[index]]=item_int;
+			}
+		}
+		if (cc == keyz[k_pclone])
+		{
+			if (!ci_toggle)
+			{
+				item_col--;
+				if (item_col<0) item_col=0;
+				colours[c_col][order[index]]=item_col;
+			}
+			else
+			{
+				item_int--;
+				if (item_int<0) item_int=0;
+				colours[c_int][order[index]]=item_int;
+			}
+		}
+
+		switch (index)
+		{
+			case 0:	// Manufacturer - Not Selected
+			{
+				drawbox(-100, 250, 100, 350, vwhite, curscol);
+				item_col=colours[c_col][c_man];
+				item_int=colours[c_int][c_man];
+				strcpy(desc, "Manufacturer (Non selected)");
+				break;
+			}
+			case 1:	// Manufacturer - Selected
+			{
+				drawbox(-100, 250, 100, 350, vwhite, curscol);
+				item_col=colours[c_col][c_sman];
+				item_int=colours[c_int][c_sman];
+				strcpy(desc, "Manufacturer (Selected)");
+				break;
+			}
+			case 2:	// Arrows
+			{
+				drawbox(-35, 180, 35, 250, vwhite, curscol);
+				drawbox(-175, 265, -105, 335, vwhite, curscol);
+				drawbox(105, 265, 175, 335, vwhite, curscol);
+				item_col=colours[c_col][c_arrow];
+				item_int=colours[c_int][c_arrow];
+				strcpy(desc, "Arrows");
+				break;
+			}
+			case 3:	// Prev/Next
+			{
+				drawbox(xmax-30, 260, xmax-170, 340, vwhite, curscol);
+				drawbox(-(xmax-170), 260, -(xmax-30), 340, vwhite, curscol);
+				item_col=colours[c_col][c_pnman];
+				item_int=colours[c_int][c_pnman];
+				strcpy(desc, "Prev/Next Manufacturer");
+				break;
+			}
+			case 4:	// Games List
+			{
+				drawbox(-130, 180, 130, -160, vwhite, curscol);
+				item_col=colours[c_col][c_glist];
+				item_int=colours[c_int][c_glist];
+				strcpy(desc, "Games List (non selected)");
+				break;
+			}
+			case 5:	// Selected Game
+			{
+				drawbox(-130, 27, 130, -13, vwhite, curscol);
+				item_col=colours[c_col][c_sgame];
+				item_int=colours[c_int][c_sgame];
+				strcpy(desc, "Games List (Selected)");
+			}
+		}
+		setcolour(vgreen, 20);
+		PrintString(desc, 0, -ymax+130, 0, 6, 6, 0);
+		
+		sendframe();
+	}
+}
+
+
+/******************************************************************
+	Draw a box on screen
+*******************************************************************/
+void drawbox(int x1, int y1, int x2, int y2, int colour, int intensity)
+{
+	point p1, p2, p3, p4;
+
+	p1.x = x1;
+	p1.y = y1;
+	p2.x = x2;
+	p2.y = y2;
+
+	setcolour(colour, intensity);
+
+	p3.x = p1.x;
+	p3.y = p2.y;
+	p4.x = p2.x;
+	p4.y = p1.y;
+
+	drawvector(p1, p3, 0, 0);
+	drawvector(p3, p2, 0, 0);
+	drawvector(p2, p4, 0, 0);
+	drawvector(p4, p1, 0, 0);
+
+}

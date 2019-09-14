@@ -131,7 +131,7 @@ void dump_list(list_node *list_root)
 }
 
 /**************************************
-	Write linked list to vmmeni.ini
+	Write linked list to vmmenu.ini
 **************************************/
 void write_list(list_node *list_root)
 {
@@ -157,7 +157,7 @@ void write_list(list_node *list_root)
 		printf("Please run makeini.exe >vmmenu.ini\n");
 		exit(1) ;
 	}
-	printf("Writing vmmeni.ini file...\n");
+	printf("Writing vmmenu.ini file...\n");
 
 	i=1;
 	do
