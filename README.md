@@ -132,12 +132,14 @@ This section will be populated by the in game settings menu, which allows you to
 
 This section binds the controls to your preferred key presses. For DOS users, you can use the supplied keycode.exe to display the keycode of a key pressed. Simply change the value against the desired function. The default values and the keycodes for both Linux and DOS are listed in the vmmstddef.h file.
 
-**New for v1.31** - The value of the last keycode pressed is displayed at the top of the screen whilst in the settings page.
+**New for v1.3.1** - The value of the last keycode pressed is displayed at the top of the screen whilst in the settings page.
 
 **[colours]**
 
 Here is where you can define the colours and intensities of various elements of the menu. Colour values are prefixed with `c_` and intensities with `i_`
 Valid colour values are red, magenta, cyan, blue, yellow, green and white. Intensity values range from 0 to 25, dimmest to brightest.
+
+**New for v1.4.2** - The colour of the various menu items can now be configured from within the menu. The colour configuration page can be found withing settings.
 
 ## The vmmenu.ini file
 
@@ -186,6 +188,10 @@ Atari|Meteorites|asteroid|meteorts
 ```
 
 You can also edit the display name if you wish, but do not alter the clone name or parent game name or the game may not run.
+
+**New for v1.3** - You can now show or hide games from within the menu itself, simply access the show/hide games option from the settings page.
+
+**New for v1.3.2** - [Added by DanP] An autostart game can now be configured, this will run prior to the menu starting so gives a more authentic startup for arcade cabinets. The autostart game can be selected/deselected from the Show/Hide games settings page. Pressing 1P Start will toggle autostart for the selected game. The currently selected game is indicated by a spinning coin.
 
 ## The VMM.BAT file
 
