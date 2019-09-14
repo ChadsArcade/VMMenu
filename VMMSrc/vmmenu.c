@@ -15,7 +15,7 @@
 * 06 Sep 19	v1.31 Added keycode display in Settings
 *				v1.32	Added SmartMenu Navigation option to settings page
 *
-* 08 Sep 19 v1.33 Add support to autostart a game before running the menu (DanP)
+* 08 Sep 19 v1.33 DanP Added support to autostart a game before running the menu
 * 09 Sep 19 v1.4	Added game show/hide screen under settings menu
 *****************************************************************************/
 #include <stdio.h>
@@ -75,9 +75,9 @@ g_node*	GetRandomGame(m_node *);										// Selects a random game from the list
 void		PlayAttractGame(m_node *gameslist);							// get a random game name and add attract mode args
 void		PrintPointer(int mx, int my);									// Print mouse pointer at current mouse position
 void		SetOptions(void);													// Lets user edit various in-menu options
-void		EditGamesList(void);
+void		EditGamesList(void);												// Show or hide games 
 
-//#define	DEBUG							// comment out to suppress debug output
+//#define	DEBUG							// uncomment out to enable debug output
 
 // Global variables (sorry - there are quite a few...)
 
@@ -107,8 +107,8 @@ m_node		*vectorgames;
 g_node		*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 uint			man_menu;
 
-char	auth1[] = "VMMenu 1.4, Chad Gray 2019";
-char	auth2[] = "ChadsArcade@Gmail.com";
+extern char	auth1[] = "VMMenu 1.4.1, Chad Gray";
+extern char	auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])
 {
@@ -121,7 +121,7 @@ int main( void) //int argc, char *argv[])
 	int		mpx = 0, mpy = 0;
 	vObject	mame, sega, cinematronics, atari, centuri, vbeam, midway;
 	FILE		*inifp;
-	char		* ini_name = "vmmenu.cfg";
+	char		*ini_name = "vmmenu.cfg";
 
 	vectorgames = createlist();
 	totalnumgames=printlist(vectorgames);
@@ -229,7 +229,6 @@ int main( void) //int argc, char *argv[])
 	// Start main loop
 	while (1)
 	{
-
 
 		// Read mouse
 		//if (mousefound && optz[o_mouse] && (timeout%optz[o_msamp] == 0))
@@ -552,7 +551,8 @@ int main( void) //int argc, char *argv[])
 	iniparser_freedict(ini);
 	printf("Quitting to OS...\n");
 	cc=credits();
-	printf("\n%s, (c) 2009-2019\n", auth1);
+	printf("\n%s, © 2009-2019\n", auth1);
+	printf("%s\n", auth2);
 	ShutdownAll();
 	return (0);
 }

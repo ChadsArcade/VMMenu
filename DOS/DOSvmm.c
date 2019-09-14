@@ -24,8 +24,10 @@ void startZVG(void)
 	error = zvgFrameOpen();			// initialize everything
 	if (error)
 	{
-		zvgError(error);		// print error
-		exit(0);			// return to DOS
+		zvgError(error);				// print error
+		printf("\n%s, © 2009-2019\n", auth1);
+		printf("%s\n", auth2);
+		exit(0);							// return to DOS
 	}
 }
 
