@@ -50,6 +50,7 @@ list_node* build_games_list(void)
 	{
 		total++;
 		if ((strlen(temp) > 1) && ((strchr(temp, '#') - temp) != 0 ))
+//		if ((strlen(temp) > 1) && ((strchr(temp, '#') - temp) != 0 ) && (strchr(temp, '|') != 0))
 		{
 			hidden=0;		// Game is not commented out
 		}
@@ -62,30 +63,33 @@ list_node* build_games_list(void)
 			}
 			hidden=1;
 		}
-		manuf = strtok(temp, "|");
-		desc = strtok(NULL, "|");
-		mame = strtok(NULL, "|");
-		clone = strtok(NULL, "|");
-
-		nl = strrchr(clone, '\r');
-		if (nl) *nl = '\0';
-		nl = strrchr(clone, '\n');
-		if (nl) *nl = '\0';
-
-		//printf("Hidden:%s Name:%s\n", (hidden==1 ? "Y": "N"), desc);
-
-		list_new=add_list_game(hidden, manuf, desc, mame, clone);
-		if (list_root == NULL)								// if the list is null
+		if ((strlen(temp) > 1) && (strchr(temp, '|') != 0))
 		{
-			list_root = list_new;							// this is the first item so point root to it
-			list_cursor = list_new;							// also initialise the cursor here
+			manuf = strtok(temp, "|");
+			desc = strtok(NULL, "|");
+			mame = strtok(NULL, "|");
+			clone = strtok(NULL, "|");
+
+			nl = strrchr(clone, '\r');
+			if (nl) *nl = '\0';
+			nl = strrchr(clone, '\n');
+			if (nl) *nl = '\0';
+
+			//printf("Hidden:%s Name:%s\n", (hidden==1 ? "Y": "N"), desc);
+
+			list_new=add_list_game(hidden, manuf, desc, mame, clone);
+			if (list_root == NULL)								// if the list is null
+			{
+				list_root = list_new;							// this is the first item so point root to it
+				list_cursor = list_new;							// also initialise the cursor here
+			}
+			else
+			{
+				list_cursor->next = list_new;					// link the current game to the newly added game
+				list_new->prev = list_cursor;					// link the newly added game to the previous game
+			}
+			list_cursor = list_new;								// update the cursor to the new record
 		}
-		else
-		{
-			list_cursor->next = list_new;					// link the current game to the newly added game
-			list_new->prev = list_cursor;					// link the newly added game to the previous game
-		}
-		list_cursor = list_new;								// update the cursor to the new record
 	}
 	fclose(fp);
 	list_root->prev=list_cursor;							// link the last item to the first as the previous game

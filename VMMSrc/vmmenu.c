@@ -17,6 +17,8 @@
 *
 * 08 Sep 19 v1.33 DanP Added support to autostart a game before running the menu
 * 09 Sep 19 v1.4	Added game show/hide screen under settings menu
+* 15 Sep 19	v1.4.4	Fixed a bug that crashed the menu if the vmmenu.ini file
+*							had a malformed line
 *****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,7 +113,7 @@ m_node		*vectorgames;
 g_node		*gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 uint			man_menu;
 
-char		auth1[] = "VMMenu 1.4.2, Chad Gray";
+char		auth1[] = "VMMenu 1.4.4, Chad Gray";
 char		auth2[] = "ChadsArcade@Gmail.com";
 
 int main( void) //int argc, char *argv[])

@@ -207,13 +207,13 @@ m_node* createlist()
 	}
 	while (fgets(temp, 99, fp) != NULL)
 	{
-		if ((strlen(temp) > 1) && ((strchr(temp, '#') - temp) != 0 ))
+		if ((strlen(temp) > 1) && ((strchr(temp, '#') - temp) != 0 ) && (strchr(temp, '|') != 0))
 		{
 			manuf = strtok(temp, "|");
 			desc = strtok(NULL, "|");
 			mame = strtok(NULL, "|");
 			clone = strtok(NULL, "|");
-
+			//printf("manuf: %s desc: %s mame: %s clone %s \n ",manuf, desc, mame, clone);
 			nl = strrchr(clone, '\r');
 			if (nl) *nl = '\0';
 			nl = strrchr(clone, '\n');
