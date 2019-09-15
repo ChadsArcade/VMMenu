@@ -2339,9 +2339,9 @@ c_asteroids, i_asteroids= asteroids
 *******************************************************************/
 void EditColours(void)
 {
-	int order[6] = {3, 2, 5, 4, 0, 1};	// this is the order the colours are saved in the cols[array] vs how they are on screen
+	int order[7] = {3, 2, 5, 4, 0, 1, 6};	// this is the order the colours are saved in the cols[array] vs how they are on screen
 	int timer=0, cc=0, top=150, games, index=0, curscol=5, cursinc=2;
-	int ci_toggle=0, item_col=0, item_int=0;
+	int items=6, ci_toggle=0, item_col=0, item_int=0;
 	char colval[10], intval[10], desc[50];
 
 	item_col=colours[c_col][c_man];
@@ -2388,6 +2388,25 @@ void EditColours(void)
 			top -= 35;
 		}
 
+		for (games=0; games < NUM_ASTEROIDS; games++)
+		{
+			if (colours[c_col][c_asts] < 7)
+			{
+				asteroid[games].colour = colours[c_col][c_asts];
+			}
+			asteroid[games].bright = colours[c_int][c_asts];
+			if (games < 5)
+			{
+				asteroid[games].pos.x = 300;
+				asteroid[games].pos.y = (games*60)-120;
+				asteroid[games].angle = (asteroid[games].angle + asteroid[games].theta) % 360;	// increment angle
+				drawshape(asteroid[games]);
+				asteroid[games].pos.x = -300;
+				drawshape(asteroid[games]);
+			}
+			//asteroid[count] = updateobject(asteroid[count]);
+		}
+
 		cc=getkey();
 		if (cc)
 		{
@@ -2395,10 +2414,9 @@ void EditColours(void)
 		}
 		if (cc == keyz[k_ngame]) index++;
 		if (cc == keyz[k_pgame]) index--;
-		if (index > 5) index=0;
-		if (index<0) index=5;
+		if (index > items) index=0;
+		if (index<0) index=items;
 		if (cc == keyz[k_start]) ci_toggle=!ci_toggle;
-
 
 		if (cc == keyz[k_nclone])
 		{
@@ -2483,13 +2501,23 @@ void EditColours(void)
 				item_col=colours[c_col][c_sgame];
 				item_int=colours[c_int][c_sgame];
 				strcpy(desc, "Games List (Selected)       ");
+				break;
+			}
+			case 6:	// Asteroids
+			{
+				drawbox(-250-(curscol/3), -170+(curscol/3), -350+(curscol/3), 170-(curscol/3), vwhite, curscol);
+				drawbox(250+(curscol/3), -170+(curscol/3), 350-(curscol/3), 170-(curscol/3), vwhite, curscol);
+				item_col=colours[c_col][c_asts];
+				if (item_col==99990) item_col=7;
+				item_int=colours[c_int][c_asts];
+				strcpy(desc, "Asteroids                   ");
 			}
 		}
 
 		setcolour(vwhite, 25);
 		PrintString("< >", -345, -ymax+165, 90, 4, 6, 90);
 		setcolour(vwhite, 20);
-//		PrintString(">", -380, -ymax+170, 90, 4, 3, 0);
+
 		PrintString("Menu Item", -245, -ymax+170, 0, 6, 6, 0);
 		setcolour(vyellow, 25-curscol);
 		PrintString(desc, 100, -ymax+170, 0, 6, 6, 0);	// Print the name of the selected menu item
@@ -2516,6 +2544,15 @@ void EditColours(void)
 		}
 		sendframe();
 	}
+	if (timer >= 1800)
+	{
+		colours[c_col][c_asts] = 99990;
+		for (games=0; games<NUM_ASTEROIDS; games++)
+		{
+			asteroid[games].colour = NewAstColour();
+		}
+	}
+
 }
 
 
