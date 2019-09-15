@@ -398,7 +398,7 @@ int main( void) //int argc, char *argv[])
 				}
 			}
 
-			drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 3, vwhite);						// Draw frame around the edge of the screen
+			drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 2, vwhite);						// Draw frame around the edge of the screen
 
 			// print the manufacturer name
 			strcpy(mytext, vectorgames->name);
@@ -1515,9 +1515,9 @@ void getsettings(void)
 	optz[o_ucase]		= iniparser_getboolean(ini, "interface:caps", 0);
 	optz[o_togpnm]		= iniparser_getboolean(ini, "interface:showpnm", 0);
 	optz[o_smenu]		= iniparser_getboolean(ini, "interface:smartmenu", 1);
-	optz[o_redozvg]		= iniparser_getboolean(ini, "interface:reopenzvg", 1);
+	optz[o_redozvg]	= iniparser_getboolean(ini, "interface:reopenzvg", 1);
 	optz[o_dovga]		= iniparser_getboolean(ini, "interface:rendervga", 0);
-	optz[o_attmode]		= iniparser_getboolean(ini, "interface:attractmode", 0);
+	optz[o_attmode]	= iniparser_getboolean(ini, "interface:attractmode", 0);
 	
 	strcpy(attractargs, iniparser_getstring(ini, "interface:attractargs", "-attract -str 30"));
 	strcpy(zvgargs, iniparser_getstring(ini, "interface:zvgargs", "-video zvg"));
@@ -1531,7 +1531,7 @@ void getsettings(void)
 	// controllers
 	optz[o_mouse]		= iniparser_getint(ini, "controls:spinnertype", 0);
 	optz[o_mouse]		= abs(optz[o_mouse]%3);
-	optz[o_mswapXY]		= iniparser_getboolean(ini, "controls:swapaxes", 0);
+	optz[o_mswapXY]	= iniparser_getboolean(ini, "controls:swapaxes", 0);
 	optz[o_msens] 		= iniparser_getint(ini, "controls:spinsens", 30);
 	optz[o_msens] 		= abs(optz[o_msens]%100);
 	optz[o_msamp] 		= iniparser_getint(ini, "controls:spinsamp", 6);
@@ -1546,7 +1546,7 @@ void getsettings(void)
 	keyz[k_menu]		= iniparser_getint(ini, "keys:k_togglemenu", HYPSPACE);
 	keyz[k_quit]		= iniparser_getint(ini, "keys:k_quit", ESC);
 	keyz[k_random]		= iniparser_getint(ini, "keys:k_random", 127);
-	keyz[k_options]		= iniparser_getint(ini, "keys:k_options", TILDE);
+	keyz[k_options]	= iniparser_getint(ini, "keys:k_options", TILDE);
 
 	// Manufacturer menu keys
 	keyz[k_pman]		= iniparser_getint(ini, "keys:k_prevman", LEFT);
@@ -1555,8 +1555,8 @@ void getsettings(void)
 	// Game list menu keys
 	keyz[k_pgame]		= iniparser_getint(ini, "keys:k_prevgame", LEFT);
 	keyz[k_ngame]		= iniparser_getint(ini, "keys:k_nextgame", RIGHT);
-	keyz[k_pclone] 		= iniparser_getint(ini, "keys:k_prevclone", THRUST);
-	keyz[k_nclone] 		= iniparser_getint(ini, "keys:k_nextclone", FIRE);
+	keyz[k_pclone] 	= iniparser_getint(ini, "keys:k_prevclone", THRUST);
+	keyz[k_nclone] 	= iniparser_getint(ini, "keys:k_nextclone", FIRE);
 	keyz[k_start]		= iniparser_getint(ini, "keys:k_startgame", START1);
 
 	// now the colour and brightness values
@@ -1598,17 +1598,17 @@ void writeinival(char *key, int value, int force, int valtype)
 		switch (valtype)
 		{
 		case 1:
-			if (value > 0)
+			if (value > 0)									// Hex value
 			{
 				sprintf(buffer, "0x%04x", value);
 				iniparser_set(ini, key, buffer);
 			}
-			break;
-		case 2:
+			break;			
+		case 2:												// Decimal value
 			if (value != 99990) iniparser_set(ini, key, cols[abs(value%7)]);
 			else iniparser_set(ini, key, itoa(value, buffer, 10));
 			break;
-		case 3:
+		case 3:												// Yes / No
 			iniparser_set(ini, key, ((value == 0) ? "no" : "yes"));
 			break;
 		default:
@@ -2468,7 +2468,8 @@ void EditColours(void)
 			}
 			case 4:	// Games List
 			{
-				drawbox(-130+(curscol/3), 180-(curscol/3), 130-(curscol/3), -160+(curscol/3), vwhite, curscol);
+				drawbox(-130+(curscol/3), (curscol/3)-12, 130-(curscol/3), -160+(curscol/3), vwhite, curscol);
+				drawbox(-130+(curscol/3), 180-(curscol/3), 130-(curscol/3), 30-(curscol/3), vwhite, curscol);
 				item_col=colours[c_col][c_glist];
 				item_int=colours[c_int][c_glist];
 				strcpy(desc, "Games List (Non-selected)   ");
@@ -2483,28 +2484,31 @@ void EditColours(void)
 			}
 		}
 
+		setcolour(vwhite, 25);
+		PrintString("< >", -345, -ymax+165, 90, 4, 6, 90);
 		setcolour(vwhite, 20);
-		PrintString("Menu Item - ", -260, -ymax+170, 0, 6, 6, 0);
+//		PrintString(">", -380, -ymax+170, 90, 4, 3, 0);
+		PrintString("Menu Item", -245, -ymax+170, 0, 6, 6, 0);
 		setcolour(vyellow, 25-curscol);
-		PrintString(desc, 100, -ymax+170, 0, 6, 6, 0);	// Print the name of the selected meni item
+		PrintString(desc, 100, -ymax+170, 0, 6, 6, 0);	// Print the name of the selected menu item
 		setcolour(vwhite, 20);
 		PrintString("P1 Start toggles editing colour/intensity", 0, -ymax+130, 0, 6, 6, 0);
 
-		sprintf(colval,"%i",item_col);
-		sprintf(intval,"%i",item_int);
+		sprintf(colval,"<  %i >",item_col);
+		sprintf(intval,"<  %i >",item_int);
 		setcolour(vwhite, 15);
-		drawbox(-200, -ymax+48, 200, -ymax+98, vwhite, curscol);
+		drawbox(-240, -ymax+48, 240, -ymax+98, vwhite, curscol);
 		if (!ci_toggle)
 		{
 			setcolour(vgreen, 25);
-			PrintString("Colour value:      ", 0, -ymax+75, 0, 6, 6, 0);
+			PrintString("Colour value:      ", -40, -ymax+75, 0, 6, 6, 0);
 			setcolour(vwhite, 25);
 			PrintString(colval, 150, -ymax+75, 0, 6, 6, 0);
 		}
 		else
 		{
-			setcolour(vgreen, 25);
-			PrintString("Intensity value:   ", 0, -ymax+75, 0, 6, 6, 0);
+			setcolour(vmagenta, 25);
+			PrintString("Intensity value:   ", -40, -ymax+75, 0, 6, 6, 0);
 			setcolour(vwhite, 25);
 			PrintString(intval, 150, -ymax+75, 0, 6, 6, 0);
 		}
