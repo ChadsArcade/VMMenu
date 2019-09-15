@@ -2341,7 +2341,7 @@ void EditColours(void)
 {
 	int order[7] = {3, 2, 5, 4, 0, 1, 6};	// this is the order the colours are saved in the cols[array] vs how they are on screen
 	int timer=0, cc=0, top=150, games, index=0, curscol=5, cursinc=2;
-	int items=6, ci_toggle=0, item_col=0, item_int=0;
+	int items=6, ci_toggle=0, item_col=0, item_int=0, lk;
 	char colval[10], intval[10], desc[50];
 
 	item_col=colours[c_col][c_man];
@@ -2411,6 +2411,7 @@ void EditColours(void)
 		if (cc)
 		{
 			timer = 0;
+			lk=cc;
 		}
 		if (cc == keyz[k_ngame]) index++;
 		if (cc == keyz[k_pgame]) index--;
@@ -2544,7 +2545,7 @@ void EditColours(void)
 		}
 		sendframe();
 	}
-	if (timer >= 1800)
+	if ((timer >= 1800) && (lk == START2))
 	{
 		colours[c_col][c_asts] = 99990;
 		for (games=0; games<NUM_ASTEROIDS; games++)
