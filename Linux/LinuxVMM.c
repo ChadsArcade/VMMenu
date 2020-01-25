@@ -16,14 +16,14 @@
 extern void	GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B components of a passed colour
 
 SDL_Surface*	screen;
-int 				WINDOW_WIDTH = 512;
-int 				WINDOW_HEIGHT = 384;
-int 				WINDOW_SCALE = 2;
+int 				WINDOW_WIDTH = 1024;
+int 				WINDOW_HEIGHT = 768;
+int 				WINDOW_SCALE = 1;
 const 			char* WINDOW_TITLE = "VectorMameMenu";
 int 				mdx=0, mdy=0;
 int				mousexmick=0, mouseymick=0;
 extern			int ZVGPresent, SDL_VB, SDL_VC;
-char				zvgargs[30];
+//char				zvgargs[30];
 int 				optz[15];
 int				LEDstate=0;
 
@@ -91,10 +91,10 @@ void InitialiseSDL(int start)
 //	WINDOW_WIDTH = ptrVidInfo->current_w;
 //	WINDOW_HEIGHT = ptrVidInfo->current_h;
 //	WINDOW_SCALE = 1;
-//	screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT, 0, SDL_SWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN);
+	screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT, 0, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN);
 
 	/* Set a video mode */
-	screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
+	//screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
 	SDL_WM_SetCaption( WINDOW_TITLE, 0 );
 
 	SDL_Event event;
@@ -336,13 +336,13 @@ void drawvector(point p1, point p2, float x_trans, float y_trans)
 /********************************************************************
 	Close SDL and execute MAME, restart SDL when done
 ********************************************************************/
-void RunGame(char *gameargs)
+void RunGame(char *gameargs, char *zvgargs)
 {
 	uint	err;
 	char	command[80];
-	
+
 	setLEDs(0);
-	CloseSDL(0);								// Close windows etc but don't quit SDL
+	CloseSDL(1);								// Close windows etc but don't quit SDL
 	if (ZVGPresent)
 	{
 		if (optz[o_redozvg])
@@ -366,6 +366,6 @@ void RunGame(char *gameargs)
 			exit(0);								// and return to OS
 		}
 	}
-	InitialiseSDL(0);							// re-open windows etc
+	InitialiseSDL(1);							// re-open windows etc
 }
 

@@ -15,7 +15,7 @@ void	setLEDs(int);
 int	sendframe(void);
 void	ShutdownAll(void);
 void	drawvector(point, point, float, float);					// draw a vector between 2 points
-void	RunGame(char*);
+void	RunGame(char*, char*);
 void	mousepos(int*, int*);
 void	KBLEDs(void);
 int	GetModifierStatus(void);

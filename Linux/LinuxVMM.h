@@ -15,7 +15,7 @@ void	setLEDs(int);
 int	sendframe(void);
 void	ShutdownAll(void);
 void	drawvector(point, point, float, float);					// draw a vector between 2 points
-void	RunGame(char*);
+void	RunGame(char*, char*);
 void	FrameSendSDL(void);
 void	SDLvector(float, float, float, float, int, int);
 void	InitialiseSDL(int);

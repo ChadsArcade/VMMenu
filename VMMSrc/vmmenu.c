@@ -225,7 +225,7 @@ int main( void) //int argc, char *argv[])
 	if (autostart)
 	{
 		printf("\nAutostart configured to run \"%s\"...\n", autogame);
-		RunGame(autogame);
+		RunGame(autogame, zvgargs);
 	}
 	// If we exit the auto started game or aren't autostarting lets go with the menu intro and loop
 
@@ -316,7 +316,7 @@ int main( void) //int argc, char *argv[])
 				/*** Keys when in any menu ***/
 				if (cc == keyz[k_options]) SetOptions();
 				if (cc == keyz[k_menu])			man_menu = !man_menu;	// Toggle between manufacturer and game menus
-				if (cc == keyz[k_random]) RunGame(GetRandomGame(vectorgames)->clone);
+				if (cc == keyz[k_random]) RunGame(GetRandomGame(vectorgames)->clone, zvgargs);
 				if (cc == keyz[k_quit])
 				{
 					if (reallyescape()) break;													// if ESC confirmed, exit menu
@@ -384,7 +384,7 @@ int main( void) //int argc, char *argv[])
 					}
 					if (cc == keyz[k_start])				// launch VMAME
 					{
-						RunGame(sel_clone->clone);
+						RunGame(sel_clone->clone, zvgargs);
 					}
 					if ((cc == keyz[k_nclone]) || (mousexmick > optz[o_msens] && (optz[o_mouse] == 2)))		// go to next clone
 					{
@@ -557,7 +557,7 @@ int main( void) //int argc, char *argv[])
 	iniparser_freedict(ini);
 	printf("Quitting to OS...\n");
 	cc=credits();
-	printf("\n%s, © 2009-2019\n", auth1);
+	printf("\n%s, (c) 2009-2019\n", auth1);
 	printf("%s\n", auth2);
 	ShutdownAll();
 	return (0);
@@ -1764,8 +1764,8 @@ void PlayAttractGame(m_node *gameslist)
 	strcpy(args, attractargs);
 	args[lf] = ' ';
 	strcpy(&args[lf+1], selectedgame->clone);
-	
-	RunGame(args);
+
+	RunGame(args, zvgargs);
 }
 
 
@@ -2341,7 +2341,7 @@ void EditColours(void)
 {
 	int order[7] = {3, 2, 5, 4, 0, 1, 6};	// this is the order the colours are saved in the cols[array] vs how they are on screen
 	int timer=0, cc=0, top=150, games, index=0, curscol=5, cursinc=2;
-	int items=6, ci_toggle=0, item_col=0, item_int=0, lk;
+	int items=6, ci_toggle=0, item_col=0, item_int=0, lk=0;
 	char colval[10], intval[10], desc[50];
 
 	item_col=colours[c_col][c_man];

@@ -12,7 +12,7 @@ int		LEDstate=0;
 int		mousexmick=0, mouseymick=0;
 int		optz[15];
 int		f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
-char		zvgargs[30];
+//char		zvgargs[30];
 extern	int ZVGPresent;
 extern	char auth1[], auth2[];
 
@@ -198,7 +198,7 @@ void drawvector(point p1, point p2, float x_trans, float y_trans)
 /********************************************************************
 	(Optionally) close ZVG and execute MAME, restart ZVG when done
 ********************************************************************/
-void RunGame(char *gameargs)
+void RunGame(char *gameargs, char *zvgargs)
 {
 	uint	err;
 	char	command[80];
