@@ -59,15 +59,18 @@ This works even on a Raspberry Pi, obviously you won't be able to hook up a ZVG 
 ![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/LinuxVMMenu1.jpg "Linux VMMenu in a window")
 
 Linux doesn't support parallel port DMA so requires a different environment variable to DOS:
+
 ZVGPORT=P{port} M{monitor type}
-port is usually 378 - check your BIOS.
-Monitor type is made up of a combination of 5 bits:
-0x01  flip the display in the X direction
-0x02  flip the display in the Y direction
-0x04  if set, handle the spot killer
-0x08  if set, mix colors down to B&W
-0x10  if set, no overscanning is allow (1024x768 max clip)
-e.g. M4 = standard colour monitor with spot killer, M12=standard B&W monitor with spot killer
+
+port is usually 378 - check your BIOS.\
+Monitor type is made up of a combination of 5 bits:\
+0x01  flip the display in the X direction\
+0x02  flip the display in the Y direction\
+0x04  if set, handle the spot killer\
+0x08  if set, mix colors down to B&W\
+0x10  if set, no overscanning is allowed (1024x768 max clip)
+
+e.g. M4 = standard colour monitor with spot killer, M12=standard B&W monitor with spot killer\
 e.g. export ZVGPORT="P378 M4"
 
 ## Building on DOS
