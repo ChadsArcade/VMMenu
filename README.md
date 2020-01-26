@@ -40,9 +40,13 @@ I still get the odd query about the menu, so I decided that I'd put it up on Git
 - Copy the dictionary and iniparser .h and .c files into the VMMenu/iniparser directory
 - Copy the ZVG files from the inc and shared folders into the VMMenu/Linux/zvg directory
 
-You will need the SDLLib1.2-dev and -gfx files:
+~~You will need the SDLLib1.2-dev and -gfx files:~~
 
-`sudo apt install libsdl1.2-dev libsdl-gfx1.2-dev`
+~~`sudo apt install libsdl1.2-dev libsdl-gfx1.2-dev`~~
+
+The Linux menu is now built against SDL2, you will need the SDL Lib2 -dev and -gfx files:
+
+`sudo apt install libsdl2-dev libsdl2-gfx-dev`
 
 Copy the makefile from the VMMenu/Linux directory to VMMenu
 

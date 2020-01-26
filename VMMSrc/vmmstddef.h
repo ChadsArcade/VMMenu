@@ -25,20 +25,38 @@
 
 /*** default key values ***/
 #if defined(linux) || defined(__linux)
-	#define TILDE		0x31			// Settings
-	#define UP			0x6f			// Up
-	#define DOWN		0x74			// Down
-	#define LEFT		0x71			// (Rotate) Left
-	#define RIGHT		0x72			// (Rotate) Right
-	#define ESC			0x09			// Esc (1P Start + 2P Start on IPAC)
-	#define FIRE		0x25			// Left CTRL key
-	#define THRUST		0x40			// Left ALT key
-	#define RSHIFT		0x3e			// Right Shift key
-	#define LSHIFT		0x32			// Left Shift key
-	#define HYPSPACE	0x41			// Space bar
-	#define CREDIT		0x0e			// 5 key
-	#define START1		0x0a			// 1 key
-	#define START2		0x0b			// 2 key
+//SDL2 key codes:
+	#define TILDE		0x0035			// Settings
+	#define UP			0x0052			// Up
+	#define DOWN		0x0051			// Down
+	#define LEFT		0x0050			// (Rotate) Left
+	#define RIGHT		0x004f			// (Rotate) Right
+	#define ESC			0x0029			// Esc (1P Start + 2P Start on IPAC)
+	#define FIRE		0x00e0			// Left CTRL key
+	#define THRUST		0x00e2			// Left ALT key
+	#define RSHIFT		0x003e			// Right Shift key
+	#define LSHIFT		0x00e1			// Left Shift key
+	#define HYPSPACE	0x002c			// Space bar
+	#define CREDIT		0x0022			// 5 key
+	#define START1		0x001e			// 1 key
+	#define START2		0x001f			// 2 key
+
+//SDL1.2 key codes:
+//	#define TILDE		0x31			// Settings
+//	#define UP			0x6f			// Up
+//	#define DOWN		0x74			// Down
+//	#define LEFT		0x71			// (Rotate) Left
+//	#define RIGHT		0x72			// (Rotate) Right
+//	#define ESC			0x09			// Esc (1P Start + 2P Start on IPAC)
+//	#define FIRE		0x25			// Left CTRL key
+//	#define THRUST		0x40			// Left ALT key
+//	#define RSHIFT		0x3e			// Right Shift key
+//	#define LSHIFT		0x32			// Left Shift key
+//	#define HYPSPACE	0x41			// Space bar
+//	#define CREDIT		0x0e			// 5 key
+//	#define START1		0x0a			// 1 key
+//	#define START2		0x0b			// 2 key
+
 #else
 	#define TILDE		0x2960		// Settings
 	#define UP			0x4800		// Up

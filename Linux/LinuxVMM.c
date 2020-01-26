@@ -4,8 +4,8 @@
 #include <fcntl.h>
 #include <linux/kd.h>
 #include <sys/io.h>
-#include "SDL.h"
-#include "SDL_gfxPrimitives.h"
+#include <SDL.h>
+#include "SDL2_gfxPrimitives.h"
 #include "vmmstddef.h"
 #include "LinuxVMM.h"
 #include "zvgFrame.h"
@@ -15,15 +15,15 @@
 
 extern void	GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B components of a passed colour
 
-SDL_Surface*	screen;
+SDL_Window*	   window=NULL;
+SDL_Renderer*  screenRender = NULL;
 int 				WINDOW_WIDTH = 1024;
 int 				WINDOW_HEIGHT = 768;
-int 				WINDOW_SCALE = 1;
-const 			char* WINDOW_TITLE = "VectorMameMenu";
+float 			WINDOW_SCALE = 1;
+const 			char* WINDOW_TITLE = "Vector Mame Menu";
 int 				mdx=0, mdy=0;
 int				mousexmick=0, mouseymick=0;
 extern			int ZVGPresent, SDL_VB, SDL_VC;
-//char				zvgargs[30];
 int 				optz[15];
 int				LEDstate=0;
 
@@ -87,31 +87,20 @@ void InitialiseSDL(int start)
 		}
 		//else printf("Init: %s\n", SDL_GetError());
 	}
-//	const SDL_VideoInfo* ptrVidInfo = SDL_GetVideoInfo();
-//	WINDOW_WIDTH = ptrVidInfo->current_w;
-//	WINDOW_HEIGHT = ptrVidInfo->current_h;
-//	WINDOW_SCALE = 1;
-	screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT, 0, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN);
-
 	/* Set a video mode */
-	//screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT, 0, SDL_SWSURFACE | SDL_DOUBLEBUF);
-	SDL_WM_SetCaption( WINDOW_TITLE, 0 );
+   window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_INPUT_GRABBED); // | SDL_WINDOW_FULLSCREEN); 
+   screenRender = SDL_CreateRenderer(window, -1, 0);
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {}				// clear event buffer
-	SDL_WM_GrabInput(SDL_GRAB_ON);
-	while (SDL_PollEvent(&event)) {}				// clear event buffer
+
+	//SDL_WM_GrabInput(SDL_GRAB_ON);          // SDL 1.2 only
+  // SDL_SetWindowGrab(window, SDL_TRUE);      // SDL 2
+
 	SDL_ShowCursor(SDL_DISABLE);
 	while (SDL_PollEvent(&event)) {}				// clear event buffer
 
-//	printf("SDL opened...\n");
-	// Move mouse to centre of window and discard the mouse deltas
-	//SDL_WarpMouse(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
-	//SDL_Event event;
-	//while (SDL_PollEvent(&event)) {}
-	//SDL_GetRelativeMouseState(&mousexmick, &mouseymick);
-	//SDL_GetRelativeMouseState (NULL, NULL);	// reset mouse deltas
-	while (SDL_PollEvent(&event)) {}				// clear event buffer
 	mousexmick = 0;
 	mouseymick = 0;
 }
@@ -122,9 +111,13 @@ void InitialiseSDL(int start)
 ********************************************************************/
 void CloseSDL(int done)
 {
-	SDL_WM_GrabInput(SDL_GRAB_OFF);
+	//SDL_WM_GrabInput(SDL_GRAB_OFF);
+   SDL_SetWindowGrab(window, SDL_FALSE);
+
 	SDL_ShowCursor(SDL_ENABLE);
-	SDL_FreeSurface(screen);
+
+	//SDL_FreeSurface(screen);
+   SDL_DestroyWindow(window);
 	if (done) SDL_Quit();
 }
 
@@ -139,7 +132,7 @@ void SDLvector(float x1, float y1, float x2, float y2, int clr, int bright)
 		if (clr > 7) clr = vwhite;
 		if (bright > 31) bright = 31;
 		GetRGBfromColour(clr, &r, &g, &b);
-		lineRGBA(screen, x1/WINDOW_SCALE+(WINDOW_WIDTH/2), -y1/WINDOW_SCALE+(WINDOW_HEIGHT/2),
+		lineRGBA(screenRender, x1/WINDOW_SCALE+(WINDOW_WIDTH/2), -y1/WINDOW_SCALE+(WINDOW_HEIGHT/2),
 							  x2/WINDOW_SCALE+(WINDOW_WIDTH/2),	-y2/WINDOW_SCALE+(WINDOW_HEIGHT/2),
 							  r*8*bright, g*8*bright, b*8*bright, 255);
 	}
@@ -154,8 +147,13 @@ void FrameSendSDL()
 	if (optz[o_dovga] || !ZVGPresent)
 	{
 		if (!ZVGPresent) SDL_Delay(100/6);	// 1/60 of a sec, same as frame rate, in msecs
-		SDL_Flip(screen);							// bring buffer to screen
-		SDL_FillRect(screen, NULL, 0);		// clear the back buffer
+		//SDL_Flip(screen);							// bring buffer to screen
+		//SDL_FillRect(screen, NULL, 0);		// clear the back buffer
+
+//SDL2 functions      
+      SDL_RenderPresent( screenRender );                    // Flip to rendered screen
+      SDL_SetRenderDrawColor(screenRender, 0, 0, 0, 255);   // Set render colour to black
+      SDL_RenderClear(screenRender);                        // Clear screen
 	}
 }
 
@@ -199,6 +197,7 @@ void mousemick(void)
 
 /******************************************************************
 Get keypress - SDL implementation. Returns scancode of pressed key
+Also updates mouse x and y movements
 *******************************************************************/
 int getkey(void)
 {
@@ -217,6 +216,7 @@ int getkey(void)
 				break;
 			case SDL_KEYDOWN:
 				key = event.key.keysym.scancode;
+            //printf("Key: %X\n", key);
 //				return key;
 				break;
 			default:
@@ -227,10 +227,14 @@ int getkey(void)
 }
 
 
+/******************************************************************
+	Set Mouse Position
+*******************************************************************/
 void mousepos(int *mx, int *my)
 {
 	SDL_GetMouseState(mx, my);
 	*mx = (*mx - WINDOW_WIDTH/2) * 2;
+   //if (*mx > WINDOW_WIDTH) *mx = WINDOW_WIDTH;
 	*my = (*my - WINDOW_HEIGHT/2) * -2;
 }
 
