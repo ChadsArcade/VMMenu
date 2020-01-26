@@ -1,11 +1,11 @@
 ##################################
-#											#
-#   VMMenu MAKEFILE for Linux		#
-#											#
-#     For use with GNU Make		#
-#											#
-#  Chad Gray, sometime in 2011	#
-#											#
+#                                #
+#   VMMenu MAKEFILE for Linux    #
+#                                #
+#     For use with GNU Make      #
+#                                #
+#  Chad Gray, sometime in 2011   #
+#                                #
 ##################################
 
 CC = gcc
@@ -40,6 +40,12 @@ clean:
 	-rm ./Linux/*.o
 	-rm ./Linux/zvg/*.o
 	-rm ./iniparser/*.o
+
+# install
+install:
+	cp ./$(NAME) /usr/local/sbin
+	chown root /usr/local/sbin/$(NAME)
+	chmod u+s /usr/local/sbin/$(NAME)
 
 # Flags for linker
 #

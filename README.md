@@ -94,6 +94,28 @@ which will create the vmmenu.exe file in the current directory
 
 Optionally you can install upx and use the compile.bat script in the VMMenu/DOS directory to compile and compress the resulting vmmenu.exe file. Note that this batch file will first attempt to copy the source files to the current location before compilation, this is because I tended to house the source on a Linux PC and compile from an XP virtual machine. You may wish to edit out the file copy commands if you are working directly under XP/DOS.
 
+## DOS VMame vs Linux VMame
+
+A Linux version of VMame was produced a few years ago, unfortunately I don't have the src code. I decided to build a Linux booting PC to try in the ZVG cab and compare the 2 builds. Here are my findings:
+
+```
+DOS VMame               Linux VMame
+
+LED support in games    No LED support in games
+No attract mode         Attract mode, plays a random game for xx seconds
+Cosmic Chasm works      Cosmic Chasm retrace lines and sound problems in ZVG mode
+Overlay colours correct Overlay colours wrong (e.g tanks white in Armor Attack)
+ECP Parallel mode       Std parallel mode, no DMA
+Some slowdown           Severe slowdown (e.g in ESB)
+Needs DOS soundcard     Use any soundcard
+Very fast boot          Fast boot
+Just switch off         Must shutdown OS
+ZVG 1, 2 and 3 options  Only renders to vector monitor, can't change settings
+                        in games with tab menu as there is no VGA displayed
+```
+
+The Linux build shows promise as it's a supported platform, unfortunately without the src code it's currently impossible to fix the issues with the build. Until things change I am sticking with DOS.
+
 ## Launching VMMenu (DOS)
 
 VMMenu should be launched toward the end of your AUTOEXEC.BAT file, after you have initialised your sound card and any other devices such as mice. Here is an example AUTOEXEC file:
