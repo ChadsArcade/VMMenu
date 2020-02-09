@@ -109,6 +109,8 @@ vObject     asteroid[NUM_ASTEROIDS];
 vStar       starz[NUM_STARS];
 static int  xmax=X_MAX, ymax=Y_MAX;
 
+extern int  mdx, mdy;
+
 extern int  optz[15];                  // array of user defined menu preferences
 extern int  keyz[11];                  // array of key press codes
 static int  colours[2][7];             // array of [colours][7] and [intensities][7]
@@ -2104,11 +2106,19 @@ void SetOptions(void)
             {
                optz[o_msens]--;                                 // decrease sensitivity
                if (optz[o_msens] < 1) optz[o_msens] = 1;
+               mouse_x=0;
+               mouse_y=0;
+               mdx=0;
+               mdy=0;
             }
             if (cc == keyz[k_nclone])
             {
                optz[o_msens]++;                                 // increase sensitivity
                if (optz[o_msens] > 100) optz[o_msens] = 100;
+               mouse_x=0;
+               mouse_y=0;
+               mdx=0;
+               mdy=0;
             }
             if (cc == keyz[k_start]) optz[o_msens] = 30;
          }
