@@ -22,10 +22,12 @@ int 				WINDOW_HEIGHT = 768;
 float 			WINDOW_SCALE = 1;
 const 			char* WINDOW_TITLE = "Vector Mame Menu";
 int 				mdx=0, mdy=0;
-int				mousexmick=0, mouseymick=0;
+int				mouse_x=0, mouse_y=0;
 extern			int ZVGPresent, SDL_VB, SDL_VC;
-int 				optz[15];
+int 				optz[15];                  // array of user defined menu preferences
 int				LEDstate=0;
+int            keyz[11];                  // array of key press codes
+extern int     mousefound;
 
 
 /******************************************************************
@@ -89,20 +91,21 @@ void InitialiseSDL(int start)
 	}
 	/* Set a video mode */
    window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_INPUT_GRABBED); // | SDL_WINDOW_FULLSCREEN); 
+                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_BORDERLESS); // | SDL_WINDOW_FULLSCREEN); 
    screenRender = SDL_CreateRenderer(window, -1, 0);
 
 	SDL_Event event;
+
+   //SDL_SetWindowGrab(window, SDL_TRUE);      // SDL 2
+   SDL_SetRelativeMouseMode(SDL_TRUE);
+
+	//SDL_ShowCursor(SDL_DISABLE);
 	while (SDL_PollEvent(&event)) {}				// clear event buffer
+   //SDL_WarpMouseInWindow(window, 200, 200);
+	//while (SDL_PollEvent(&event)) {}				// clear event buffer
 
-	//SDL_WM_GrabInput(SDL_GRAB_ON);          // SDL 1.2 only
-  // SDL_SetWindowGrab(window, SDL_TRUE);      // SDL 2
-
-	SDL_ShowCursor(SDL_DISABLE);
-	while (SDL_PollEvent(&event)) {}				// clear event buffer
-
-	mousexmick = 0;
-	mouseymick = 0;
+	mouse_x = 0;
+	mouse_y = 0;
 }
 
 
@@ -111,12 +114,8 @@ void InitialiseSDL(int start)
 ********************************************************************/
 void CloseSDL(int done)
 {
-	//SDL_WM_GrabInput(SDL_GRAB_OFF);
    SDL_SetWindowGrab(window, SDL_FALSE);
-
 	SDL_ShowCursor(SDL_ENABLE);
-
-	//SDL_FreeSurface(screen);
    SDL_DestroyWindow(window);
 	if (done) SDL_Quit();
 }
@@ -146,11 +145,7 @@ void FrameSendSDL()
 {
 	if (optz[o_dovga] || !ZVGPresent)
 	{
-		if (!ZVGPresent) SDL_Delay(100/6);	// 1/60 of a sec, same as frame rate, in msecs
-		//SDL_Flip(screen);							// bring buffer to screen
-		//SDL_FillRect(screen, NULL, 0);		// clear the back buffer
-
-//SDL2 functions      
+		if (!ZVGPresent) SDL_Delay(100/6);	                  // 1/60 of a sec, same as frame rate, in msecs
       SDL_RenderPresent( screenRender );                    // Flip to rendered screen
       SDL_SetRenderDrawColor(screenRender, 0, 0, 0, 255);   // Set render colour to black
       SDL_RenderClear(screenRender);                        // Clear screen
@@ -168,32 +163,41 @@ int initmouse(void)
 /******************************************************************
 Get the amount by which the mouse has been moved since last check
 	deltas are read and accumulated by keyboard event function
+	Mouse types:   0 = No device
+	               1 = X-Axis Spinner
+	               2 = Y-Axis Spinner
+	               3 = Trackball/Mouse
 *******************************************************************/
-void mousemick(void)
+void readmouse(void)
 {
-	int tempaxis;
-//	SDL_PumpEvents();
-//	printf("MickX: %d  MickY: %d\n",mousexmick, mouseymick);
-//	SDL_GetRelativeMouseState(&mousexmick, &mouseymick);
-//	printf("MickX: %d  MickY: %d\n",mousexmick, mouseymick);
-	mousexmick = mdx;
-	mouseymick = mdy;
-	mdx = 0;
-	mdy = 0;
-	if (mousexmick | mouseymick)
-	{
-		if (optz[o_mswapXY]) // swap x and y axes
-		{
-			tempaxis = mousexmick;
-			mousexmick = mouseymick;
-			mouseymick = tempaxis;
-		}
-		if (optz[o_mrevX]) mousexmick = -mousexmick;
-		if (optz[o_mrevY]) mouseymick = -mouseymick;
-		if (optz[o_mouse] == 1) mouseymick = 0;
-		//printf("MickX: %d  MickY: %d\n",mousexmick, mouseymick);
-	}
+   if (optz[o_mouse])
+   {
+	   mouse_x = mdx/optz[o_msens];           // use the integer part
+	   mouse_y = mdy/optz[o_msens];
+	   mdx = mdx%optz[o_msens];               // retain the fractional part
+	   mdy = mdy%optz[o_msens];
+	   //printf("mdx: %d mdy: %d\n", mdx, mdy);
+
+      // If spinner selected, discard the axis not in use (it might really be a mouse)
+      if (optz[o_mouse] == 1) mouse_y = 0;   // Spinner which moves X-axis
+      if (optz[o_mouse] == 2)                // Spinner which moves Y-axis
+      {
+         mouse_x = mouse_y;                  // Convert to X axis
+         mouse_y = 0;                        // Discard Y axis
+      }
+
+      if (optz[o_mrevX]) mouse_x = -mouse_x;
+      if (optz[o_mrevY]) mouse_y = -mouse_y;
+   }
+   else
+   {
+      mouse_x = 0;
+      mouse_y = 0;
+	   mdx=0;
+	   mdy=0;
+   }
 }
+
 
 /******************************************************************
 Get keypress - SDL implementation. Returns scancode of pressed key
@@ -223,6 +227,16 @@ int getkey(void)
 				break;
 		}
 	}
+	
+   if (mousefound) readmouse();              // 3 Feb 2020, read every frame, ignore sample rate
+   // convert mouse movement into key presses. Should really build this into the getkey function
+   if (mouse_y < 0 && optz[o_mouse]==3) key = keyz[k_pgame];       // Trackball Up    = Up
+   if (mouse_y > 0 && optz[o_mouse]==3) key = keyz[k_ngame];       // Trackball Down  = Down
+   if (mouse_x < 0 && optz[o_mouse]==3) key = keyz[k_pclone];      // Trackball Left  = Left
+   if (mouse_x > 0 && optz[o_mouse]==3) key = keyz[k_nclone];      // Trackball Right = Right
+   if (mouse_x < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];       // Spinner   Left  = Up
+   if (mouse_x > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];       // Spinner   Right = Down
+	
 	return key;
 }
 
@@ -233,9 +247,8 @@ int getkey(void)
 void mousepos(int *mx, int *my)
 {
 	SDL_GetMouseState(mx, my);
-	*mx = (*mx - WINDOW_WIDTH/2) * 2;
-   //if (*mx > WINDOW_WIDTH) *mx = WINDOW_WIDTH;
-	*my = (*my - WINDOW_HEIGHT/2) * -2;
+   *mx = (*mx - (WINDOW_WIDTH/2 -22));
+	*my = -(*my - (WINDOW_HEIGHT/2 -22));
 }
 
 

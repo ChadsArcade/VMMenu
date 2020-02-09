@@ -5,16 +5,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "vmmstddef.h"
+#include "DOSVMM.h"
 #include "zvgFrame.h"
 
-union		REGS in, out;
-int		LEDstate=0;
-int		mousexmick=0, mouseymick=0;
-int		optz[15];
-int		f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
+#define Mouse_INT 0X33
+
+union		      REGS in, out;
+int		      LEDstate=0;
+int		      mouse_x=0, mouse_y=0;
+int            mdx=0, mdy=0;
+int		      optz[15];         // array of user defined menu preferences
+int		      f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
 //char		zvgargs[30];
-extern	int ZVGPresent;
-extern	char auth1[], auth2[];
+extern	int   ZVGPresent;
+extern   char  auth1[], auth2[];
+int            keyz[11];         // array of key press codes
+extern   int   mousefound;
+
 
 /******************************************************************
 Try to open the ZVG
@@ -46,22 +53,32 @@ int getkey(void)
 	shift=bioskey(2) & 15;			// only want bits 0-3 so mask off higher 4 bits
 	if (shift)	key=shift;
 	// Disable autorepeat of modifiers
-	if (key==FIRE)						//LCTRL
+	if (key==FIRE)						// LCTRL
 		if (f1_press==1) key=0;
 		else f1_press=1;
 	else f1_press=0;
-	if (key==THRUST)					//L_ALT
+	if (key==THRUST)					// L_ALT
 		if (f2_press==1) key=0;
 		else f2_press=1;
 	else f2_press=0;
-	if (key==RSHIFT)					//R_SHIFT
+	if (key==RSHIFT)					// R_SHIFT
 		if (f3_press==1) key=0;
 		else f3_press=1;
 	else f3_press=0;
-	if (key==LSHIFT)					//L_SHIFT
+	if (key==LSHIFT)					// L_SHIFT
 		if (f4_press==1) key=0;
 		else f4_press=1;
 	else f4_press=0;
+	
+	if (mousefound) readmouse();              // 3 Feb 2020, read every frame, ignore sample rate
+   // convert mouse movement into key presses. Should really build this into the getkey function
+   if (mouse_y < 0 && optz[o_mouse]==3) key = keyz[k_pgame];       // Trackball Up    = Up
+   if (mouse_y > 0 && optz[o_mouse]==3) key = keyz[k_ngame];       // Trackball Down  = Down
+   if (mouse_x < 0 && optz[o_mouse]==3) key = keyz[k_pclone];      // Trackball Left  = Left
+   if (mouse_x > 0 && optz[o_mouse]==3) key = keyz[k_nclone];      // Trackball Right = Right
+   if (mouse_x < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];       // Spinner   Left  = Up
+   if (mouse_x > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];       // Spinner   Right = Down
+	
 	return key;
 }
 
@@ -71,35 +88,56 @@ Check whether a mouse driver is installed
 *******************************************************************/
 int initmouse()
 {
-	in.x.ax = 0;
-	int86 (0X33,&in,&out);
+	in.x.ax = 0;                  // Mouse Reset/Get Mouse Installed Flag
+	int86 (Mouse_INT, &in, &out);
 	return out.x.ax;
 }
 
 
 /******************************************************************
 Get the amount by which the mouse has been moved since last check
-0 = return Y axis
-1 = return X axis
+	Mouse types:   0 = No device
+	               1 = X-Axis Spinner
+	               2 = Y-Axis Spinner
+	               3 = Trackball/Mouse
 *******************************************************************/
-void mousemick()
+void readmouse()
 {
-	int tempaxis;
-	in.x.ax = 0x0b;
-	int86 (0x33, &in, &out);
-	mousexmick = out.x.cx;		// read X axis
-	mouseymick = out.x.dx;		// Read Y axis
-	if (mousexmick > 32768) mousexmick -= 65536;
-	if (mouseymick > 32768) mouseymick -= 65536;
-	if (optz[o_mswapXY] == 1)	// swap x and y axes
-	{
-		tempaxis = mousexmick;
-		mousexmick = mouseymick;
-		mouseymick = tempaxis;
-	}
-	if (optz[o_mrevX]) mousexmick = -mousexmick;
-	if (optz[o_mrevY]) mouseymick = -mouseymick;
-	if (optz[o_mouse] == 1) mouseymick = 0;
+	in.x.ax = 0x0b;                           // Read Mouse Motion Counters
+	int86 (Mouse_INT, &in, &out);
+
+	mdx += out.x.cx;		                     // Read X axis
+	mdy += out.x.dx;		                     // Read Y axis
+
+	if (mdx > 32768) mdx -= 65536;            // Correction for negative values
+	if (mdy > 32768) mdy -= 65536;            // Correction for negative values
+
+   if (optz[o_mouse])
+   {
+	   mouse_x = mdx/optz[o_msens];           // use the integer part
+	   mouse_y = mdy/optz[o_msens];
+	   mdx = mdx%optz[o_msens];               // retain the fractional part
+	   mdy = mdy%optz[o_msens];
+	   //printf("mdx: %d mdy: %d\n", mdx, mdy);
+
+      // If spinner selected, discard the axis not in use (it might really be a mouse)
+      if (optz[o_mouse] == 1) mouse_y = 0;   // Spinner which moves X-axis
+      if (optz[o_mouse] == 2)                // Spinner which moves Y-axis
+      {
+         mouse_x = mouse_y;                  // Convert to X axis
+         mouse_y = 0;                        // Discard Y axis
+      }
+
+      if (optz[o_mrevX]) mouse_x = -mouse_x;
+      if (optz[o_mrevY]) mouse_y = -mouse_y;
+   }
+   else
+   {
+      mouse_x = 0;
+      mouse_y = 0;
+  	   mdx=0;
+	   mdy=0;
+   }
 }
 
 
@@ -109,8 +147,8 @@ void mousemick()
 void mousepos(int *mx, int *my)
 {
 	int x, y;
-	in.x.ax = 0x03;
-	int86 (0x33, &in, &out);
+	in.x.ax = 0x03;                  // Get Mouse Position and Button Status
+	int86 (Mouse_INT, &in, &out);
 	x = out.x.cx;
 	y = out.x.dx;
 	x = (x * 1.6) - X_MAX;
@@ -152,12 +190,12 @@ Send the frame to the ZVG, exit if it went pear shaped
 int sendframe(void)
 {
 	uint	err;
-	tmrWaitFrame();			// wait for next frame time
-	err = zvgFrameSend();	// send next frame
+	tmrWaitFrame();			         // wait for next frame time
+	err = zvgFrameSend();	         // send next frame
 	if (err)
 	{
 		zvgError( err);
-		zvgFrameClose();		// fix up all the ZVG stuff
+		zvgFrameClose();		         // fix up all the ZVG stuff
 		exit(1);
 	}
 	return err;
@@ -208,13 +246,13 @@ void RunGame(char *gameargs, char *zvgargs)
 	if (ZVGPresent)
 	{
 		ShutdownAll();
-		sprintf(command, "./vmm.bat %s %s", gameargs, zvgargs);
+		//sprintf(command, "./vmm.bat %s %s", gameargs, zvgargs);
+		sprintf(command, "./vmm.bat %s", gameargs);
 	}
 	else
 	{
 		sprintf(command, "./vmm.bat %s", gameargs);
 	}
-
 	printf("Launching: [%s]\n", command);
 	err = system(command);
 	if (optz[o_redozvg] && ZVGPresent)	// Re-open the ZVG if MAME closed it

@@ -25,24 +25,25 @@
 
 /*** default key values ***/
 #if defined(linux) || defined(__linux)
-//SDL2 key codes:
-	#define TILDE		0x0035			// Settings
-	#define UP			0x0052			// Up
-	#define DOWN		0x0051			// Down
-	#define LEFT		0x0050			// (Rotate) Left
-	#define RIGHT		0x004f			// (Rotate) Right
-	#define ESC			0x0029			// Esc (1P Start + 2P Start on IPAC)
-	#define FIRE		0x00e0			// Left CTRL key
-	#define THRUST		0x00e2			// Left ALT key
-	#define RSHIFT		0x003e			// Right Shift key
-	#define LSHIFT		0x00e1			// Left Shift key
-	#define HYPSPACE	0x002c			// Space bar
-	#define CREDIT		0x0022			// 5 key
-	#define START1		0x001e			// 1 key
-	#define START2		0x001f			// 2 key
+   #include "SDL.h"
+   //SDL key codes:
+	#define GRAVE		SDL_SCANCODE_GRAVE   // Settings (use service switch)
+	#define UP			SDL_SCANCODE_UP      // Up
+	#define DOWN		SDL_SCANCODE_DOWN    // Down
+	#define LEFT		SDL_SCANCODE_LEFT    // (Rotate) Left
+	#define RIGHT		SDL_SCANCODE_RIGHT   // (Rotate) Right
+	#define ESC			SDL_SCANCODE_ESCAPE  // Esc (1P Start + 2P Start on IPAC)
+	#define FIRE		SDL_SCANCODE_LCTRL   // Left CTRL key
+	#define THRUST		SDL_SCANCODE_LALT    // Left ALT key
+	#define RSHIFT		SDL_SCANCODE_RSHIFT  // Right Shift key
+	#define LSHIFT		SDL_SCANCODE_LSHIFT  // Left Shift key
+	#define HYPSPACE	SDL_SCANCODE_SPACE   // Space bar
+	#define CREDIT		SDL_SCANCODE_5       // 5 key
+	#define START1		SDL_SCANCODE_1       // 1 key
+	#define START2		SDL_SCANCODE_2       // 2 key
 
 //SDL1.2 key codes:
-//	#define TILDE		0x31			// Settings
+//	#define GRAVE		0x31			// Settings
 //	#define UP			0x6f			// Up
 //	#define DOWN		0x74			// Down
 //	#define LEFT		0x71			// (Rotate) Left
@@ -57,8 +58,8 @@
 //	#define START1		0x0a			// 1 key
 //	#define START2		0x0b			// 2 key
 
-#else
-	#define TILDE		0x2960		// Settings
+#else // DOS key values
+	#define GRAVE		0x2960		// Settings
 	#define UP			0x4800		// Up
 	#define DOWN		0x5000		// Down
 	#define LEFT		0x4b00		// (Rotate) Left
@@ -136,17 +137,15 @@
 #define	o_stars		1
 #define	o_ucase		2
 #define	o_togpnm		3
-#define	o_smenu		4
+#define	o_cpanel		4
 #define	o_redozvg	5
 #define	o_mouse		6
 #define	o_msens		7
-#define	o_msamp		8
-#define	o_mswapXY	9
-#define	o_mrevX		10
-#define	o_mrevY		11
-#define	o_mpoint		12
-#define	o_dovga		13
-#define	o_attmode	14
+#define	o_mrevX		8
+#define	o_mrevY		9
+#define	o_mpoint		10
+#define	o_dovga		11
+#define	o_attmode	12
 
 typedef struct {
 	float x, y;

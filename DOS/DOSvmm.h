@@ -10,7 +10,7 @@ DOS Specific Function declarations
 void	startZVG(void);
 int	getkey(void);
 int	initmouse(void);
-void	mousemick(void);
+void	readmouse(void);
 void	setLEDs(int);
 int	sendframe(void);
 void	ShutdownAll(void);
