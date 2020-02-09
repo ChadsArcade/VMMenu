@@ -61,7 +61,7 @@
    #include "LinuxVMM.h"
 #else
    #include "DOSvmm.h"
-#endif 
+#endif
 
 /****Function declarations***/
 void      PrintString(char*, int, int, int, float, float, int);   // prints a string of characters
@@ -120,7 +120,7 @@ static char zvgargs[30];
 static int  totalnumgames=0;
 
 static char autogame[30];
-static int  autostart=0;                  
+static int  autostart=0;
 
 static      dictionary* ini;
 
@@ -429,7 +429,7 @@ int main( void) //int argc, char *argv[])
          setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
          if (man_menu)                                                                       // Print Arrow pointing to games list
             PrintString(">", 0, 220, 270, 6, 6, 0);
-         if (!man_menu)                                                                      // Print Arrow pointing to manufacturer list         
+         if (!man_menu)                                                                      // Print Arrow pointing to manufacturer list
             PrintString(">", 0, 210, 90, 6, 6, 0);
 
          // print the next and previous manufacturers at the sides and arrows
@@ -626,7 +626,7 @@ void PrintString(char *text, int xpos, int ypos, int charangle, float xScale, fl
    {
       if (optz[o_ucase]) printchar = fnGetChar(toupper(text[ii]));
       else printchar = fnGetChar(text[ii]);
-      
+
       //Loop for each vector in the character
       for (vv=0;vv<printchar.size;vv+=4)
       {
@@ -1548,7 +1548,7 @@ void getsettings(void)
    optz[o_redozvg]   = iniparser_getboolean(ini, "interface:reopenzvg", 1);
    optz[o_dovga]     = iniparser_getboolean(ini, "interface:rendervga", 0);
    optz[o_attmode]   = iniparser_getboolean(ini, "interface:attractmode", 0);
-   
+
    strcpy(attractargs, iniparser_getstring(ini, "interface:attractargs", "-attract -str 30"));
    strcpy(zvgargs, iniparser_getstring(ini, "interface:zvgargs", "-video zvg"));
 
@@ -1628,7 +1628,7 @@ void writeinival(char *key, int value, int force, int valtype)
             sprintf(buffer, "0x%04x", value);
             iniparser_set(ini, key, buffer);
          }
-         break;         
+         break;
       case 2:                                    // Decimal value
          if (value != 99990) iniparser_set(ini, key, cols[abs(value%7)]);
          else iniparser_set(ini, key, itoa(value, buffer, 10));
@@ -1925,7 +1925,7 @@ void SetOptions(void)
             if (cursor == 7)   setcolour(vwhite, 25);
             PrintString("- Reverse X Axis  ", -133, top, 0, 6, 6, 0);
             PrintString((optz[o_mrevX] == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
-      
+
             // Reverse Y Axis
             top-=spacing;
             setcolour(vwhite, 15);
@@ -1962,7 +1962,7 @@ void SetOptions(void)
       if (cursor == options - 1)   setcolour(vwhite, 25);
       PrintString("Edit Menu Colours", -150, top, 0, 6, 6, 0);
       PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
-      
+
       // Print Keycode
       top=-ymax+80;
       setcolour(vgreen, 20);
@@ -1972,7 +1972,7 @@ void SetOptions(void)
 
       if (cc) lastkey = cc;                        // Record keypress
       if (cc) timer = 0;                           // Reset timer if we pressed something
-         
+
       if (cc == keyz[k_ngame])                     // Up: Next option
       {
          cursor = (cursor + 1) % options;          // go to next option
@@ -2018,14 +2018,14 @@ void SetOptions(void)
             if (cc == keyz[k_start]) optz[o_ucase] = 0;
             break;
          }
-         
+
          case 3:     // Prev/Next manufacturer names
          {
             if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_togpnm] = !optz[o_togpnm];
             if (cc == keyz[k_start]) optz[o_togpnm] = 0;
             break;
          }
-         
+
          case 4:     // Control Panel Type, 0=Buttons (e.g. Asteroids), 1=Joystick, 2=Spinner (e.g. Tempest)
          {
             if (cc == keyz[k_nclone]) optz[o_cpanel] = ((optz[o_cpanel]+1)%3);
@@ -2064,14 +2064,14 @@ void SetOptions(void)
             }
             break;
          }
-         
+
          case 5:     // re-open ZVG
          {
             if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_redozvg] = !optz[o_redozvg];
             if (cc == keyz[k_start]) optz[o_redozvg] = 0;
             break;
          }
-         
+
          case 6:     // Optical controller
          {
             if (cc == keyz[k_nclone]) optz[o_mouse] = ((optz[o_mouse]+1)%4);
@@ -2092,7 +2092,7 @@ void SetOptions(void)
             if (cc == keyz[k_start]) optz[o_mrevX] = 0;
             break;
          }
-         
+
          case 8:     // reverse Y axis
          {
             if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_mrevY] = !optz[o_mrevY];
@@ -2379,13 +2379,13 @@ void EditColours(void)
       if (index==1)  setcolour(colours[c_col][c_sman], colours[c_int][c_sman]);
       else           setcolour(colours[c_col][c_man], colours[c_int][c_man]);
       PrintString("Maker", 0, 300, 0, 12, 12, 0);
-   
+
       setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
       PrintString(">", 0, 220, 270, 6, 6, 0);
       setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
       PrintString("<", -150, 300, 0, 7, 7, 0);
       PrintString(">", 125, 300, 0, 7, 7, 0);
-   
+
       setcolour(colours[c_col][c_pnman], colours[c_int][c_pnman]);
       PrintString("Prev", -(xmax-100), 300, 0, 6, 6, 0);
       PrintString("Next", xmax-100, 300, 0, 6, 6, 0);
@@ -2438,7 +2438,7 @@ void EditColours(void)
       if (index<0) index=items;
       if (cc == keyz[k_start]) ci_toggle=!ci_toggle;
 
-      if (cc == keyz[k_nclone])                          // Right:    
+      if (cc == keyz[k_nclone])                          // Right:
       {
          if (!ci_toggle)
          {
@@ -2448,7 +2448,7 @@ void EditColours(void)
          }
          else
          {
-            item_int++;                                  // Increment intensity 
+            item_int++;                                  // Increment intensity
             if (item_int>25) item_int=25;
             colours[c_int][order[index]]=item_int;
          }
