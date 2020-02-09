@@ -159,15 +159,18 @@ When first run, VMMenu will create a vmmenu.cfg file with various default settin
 
 **[interface]**
 
-Most of the interface options can be set via the in game settings menu, which by default is accessed by pressing the backtick ` key, usually found below the escape key. Tip: It can be useful to bind this function to the test or service switch in your cabinet!
+Most of the interface options can be set via the in game settings menu, which by default is accessed by pressing the backtick  key, usually found below the escape key. Tip: It can be useful to bind this function to the test or service switch in your cabinet!
 
-One interface option worthy of some explanation is "smartmenu". This allows you to control the menu in a more intuitive manner using a joystick, with direct navigation in the up, down, left and right directions. As not all vector cabs have a joystick (e.g. Asteroids, Tempest), this option defaults to `off` and menu navigation is setup to use the rotation keys, with Hyperspace toggling between the games list and manufacturer list. If switching this option `on`, remember you will also need to specify the keys used to navigate between manufacturers, games and clones. If you switch smartmenu `on` without specifying suitable keys, the option will be switched off again as you would not be able to control the menu correctly.
+~~One interface option worthy of some explanation is "smartmenu". This allows you to control the menu in a more intuitive manner using a joystick, with direct navigation in the up, down, left and right directions. As not all vector cabs have a joystick (e.g. Asteroids, Tempest), this option defaults to `off` and menu navigation is setup to use the rotation keys, with Hyperspace toggling between the games list and manufacturer list. If switching this option `on`, remember you will also need to specify the keys used to navigate between manufacturers, games and clones. If you switch smartmenu `on` without specifying suitable keys, the option will be switched off again as you would not be able to control the menu correctly.~~
 
-**New for v1.32** - SmartMenu Navigation can now be selected from the settings page. Default key values from the vmmstddef.h file are used (see [keys] section below), you can change these manually in the vmmenu.cfg file if you want to customise them. 
+**New for v1.5**
+SmartMenu has been dropped in favour of control panel type selection within the settings page. You can select a "buttons" control panel (e.g. Asteroids), a "Joystick" control panel, or a "Spinner" control panel (e.g. Tempest). Essentially, a pair of keys is bound to the Left and Right directions, and a pair to the Up and Down directions. A Spinner control will move the cursor Up and Down the menus. Use the appropriate controls to navitage up and down the lists, and left and right to navigate between clones and manufacturers. Sensible defaults are chosen for each type of control panel based upon the keycodes specified in the cfg file. Default key values are set to use Mame key bindings.
+
+**New for v1.32** - ~~SmartMenu Navigation can now be selected from the settings page.~~ Default key values from the vmmstddef.h file are used (see [keys] section below), you can change these manually in the vmmenu.cfg file if you want to customise them. 
 
 **[controls]**
 
-This section will be populated by the in game settings menu, which allows you to set up a mouse or spinner and change/swap the axes, alter the sample rate etc.
+This section will be populated by the in game settings menu, which allows you to set up a mouse or spinner and reverse the axes, alter the sensitivity etc. The sensitivity value denotes how many pulses must be generated before a movement event is triggered. Mouse types can be a Spinner bound to the X-axis, a Spinner bound to the Y-axis, or a trackball which moves both axes. 
 
 **[keys]**
 
@@ -321,4 +324,3 @@ In the Utils folder you can find some utilities:
 
  - **Makeini** can be used to generate a template ini file for VMMenu. It will query your version of Mame and generate an entry for each vector game it finds.
  - **BiosKey** can be used to display the keycode of a pressed key under DOS. Use this if you are customising the keyboard inputs and need the keycodes. Keycodes are also displayed in the settings page from v1.3.1
-
