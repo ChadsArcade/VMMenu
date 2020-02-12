@@ -166,6 +166,8 @@ Most of the interface options can be set via the in game settings menu, which by
 **New for v1.5**
 SmartMenu has been dropped in favour of control panel type selection within the settings page. You can select a "buttons" control panel (e.g. Asteroids), a "Joystick" control panel, or a "Spinner" control panel (e.g. Tempest). Essentially, a pair of keys is bound to the Left and Right directions, and a pair to the Up and Down directions. A Spinner control will move the cursor Up and Down the menus. Use the appropriate controls to navitage up and down the lists, and left and right to navigate between clones and manufacturers. Sensible defaults are chosen for each type of control panel based upon the keycodes specified in the cfg file. Default key values are set to use Mame key bindings.
 
+![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/Cab-Spinner.jpg "Spinner enabled cab and menu")
+
 **New for v1.32** - ~~SmartMenu Navigation can now be selected from the settings page.~~ Default key values from the vmmstddef.h file are used (see [keys] section below), you can change these manually in the vmmenu.cfg file if you want to customise them. 
 
 **[controls]**
