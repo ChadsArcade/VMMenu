@@ -10,11 +10,11 @@ Pass it a character, receive an array and size
 #define _VCHARS_H_
 
 typedef struct {
-	int *array;
-	int size;
+   int *array;
+   int size;
 } vShape;
 
-vShape	fnGetChar(char);													// point to array for given character
+vShape   fnGetChar(char);                    // point to array for given character
 
 #endif
 

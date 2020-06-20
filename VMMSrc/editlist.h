@@ -9,18 +9,18 @@ Function declarations
 
 typedef struct listnode
 {
-	struct listnode	*next, *prev;
-	char					manuf[20];
-	char					desc[50];
-	char					parent[10];
-	char					clone[10];
-	int 					hidden;
+   struct listnode   *next, *prev;
+   char              manuf[20];
+   char              desc[50];
+   char              parent[10];
+   char              clone[10];
+   int               hidden;
 } list_node;
 
-list_node* build_games_list(void);
-list_node* add_list_game(int, char*, char*, char*, char*);
-void dump_list(list_node*);
-void write_list(list_node*);
+list_node*  build_games_list(void);
+list_node*  add_list_game(int, char*, char*, char*, char*);
+void        dump_list(list_node*);
+void        write_list(list_node*);
 
 #endif
 

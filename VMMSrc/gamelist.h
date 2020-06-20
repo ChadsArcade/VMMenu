@@ -9,32 +9,32 @@ Function declarations
 
 typedef struct gamenode
 {
-	struct gamenode	*next, *prev;
-	struct gamenode	*nclone, *pclone;
-	char					name[50];
-	char					parent[10];
-	char					clone[10];
+   struct gamenode   *next, *prev;
+   struct gamenode   *nclone, *pclone;
+   char              name[50];
+   char              parent[10];
+   char              clone[10];
 } g_node;
 
 typedef struct manufnode
 {
-	struct manufnode	*nmanuf;
-	struct manufnode	*pmanuf;
-	struct gamenode	*firstgame;
-	char					name[20];
+   struct manufnode  *nmanuf;
+   struct manufnode  *pmanuf;
+   struct gamenode   *firstgame;
+   char              name[20];
 } m_node;
 
-m_node* createlist();
+m_node*  createlist();
 
-int printlist(m_node*);
-void linklist(m_node*);
-m_node* add_manuf(char*);
-m_node* findmanuf(m_node*, char*);
-m_node* gotolastmanuf(m_node*);
+int      printlist(m_node*);
+void     linklist(m_node*);
+m_node*  add_manuf(char*);
+m_node*  findmanuf(m_node*, char*);
+m_node*  gotolastmanuf(m_node*);
 
-g_node* add_game(char*, char*, char*);
-g_node* gotolastgame(g_node*);
-g_node* gotolastclone(g_node*);
-g_node* findparentgame(g_node*, char*);
+g_node*  add_game(char*, char*, char*);
+g_node*  gotolastgame(g_node*);
+g_node*  gotolastclone(g_node*);
+g_node*  findparentgame(g_node*, char*);
 
 #endif
