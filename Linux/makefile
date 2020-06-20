@@ -11,8 +11,8 @@
 CC = gcc
 LINK = gcc
 ASM = NASM
-INC = `sdl-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser
-LIBS= `sdl-config --libs` -lSDL -lGL -lSDL_gfx -lm -lX11
+INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser
+LIBS= `sdl2-config --libs` -lSDL2 -lGL -lSDL2_gfx -lm -lX11
 
 NAME = vmmenu
 
