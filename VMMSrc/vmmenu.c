@@ -93,7 +93,7 @@ void     showstars();                                            // Display all 
 void     getsettings(void);                                      // get settings from ini file
 void     writeinival(char*, int, int, int);                      // write a value to the cfg file
 void     writecfg(void);                                         // write the cfg file
-int      getcolour(char*);                                       // Get colour value from cfg as an int
+int      getcolour(const char*);                                 // Get colour value from cfg as an int
 void     pressakey(int, int);                                    // Message to escape from screen saver to menu
 void     GetRGBfromColour(int, int*, int*, int*);                // Get R, G and B components of a passed colour
 g_node*  GetRandomGame(m_node *);                                // Selects a random game from the list
@@ -1730,7 +1730,7 @@ void writecfg()
 /******************************************************************
 Get a colour from the cfg file and convert to an integer
 *******************************************************************/
-int getcolour(char *colval)
+int getcolour(const char *colval)
 {
    char cols[8][10] = {"RED", "MAGENTA", "CYAN", "BLUE", "YELLOW", "GREEN", "WHITE", "99990"};
    int c, value;

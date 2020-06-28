@@ -44,9 +44,9 @@ I still get the odd query about the menu, so I decided that I'd put it up on Git
 
 ~~`sudo apt install libsdl1.2-dev libsdl-gfx1.2-dev`~~
 
-The Linux menu is now built against SDL2, you will need the SDL Lib2 -dev and -gfx files:
+The Linux menu is now built against SDL2, you will need the SDL Lib2-dev files:
 
-`sudo apt install libsdl2-dev libsdl2-gfx-dev`
+`sudo apt install libsdl2-dev`
 
 Copy the makefile from the VMMenu/Linux directory to VMMenu
 

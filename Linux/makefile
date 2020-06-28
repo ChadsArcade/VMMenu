@@ -1,18 +1,18 @@
 ##################################
-#                                #
-#   VMMenu MAKEFILE for Linux    #
-#                                #
-#     For use with GNU Make      #
-#                                #
-#  Chad Gray, sometime in 2011   #
-#                                #
+#											#
+#   VMMenu MAKEFILE for Linux		#
+#											#
+#     For use with GNU Make		#
+#											#
+#  Chad Gray, sometime in 2011	#
+#											#
 ##################################
 
 CC = gcc
 LINK = gcc
 ASM = NASM
 INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser
-LIBS= `sdl2-config --libs` -lSDL2 -lGL -lSDL2_gfx -lm -lX11
+LIBS= `sdl2-config --libs` -lSDL2 -lGL -lm -lX11
 
 NAME = vmmenu
 
