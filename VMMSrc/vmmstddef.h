@@ -23,6 +23,11 @@
 #define	NUM_ASTEROIDS	20			// number of asteroids on screensaver and exit screen
 #define	NUM_STARS		40			// number of stars
 
+#define	X_MIN			(-512)
+#define	X_MAX			511
+#define	Y_MIN			(-384)
+#define	Y_MAX			383
+
 /*** default key values ***/
 #if defined(linux) || defined(__linux)
    #include "SDL.h"

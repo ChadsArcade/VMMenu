@@ -44,7 +44,7 @@ copy e:\VMMSrc\gamelist.h .\VMMSrc\
 copy e:\VMMSrc\gamelist.c .\VMMSrc\
 copy e:\VMMSrc\vmmenu.c .\VMMSrc\
 
-make
+make target=DOS
 :: pause so you can examine the output for errors
 pause
 

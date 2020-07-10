@@ -48,11 +48,11 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
-#include "zstddef.h"
-#include "zvgPort.h"
-#include "zvgEnc.h"
-#include "timer.h"
-#include "zvgFrame.h"
+//#include "zstddef.h"
+//#include "zvgPort.h"
+//#include "zvgEnc.h"
+//#include "timer.h"
+//#include "zvgFrame.h"
 #include "gamelist.h"
 #include "vchars.h"
 #include "iniparser.h"
@@ -63,6 +63,10 @@
 //OS Specific Headers
 #if defined(linux) || defined(__linux)
    #include "LinuxVMM.h"
+   #include "VMM-SDL.h"
+#elif defined(__WIN32__) || defined(_WIN32)
+   #include "WinVMM.h"
+   #include "VMM-SDL.h"
 #else
    #include "DOSvmm.h"
 #endif
@@ -84,7 +88,7 @@ vObject  make_vbeam(void);                                       // define vecto
 vObject  make_midway(void);                                      // define midway logo
 int      reallyescape(void);                                     // See if you really want to quit
 void     author(int);                                            // Print author info
-void     setcolour(int, int);                                    // set colour and brightness
+//void     setcolour(int, int);                                    // set colour and brightness
 int      credits(void);                                          // print credits
 vStar    make_star(void);                                        // define a star
 vStar    updatestar(vStar);                                      // update a star object
@@ -110,61 +114,61 @@ void     BrightnessBars(int, int, int, int);
 
 // Global variables (there are quite a few...)
 
-vObject     asteroid[NUM_ASTEROIDS];
-vStar       starz[NUM_STARS];
-static int  xmax=X_MAX, ymax=Y_MAX;
+vObject      asteroid[NUM_ASTEROIDS];
+vStar        starz[NUM_STARS];
+static int   xmax=X_MAX, ymax=Y_MAX;
 
-extern int  mdx, mdy;
+extern int   mdx, mdy;
 
-extern int  optz[15];                  // array of user defined menu preferences
-extern int  keyz[11];                  // array of key press codes
-static int  colours[2][7];             // array of [colours][7] and [intensities][7]
+extern int   optz[15];                  // array of user defined menu preferences
+extern int   keyz[11];                  // array of key press codes
+static int   colours[2][7];             // array of [colours][7] and [intensities][7]
 
-static char attractargs[30];
-static char zvgargs[30];
-static int  totalnumgames=0;
+static char  attractargs[30];
+static char  zvgargs[30];
+static int   totalnumgames=0;
 
-static char autogame[30];
-static int  autostart=0;
+static char  autogame[30];
+static int   autostart=0;
 
-static      dictionary* ini;
+static       dictionary* ini;
 
-extern int  mouse_x, mouse_y;
-int         ZVGPresent = 1;
-int         SDL_VC, SDL_VB;            // colour and brightness for SDL vectors
-int         mousefound=0;
+extern int   mouse_x, mouse_y;
+int          ZVGPresent = 1;
+int          SDL_VC, SDL_VB;            // colour and brightness for SDL vectors
+int          mousefound=0;
 
-m_node      *vectorgames;
-g_node      *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
-uint        man_menu;
+m_node       *vectorgames;
+g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
+unsigned int man_menu;
 
-char        auth1[] = "VMMenu 1.5.1, Chad Gray";
-char        auth2[] = "ChadsArcade@Gmail.com";
+char         auth1[] = "VMMenu 1.5.1, Chad Gray";
+char         auth2[] = "ChadsArcade@Gmail.com";
 
-vObject     mame;
+vObject      mame;
 
 /*******************************************************************
  Main program loop
 ********************************************************************/
 int main( void) //int argc, char *argv[])
 {
-   uint     err;
-   int      count, top, timeout = 0, ticks = 0, gamesize;
-   int      pressx=0, pressy=0;
-   int      cc;
-   float    width=0.0;
-   char     mytext[100];
-   int      mpx = 0, mpy = 0;
-   vObject  sega, cinematronics, atari, centuri, vbeam, midway;
-   FILE     *inifp;
-   char     *ini_name = "vmmenu.cfg";
+   unsigned int err;
+   int          count, top, timeout = 0, ticks = 0, gamesize;
+   int          pressx=0, pressy=0;
+   int          cc;
+   float        width=0.0;
+   char         mytext[100];
+   int          mpx = 0, mpy = 0;
+   vObject      sega, cinematronics, atari, centuri, vbeam, midway;
+   FILE         *inifp;
+   char         *ini_name = "vmmenu.cfg";
 
    vectorgames = createlist();
    totalnumgames=printlist(vectorgames);
    linklist(vectorgames);
    sel_game = vectorgames->firstgame;
    sel_clone = sel_game;
-   man_menu = zTrue;
+   man_menu = 1;
 
    inifp = fopen (ini_name, "r" );
    if (inifp != NULL)
@@ -196,7 +200,8 @@ int main( void) //int argc, char *argv[])
    }
 
    startZVG();
-   srandom(time(NULL));
+//   srandom(time(NULL));
+   srand(time(NULL));
    setLEDs(0);
 
    //printf("o_mouse: %d o_mpoint: %d\n", optz[o_mouse], optz[o_mpoint]);
@@ -230,13 +235,6 @@ int main( void) //int argc, char *argv[])
       printf("No mouse device driver was found.\n");
    }
 
-
-#ifdef DEBUG
-   //print out a ZVG banner, indicating version etc.
-   zvgBanner( ZvgSpeeds, &ZvgID);
-   printf("\n\n");
-#endif
-
    // define 20 asteroids to randomly move around screen
    for (count=0; count < NUM_ASTEROIDS; count++)
    {
@@ -253,12 +251,6 @@ int main( void) //int argc, char *argv[])
    centuri        = make_centuri();
    vbeam          = make_vbeam();
    midway         = make_midway();
-
-   if (ZVGPresent)
-   {
-      tmrSetFrameRate( FRAMES_PER_SEC);
-      zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
-   }
 
    if (autostart)
    {
@@ -1306,25 +1298,6 @@ void pressakey(int x, int y)
 
 
 /***********************************************
- Set colour to one of red, green, blue, magenta,
-                       cyan, yellow, white
-************************************************/
-void setcolour(int clr, int bright)
-{
-   int r, g, b;
-   if (clr > 7) clr = vwhite;
-   if (bright > 31) bright = 31;
-   GetRGBfromColour(clr, &r, &g, &b);
-   if (ZVGPresent)
-   {
-      zvgFrameSetRGB15(r*bright, g*bright, b*bright);
-   }
-   SDL_VC = clr;      // very hacky!
-   SDL_VB = bright;   // should pass as parameters to draw functions
-}
-
-
-/***********************************************
  Set colour to one of red, green, blue, magenta, cyan, yellow, white
 ************************************************/
 void GetRGBfromColour(int clr, int *r, int *g, int *b)
@@ -1350,7 +1323,7 @@ int credits(void)
    int count = 0;
    int scale, start, finish, l;
    int breakout = 0;
-   int bnw = (ZvgIO.envMonitor & MONF_BW) && ZVGPresent;    // Black'n'White monitor
+   int bnw = 0; //(ZvgIO.envMonitor & MONF_BW) && ZVGPresent;    // Black'n'White monitor
    char credits[lines][60];
 
    strcpy(credits[0], "ZVG Vector Mame Menu, Chad Gray 2011");
@@ -1633,7 +1606,7 @@ valtype: 0 = write value as-is
 *******************************************************************/
 void writeinival(char *key, int value, int force, int valtype)
 {
-   char buffer[10];
+   char buffer[12];
    char cols[7][10] = {"red", "magenta", "cyan", "blue", "yellow", "green", "white"};
    if ((iniparser_find_entry(ini, key)) || (force))
    {
@@ -2366,7 +2339,7 @@ void   EditGamesList(void)
    linklist(vectorgames);
    sel_game       = vectorgames->firstgame;
    sel_clone      = sel_game;
-   man_menu       = zTrue;
+   man_menu       = 1;
 }
 
 
@@ -2644,7 +2617,7 @@ void TestPatterns()
    int cc=0, col=6, pattern=0, rotation=0, x=0, showchars=0, timer=0;
    int a_cols[7] = {vwhite, vred, vgreen, vblue, vmagenta, vcyan, vyellow};
    char* a_cnames[7] = { "W", "R", "G", "B", "M", "C", "Y"};
-   int mono = (ZvgIO.envMonitor & MONF_BW); // && ZVGPresent;    // Black & White monitor
+   int mono = 0; //(ZvgIO.envMonitor & MONF_BW); // && ZVGPresent;    // Black & White monitor
    point start, end;
    while (cc != keyz[k_quit] && cc != keyz[k_options] && cc != START2)
    {
