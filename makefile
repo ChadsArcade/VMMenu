@@ -9,13 +9,9 @@
 #                                #
 # usage:                         #
 #                                #
-# make target=linux {clean}      #
-# or                             #
-# make target=Win32 {clean}      #
-# or                             #
-# make target=DOS {clean}        #
-#                                #
-# The default target is DOS      #
+# make target=linux or           #
+# make target=Win32 or           #
+# make target=DOS (default)      #
 #                                #
 ##################################
 
@@ -29,7 +25,7 @@ ifndef target
    target=DOS
 endif
 ifeq ($(target),linux)
-   $(info Building for Linux)
+   $(info Building for Linux ZVG)
    VPATH=VMMSrc iniparser Linux Linux/zvg VMMSDL
    INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser -I./VMMSDL
    LIBS= `sdl2-config --libs` -lSDL2 -lm -lX11
@@ -44,6 +40,26 @@ ifeq ($(target),linux)
           $(OBJ_DIR)/zvgEnc.o \
           $(OBJ_DIR)/zvgError.o \
           $(OBJ_DIR)/zvgBan.o \
+          $(OBJ_DIR)/iniparser.o \
+          $(OBJ_DIR)/dictionary.o \
+          $(OBJ_DIR)/LinuxVMM.o \
+          $(OBJ_DIR)/VMM-SDL.o \
+          $(OBJ_DIR)/vchars.o \
+          $(OBJ_DIR)/gamelist.o \
+          $(OBJ_DIR)/editlist.o
+endif
+ifeq ($(target),linuxdvg)
+   $(info Building for Linux DVG)
+   VPATH=VMMSrc iniparser Linux Win32/dvg VMMSDL
+   INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Win32/dvg -I./iniparser -I./VMMSDL
+   LIBS= `sdl2-config --libs` -lSDL2 -lm -lX11
+   EXEC = vmmenu
+   RM = rm -f
+   RMDIR = rm -rf
+   MKDIR = mkdir -p $(1)
+   OBJS = $(OBJ_DIR)/$(EXEC).o \
+          $(OBJ_DIR)/zvgFrame.o \
+          $(OBJ_DIR)/timer.o \
           $(OBJ_DIR)/iniparser.o \
           $(OBJ_DIR)/dictionary.o \
           $(OBJ_DIR)/LinuxVMM.o \

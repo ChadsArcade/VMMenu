@@ -24,14 +24,14 @@ const          char* WINDOW_TITLE = "Vector Mame Menu for Linux";
 #elif defined(__WIN32__) || defined(_WIN32)
 const          char* WINDOW_TITLE = "Vector Mame Menu for Win32";
 #endif
-int 	         mdx=0, mdy=0;
+int            mdx=0, mdy=0;
 int            mouse_x=0, mouse_y=0;
 extern         int ZVGPresent;
 int            SDL_VB, SDL_VC;            // SDL_Vector "Brightness" and "Colour"
 int            optz[15];                  // array of user defined menu preferences
 int            keyz[11];                  // array of key press codes
 extern int     mousefound;
-
+extern char    DVPort[15];
 
 /******************************************************************
 	Start up the DVG if poss and use SDL if necessary
@@ -39,11 +39,34 @@ extern int     mousefound;
 void startZVG(void)
 {
 	unsigned int error;
+#if DEBUG	
+	printf("Key UP:       0x%04x\n", UP);
+	printf("Key DOWN:     0x%04x\n", DOWN);
+	printf("Key LEFT:     0x%04x\n", LEFT);
+	printf("Key RIGHT:    0x%04x\n", RIGHT);
+	printf("Key SETTINGS: 0x%04x\n", GRAVE);
+	printf("Key ESCAPE:   0x%04x\n", ESC);
+	printf("Key CREDIT:   0x%04x\n", CREDIT);
+	printf("Key START1:   0x%04x\n", START1);
+	printf("Key START2:   0x%04x\n", START2);
+	printf("Key FIRE:     0x%04x\n", FIRE);
+	printf("Key THRUST:   0x%04x\n", THRUST);
+	printf("Key HYPSPACE: 0x%04x\n", HYPSPACE);
+	printf("Key RSHIFT:   0x%04x\n", RSHIFT);
+	printf("Key LSHIFT:   0x%04x\n", LSHIFT);
+#endif
+	
 	InitialiseSDL(1);
+   #ifdef _DVGTIMER_H_
+      printf("\n>>> DVG Hardware Version <<<\n");
+      printf(">>> DVGPort is \"%s\"\n\n", DVPort);
+   #else
+      printf("\n>>> ZVG Hardware Version <<<\n");
+   #endif
 	error = zvgFrameOpen();			// initialize ZVG
 	if (error)
 	{	zvgError( error);				// print error
-		printf("Vector Generator hardware not found, all rendering will be done to window.\n");
+		printf("Vector Generator hardware not found, rendering to SDL window only.\n");
 		ZVGPresent = 0;
 	}
 	else
@@ -51,11 +74,11 @@ void startZVG(void)
       tmrSetFrameRate( FRAMES_PER_SEC);
       zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
    }
-   #ifdef DEBUG
-      //print out a ZVG banner, indicating version etc.
-      zvgBanner( ZvgSpeeds, &ZvgID);
-      printf("\n\n");
-   #endif
+//   #if DEBUG
+//      //print out a ZVG banner, indicating version etc.
+//      zvgBanner( ZvgSpeeds, &ZvgID);
+//      printf("\n\n");
+//   #endif
 
 }
 
@@ -105,11 +128,11 @@ void InitialiseSDL(int start)
 	}
 	/* Set a video mode */
    window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN); // || SDL_WINDOW_INPUT_GRABBED); 
+                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN); // || SDL_WINDOW_INPUT_GRABBED);
 
    screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
    //screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-   
+
    SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {}				// clear event buffer
@@ -237,7 +260,7 @@ int getkey(void)
 				break;
 		}
 	}
-	
+
    if (mousefound) processmouse();              // 3 Feb 2020, read every frame, ignore sample rate
    // convert mouse movement into key presses. Now built into the getkey function
    if (mouse_y < 0 && optz[o_mouse]==3) key = keyz[k_pgame];       // Trackball Up    = Up
@@ -246,7 +269,7 @@ int getkey(void)
    if (mouse_x > 0 && optz[o_mouse]==3) key = keyz[k_nclone];      // Trackball Right = Right
    if (mouse_x < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];       // Spinner   Left  = Up
    if (mouse_x > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];       // Spinner   Right = Down
-	
+
 	return key;
 }
 
@@ -290,17 +313,17 @@ Close everything off for a graceful exit
 void ShutdownAll(void)
 {
 	CloseSDL(1);
-	setLEDs(0);											// restore LED status
+	setLEDs(0);                                    // restore LED status
 	if (ZVGPresent)
 	{
-		zvgFrameClose();									// fix up all the ZVG stuff
+		zvgFrameClose();                            // fix up all the ZVG stuff
 	}
 }
 
 
 /***********************************************
  Set colour to one of red, green, blue, magenta,
-                       cyan, yellow, white
+ cyan, yellow, white
 ************************************************/
 void setcolour(int clr, int bright)
 {
@@ -397,4 +420,3 @@ void RunGame(char *gameargs, char *zvgargs)
 	}
 	InitialiseSDL(1);							// re-open windows etc
 }
-

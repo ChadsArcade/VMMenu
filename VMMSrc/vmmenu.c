@@ -48,11 +48,6 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
-//#include "zstddef.h"
-//#include "zvgPort.h"
-//#include "zvgEnc.h"
-//#include "timer.h"
-//#include "zvgFrame.h"
 #include "gamelist.h"
 #include "vchars.h"
 #include "iniparser.h"
@@ -64,9 +59,11 @@
 #if defined(linux) || defined(__linux)
    #include "LinuxVMM.h"
    #include "VMM-SDL.h"
+   #define DefDVPort "/dev/ttyACM0"
 #elif defined(__WIN32__) || defined(_WIN32)
    #include "WinVMM.h"
    #include "VMM-SDL.h"
+   #define DefDVPort "COM3"
 #else
    #include "DOSvmm.h"
 #endif
@@ -88,7 +85,6 @@ vObject  make_vbeam(void);                                       // define vecto
 vObject  make_midway(void);                                      // define midway logo
 int      reallyescape(void);                                     // See if you really want to quit
 void     author(int);                                            // Print author info
-//void     setcolour(int, int);                                    // set colour and brightness
 int      credits(void);                                          // print credits
 vStar    make_star(void);                                        // define a star
 vStar    updatestar(vStar);                                      // update a star object
@@ -109,8 +105,6 @@ void     EditColours(void);                                      // Settings pag
 void     drawbox(int, int, int, int, int, int);                  // xmin, ymin, xmax, ymax, colout, intensity
 void     TestPatterns(void);                                     // Monitor Test Patterns
 void     BrightnessBars(int, int, int, int);
-         
-//#define   DEBUG                      // uncomment to enable debug output
 
 // Global variables (there are quite a few...)
 
@@ -130,6 +124,7 @@ static int   totalnumgames=0;
 
 static char  autogame[30];
 static int   autostart=0;
+char         DVPort[15];
 
 static       dictionary* ini;
 
@@ -150,7 +145,7 @@ vObject      mame;
 /*******************************************************************
  Main program loop
 ********************************************************************/
-int main( void) //int argc, char *argv[])
+int main(int argc, char *argv[])
 {
    unsigned int err;
    int          count, top, timeout = 0, ticks = 0, gamesize;
@@ -615,7 +610,7 @@ void PrintString(char *text, int xpos, int ypos, int charangle, float xScale, fl
    textx = line_start.x + (x_delta / 2);
    texty = line_start.y + (y_delta / 2);
 
-#ifdef DEBUG
+#if DEBUG
    drawvector(line_start, line_end, 0, 0);         // For testing, draw the line the text will be printed along
 #endif
 
@@ -832,7 +827,7 @@ vObject intro(void)
    353,47,333,27,    333,27,249,27,    249,27,254,33,                                        // O
    254,33,254,55,    254,55,224,25,    224,25,224,60,    224,60,190,27,    190,27,154,27,    // G
    154,27,154,55,    154,55,98,0,      98,0,65,0,        65,0,96,31,                         // O
-   96,31,96,55,      96,55,66,25,      66,25,66,60,      66,60,32,27,      32,27,0,27,       // 
+   96,31,96,55,      96,55,66,25,      66,25,66,60,      66,60,32,27,      32,27,0,27,       //
    154,20,154,0,     154,0,174,20,                                                           // V
    198,20,183,20,    183,20,163,0,     163,0,183,0,      173,10,183,10,                      // E
    223,20,208,20,    208,20,188,0,     188,0,208,0,                                          // C
@@ -1546,6 +1541,9 @@ void getsettings(void)
    strcpy(autogame, iniparser_getstring(ini, "autostart:game", ""));
    autostart         = iniparser_getboolean(ini, "autostart:start", 0);
 
+   // Com port for USB-DVG
+   strcpy(DVPort, iniparser_getstring(ini, "DVG:port", DefDVPort));
+
    // controllers
    optz[o_mouse]     = iniparser_getint(ini, "controls:spinnertype", 0);
    optz[o_mouse]     = abs(optz[o_mouse]%4);
@@ -1645,6 +1643,7 @@ void writecfg()
    if (!iniparser_find_entry(ini, "keys"))      iniparser_set(ini, "keys", NULL);
    if (!iniparser_find_entry(ini, "colours"))   iniparser_set(ini, "colours", NULL);
    if (!iniparser_find_entry(ini, "autostart")) iniparser_set(ini, "autostart", NULL);
+   if (!iniparser_find_entry(ini, "DVG"))       iniparser_set(ini, "DVG", NULL);
 
    // write the interface settings
    writeinival("interface:rotation",            optz[o_rot], 1, 0);
@@ -1661,6 +1660,9 @@ void writecfg()
    // write the autostart settings, default is blank and autostart is off
    iniparser_set(ini, "autostart:game",         autogame);
    writeinival("autostart:start",               autostart, 1, 3);
+
+   // Com port for USB-DVG, default is /dev/ttyACM0 or COM3
+   iniparser_set(ini, "DVG:Port",               DVPort);
 
    // write the spinner/mouse settings
    writeinival("controls:spinnertype",          optz[o_mouse], 1, 0);
@@ -2169,7 +2171,7 @@ void   EditGamesList(void)
    {
       list_cursor = list_cursor->prev;
    }
-#ifdef DEBUG
+#if DEBUG
    dump_list(list_root);
 #endif
 
@@ -2292,7 +2294,7 @@ void   EditGamesList(void)
       if (cc == keyz[k_nclone] || cc == keyz[k_pclone])  // [Left] or [Right]: Toggle Show/Hide
       {
          list_active->hidden=!list_active->hidden;
-#ifdef DEBUG
+#if DEBUG
          printf("Hidden: %i game: %s Autogame: %s Autostart: %i\n", list_active->hidden, list_active->clone, autogame, autostart);
 #endif
          // If we just hid the selected autostart game, we turn autostart off
@@ -2309,7 +2311,7 @@ void   EditGamesList(void)
             autostart=1;
             strcpy(autogame, list_active->clone);
             list_active->hidden=0;
-#ifdef DEBUG
+#if DEBUG
             printf("%s\n", autogame);
 #endif
          }
@@ -2610,7 +2612,7 @@ void drawbox(int x1, int y1, int x2, int y2, int colour, int intensity)
 
 /******************************************************************
    Monitor Test Patterns
-   Useful for helping calibrate the ZVG board 
+   Useful for helping calibrate the ZVG board
 *******************************************************************/
 void TestPatterns()
 {
@@ -2631,15 +2633,15 @@ void TestPatterns()
       if (cc == keyz[k_ngame])  if (++pattern > 4) pattern=0;
       if (cc == keyz[k_start]) showchars = !showchars;
       //if (cc == START2) mono = !mono;        // For test purposes
-      
+
       rotation = optz[o_rot];
       optz[o_rot] = 0;
       setcolour(col, EDGE_NRM);
       drawbox(X_MIN, Y_MIN, X_MAX, Y_MAX, col, EDGE_NRM);
-      
+
       switch (pattern)
       {
-      
+
          case 0:                             // Diagonal boxes
          {
             start.x = -512;
@@ -2685,7 +2687,7 @@ void TestPatterns()
             drawvector(start, end, 0, 0);
             break;
          }
-         
+
          case 1:                             // Concentric boxes
          {
             for(x=1;x<3;x++)
@@ -2694,7 +2696,7 @@ void TestPatterns()
             }
             break;
          }
-         
+
          case 2:                             // Grid
          {
             start.x=-512;
@@ -2706,7 +2708,7 @@ void TestPatterns()
                start.x+=128;
                end.x=start.x;
                drawvector(start, end, 0, 0);
-            }               
+            }
             start.x=-512;
             start.y=-384;
             end.x=512;
@@ -2716,10 +2718,10 @@ void TestPatterns()
                start.y+=128;
                end.y=start.y;
                drawvector(start, end, 0, 0);
-            }               
+            }
             break;
          }
-         
+
          case 3:                             // Mame Vector Logo
          {
             mame.pos.x=0;
@@ -2733,7 +2735,7 @@ void TestPatterns()
             mame.angle=0;
             break;
          }
-         
+
          case 4:                             // Colour intensity bars
          {
             optz[o_rot] = rotation;
@@ -2752,8 +2754,8 @@ void TestPatterns()
             }
             break;
          }
-         
-      }                                      //end of switch/case            
+
+      }                                      //end of switch/case
       optz[o_rot] = rotation;
       // Draw character set on all screens if 1P pressed
       setcolour(col, EDGE_NRM);
@@ -2792,4 +2794,3 @@ void BrightnessBars(int x, int y, int height, int colour)
    end.y=start.y;
    drawvector(start, end, 0, 0);
 }
-
