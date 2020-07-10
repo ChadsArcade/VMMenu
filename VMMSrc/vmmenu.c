@@ -92,7 +92,7 @@ void     drawstar(vStar);                                        // Draw a star
 void     showstars();                                            // Display all the stars on screen
 void     getsettings(void);                                      // get settings from ini file
 void     writeinival(char*, int, int, int);                      // write a value to the cfg file
-void     writecfg(void);                                         // write the cfg file
+void     writecfg(void);                                         // write the cfg file to the dictionary
 int      getcolour(const char*);                                 // Get colour value from cfg as an int
 void     pressakey(int, int);                                    // Message to escape from screen saver to menu
 void     GetRGBfromColour(int, int*, int*, int*);                // Get R, G and B components of a passed colour
@@ -147,6 +147,8 @@ vObject      mame;
 ********************************************************************/
 int main(int argc, char *argv[])
 {
+   (void)       argc;
+   (void)       argv;
    unsigned int err;
    int          count, top, timeout = 0, ticks = 0, gamesize;
    int          pressx=0, pressy=0;
@@ -181,6 +183,20 @@ int main(int argc, char *argv[])
       printf("Creating new CFG file.\n");
    }
    getsettings();
+
+//##########################################
+
+   inifp = fopen (ini_name, "w" );
+   if (inifp != NULL)
+   {
+      printf("Writing cfg file... ");
+      writecfg();
+      iniparser_dump_ini(ini, inifp);
+      printf("Done.\n");
+      fclose(inifp);
+   }
+
+//##########################################
 
    // Set up rotation
    if ((optz[o_rot] == 1) || (optz[o_rot] == 3))
@@ -1541,8 +1557,10 @@ void getsettings(void)
    strcpy(autogame, iniparser_getstring(ini, "autostart:game", ""));
    autostart         = iniparser_getboolean(ini, "autostart:start", 0);
 
-   // Com port for USB-DVG
-   strcpy(DVPort, iniparser_getstring(ini, "DVG:port", DefDVPort));
+   #if defined(linux) || defined(__linux) || (__WIN32__) || defined(_WIN32)
+      // Com port for USB-DVG
+      strcpy(DVPort, iniparser_getstring(ini, "DVG:port", DefDVPort));
+   #endif
 
    // controllers
    optz[o_mouse]     = iniparser_getint(ini, "controls:spinnertype", 0);
@@ -1572,17 +1590,17 @@ void getsettings(void)
    keyz[k_start]     = iniparser_getint(ini, "keys:k_startgame",  START1);
 
    // now the colour and brightness values
-   colours[c_col][c_glist] = getcolour(iniparser_getstring(ini, "colours:c_gamelist", "green"));
+   colours[c_col][c_glist] = getcolour(iniparser_getstring(ini, "colours:c_gamelist", "cyan"));
    colours[c_int][c_glist] = iniparser_getint(ini, "colours:i_gamelist", EDGE_NRM);
    colours[c_col][c_sgame] = getcolour(iniparser_getstring(ini, "colours:c_selgame", "white"));
    colours[c_int][c_sgame] = iniparser_getint(ini, "colours:i_selgame", EDGE_BRI);
    colours[c_col][c_sman]  = getcolour(iniparser_getstring(ini, "colours:c_selman", "white"));
    colours[c_int][c_sman]  = iniparser_getint(ini, "colours:i_selman", EDGE_BRI);
-   colours[c_col][c_man]   = getcolour(iniparser_getstring(ini, "colours:c_man", "white"));
+   colours[c_col][c_man]   = getcolour(iniparser_getstring(ini, "colours:c_man", "cyan"));
    colours[c_int][c_man]   = iniparser_getint(ini, "colours:i_man", EDGE_NRM);
-   colours[c_col][c_pnman] = getcolour(iniparser_getstring(ini, "colours:c_pnman", "green"));
+   colours[c_col][c_pnman] = getcolour(iniparser_getstring(ini, "colours:c_pnman", "cyan"));
    colours[c_int][c_pnman] = iniparser_getint(ini, "colours:i_pnman", EDGE_NRM);
-   colours[c_col][c_arrow] = getcolour(iniparser_getstring(ini, "colours:c_arrow", "yellow"));
+   colours[c_col][c_arrow] = getcolour(iniparser_getstring(ini, "colours:c_arrow", "white"));
    colours[c_int][c_arrow] = iniparser_getint(ini, "colours:i_arrow", EDGE_NRM);
    colours[c_col][c_asts]  = getcolour(iniparser_getstring(ini, "colours:c_asteroids", "white"));
    colours[c_int][c_asts]  = iniparser_getint(ini, "colours:i_asteroids", EDGE_NRM);
@@ -1643,8 +1661,13 @@ void writecfg()
    if (!iniparser_find_entry(ini, "keys"))      iniparser_set(ini, "keys", NULL);
    if (!iniparser_find_entry(ini, "colours"))   iniparser_set(ini, "colours", NULL);
    if (!iniparser_find_entry(ini, "autostart")) iniparser_set(ini, "autostart", NULL);
-   if (!iniparser_find_entry(ini, "DVG"))       iniparser_set(ini, "DVG", NULL);
 
+   // Com port for USB-DVG, default is /dev/ttyACM0 or COM3
+   #if defined(linux) || defined(__linux) || (__WIN32__) || defined(_WIN32)
+      if (!iniparser_find_entry(ini, "DVG"))       iniparser_set(ini, "DVG", NULL);
+      iniparser_set(ini, "DVG:Port",               DVPort);
+   #endif
+   
    // write the interface settings
    writeinival("interface:rotation",            optz[o_rot], 1, 0);
    writeinival("interface:stars",               optz[o_stars], 1, 3);
@@ -1660,9 +1683,6 @@ void writecfg()
    // write the autostart settings, default is blank and autostart is off
    iniparser_set(ini, "autostart:game",         autogame);
    writeinival("autostart:start",               autostart, 1, 3);
-
-   // Com port for USB-DVG, default is /dev/ttyACM0 or COM3
-   iniparser_set(ini, "DVG:Port",               DVPort);
 
    // write the spinner/mouse settings
    writeinival("controls:spinnertype",          optz[o_mouse], 1, 0);

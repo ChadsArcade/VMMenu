@@ -15,6 +15,8 @@ DOS Specific Function definitons
 #define Mouse_INT 0X33
 
 extern void	GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B components of a passed colour
+extern void writecfg(void);                                       // write the cfg file
+
 
 union       REGS in, out;
 int         LEDstate=0;
@@ -271,8 +273,9 @@ void drawvector(point p1, point p2, float x_trans, float y_trans)
 ********************************************************************/
 void RunGame(char *gameargs, char *zvgargs)
 {
-   uint   err;
-   char   command[80];
+   (void)         zvgargs;
+   unsigned int   err;
+   char           command[80];
    //setLEDs(0);
    setLEDs(S_LED);
 
