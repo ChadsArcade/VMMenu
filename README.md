@@ -29,7 +29,7 @@ Today I have two ZVG cabs: the original Asteroids Deluxe Cabaret, and an upright
 ![alt text](https://raw.githubusercontent.com/ChadsArcade/VMMenu/master/pics/SDCab2.jpg "DOS VMMenu in a Space Duel Cab")
 
 
-I still get the odd query about the menu, so I decided that I'd put it up on GitHub rather than have it languish in a virtual PC. I hope somebody finds it useful... it wold be nice to see some new vector games written for DOS/Linux :-)
+I still get the odd query about the menu, so I decided that I'd put it up on GitHub rather than have it languish in a virtual PC. I hope somebody finds it useful... it would be nice to see some new vector games written for DOS/Linux :-)
 
 ## Building on Linux:
 
@@ -48,11 +48,13 @@ The Linux menu is now built against SDL2, you will need the SDL Lib2-dev files:
 
 `sudo apt install libsdl2-dev`
 
-Copy the makefile from the VMMenu/Linux directory to VMMenu
+~~Copy the makefile from the VMMenu/Linux directory to VMMenu~~
+The makefile now supports all OS targets, and should cater for their foibles.
 
 Then run:
 
-`make`
+`make target=linux clean`
+`make target=linux`
 
 which will create the vmmenu file in the current directory
 
@@ -88,11 +90,13 @@ You will need a working DJGPP environment to compile VMMenu for DOS. There are m
 - Copy the dictionary and iniparser .h and .c files into the VMMenu/iniparser directory
 - Copy the ZVG files from the inc and shared folders into the VMMenu/DOS/zvg directory
 
-Copy the makefile from the VMMenu/DOS directory to VMMenu
+~~Copy the makefile from the VMMenu/DOS directory to VMMenu~~
+The makefile now supports all OS targets, and should cater for their foibles.
 
 Then run:
 
-`make`
+`make target=DOS clean`
+`make target=DOS`
 
 which will create the vmmenu.exe file in the current directory
 
