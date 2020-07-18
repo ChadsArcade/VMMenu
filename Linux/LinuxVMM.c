@@ -1,32 +1,30 @@
 // Linux specific functions for the Vector Mame Menu
 
-//#include <sys/ioctl.h>
-//#include <fcntl.h>
-//#include <linux/kd.h>
-//#include <sys/io.h>
 #include "vmmstddef.h"
 #include "LinuxVMM.h"
-#include <X11/Xlib.h>
-#include <X11/XKBlib.h>
+#include <sys/ioctl.h>
+#include <sys/kd.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-int            LEDstate=0;
+int LEDstate=0;
 
 /******************************************************************
    Write to keyboard LEDs value held in global variable LEDstate
- - only if state has changed
+   only if state has changed
+   Unfortunately the use of ioctl requires root access,
+   or (apparently) the capability "CAP_SYS_TTY_CONFIG"
 *******************************************************************/
 void setLEDs(int leds)
 {
+   int fd;
    if (LEDstate != leds)
    {
-      Display *dpy = XOpenDisplay(0);
-      XKeyboardControl values;
-      values.led_mode = leds & S_LED ? LedModeOn : LedModeOff;
-      values.led = 3;
-      XChangeKeyboardControl(dpy, KBLedMode, &values);
-      XkbLockModifiers(dpy, XkbUseCoreKbd, C_LED | N_LED, leds & (C_LED | N_LED) );
-      XFlush(dpy);
-      XCloseDisplay(dpy);
+      if ((fd = open("/dev/console", O_NOCTTY)) != -1)
+      {
+         ioctl(fd, KDSETLED, leds);
+         close(fd);
+      }
       LEDstate = leds;
    }
 }

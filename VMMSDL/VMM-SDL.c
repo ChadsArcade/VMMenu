@@ -17,8 +17,8 @@ extern void	GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B compo
 
 SDL_Window     *window = NULL;
 SDL_Renderer   *screenRender = NULL;
-int            WINDOW_WIDTH  = 800;
-int            WINDOW_HEIGHT = 600;
+int            WINDOW_WIDTH  = 1024;
+int            WINDOW_HEIGHT = 768;
 #if defined(linux) || defined(__linux)
 const          char* WINDOW_TITLE = "Vector Mame Menu for Linux";
 #elif defined(__WIN32__) || defined(_WIN32)
@@ -33,45 +33,46 @@ int            keyz[11];                  // array of key press codes
 extern int     mousefound;
 extern char    DVPort[15];
 
+
 /******************************************************************
 	Start up the DVG if poss and use SDL if necessary
 *******************************************************************/
 void startZVG(void)
 {
 	unsigned int error;
-#if DEBUG	
-	printf("Key UP:       0x%04x\n", UP);
-	printf("Key DOWN:     0x%04x\n", DOWN);
-	printf("Key LEFT:     0x%04x\n", LEFT);
-	printf("Key RIGHT:    0x%04x\n", RIGHT);
-	printf("Key SETTINGS: 0x%04x\n", GRAVE);
-	printf("Key ESCAPE:   0x%04x\n", ESC);
-	printf("Key CREDIT:   0x%04x\n", CREDIT);
-	printf("Key START1:   0x%04x\n", START1);
-	printf("Key START2:   0x%04x\n", START2);
-	printf("Key FIRE:     0x%04x\n", FIRE);
-	printf("Key THRUST:   0x%04x\n", THRUST);
-	printf("Key HYPSPACE: 0x%04x\n", HYPSPACE);
-	printf("Key RSHIFT:   0x%04x\n", RSHIFT);
-	printf("Key LSHIFT:   0x%04x\n", LSHIFT);
-#endif
+   #if DEBUG	
+      printf("Key UP:       0x%04x\n", UP);
+      printf("Key DOWN:     0x%04x\n", DOWN);
+      printf("Key LEFT:     0x%04x\n", LEFT);
+      printf("Key RIGHT:    0x%04x\n", RIGHT);
+      printf("Key SETTINGS: 0x%04x\n", GRAVE);
+      printf("Key ESCAPE:   0x%04x\n", ESC);
+      printf("Key CREDIT:   0x%04x\n", CREDIT);
+      printf("Key START1:   0x%04x\n", START1);
+      printf("Key START2:   0x%04x\n", START2);
+      printf("Key FIRE:     0x%04x\n", FIRE);
+      printf("Key THRUST:   0x%04x\n", THRUST);
+      printf("Key HYPSPACE: 0x%04x\n", HYPSPACE);
+      printf("Key RSHIFT:   0x%04x\n", RSHIFT);
+      printf("Key LSHIFT:   0x%04x\n", LSHIFT);
+   #endif
 	
 	InitialiseSDL(1);
    #ifdef _DVGTIMER_H_
-      printf("\n>>> DVG Hardware Version <<<\n");
-      printf(">>> DVGPort is \"%s\"\n\n", DVPort);
+      printf(">>> DVG Hardware Version using port: %s <<<\n",DVPort);
    #else
-      printf("\n>>> ZVG Hardware Version <<<\n");
+      printf(">>> ZVG Hardware Version <<<");
    #endif
-	error = zvgFrameOpen();			// initialize ZVG
+	error = zvgFrameOpen();			// initialize ZVG/DVG
 	if (error)
-	{	zvgError( error);				// print error
+	{
+		zvgError(error);				// print error
 		printf("Vector Generator hardware not found, rendering to SDL window only.\n");
 		ZVGPresent = 0;
 	}
 	else
    {
-      tmrSetFrameRate( FRAMES_PER_SEC);
+      tmrSetFrameRate(FRAMES_PER_SEC);
       zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
    }
 //   #if DEBUG
@@ -79,7 +80,6 @@ void startZVG(void)
 //      zvgBanner( ZvgSpeeds, &ZvgID);
 //      printf("\n\n");
 //   #endif
-
 }
 
 /******************************************************************
@@ -180,7 +180,7 @@ void FrameSendSDL()
 {
 	if (optz[o_dovga] || !ZVGPresent)
 	{
-		if (!ZVGPresent) SDL_Delay(100/6);	                  // 1/60 of a sec, same as frame rate, in msecs
+		if (!ZVGPresent) SDL_Delay(100/8);	                  // 1/60 of a sec, same as frame rate, in msecs. Make it a bit faster to compensate for code running time
       SDL_RenderPresent( screenRender );                    // Flip to rendered screen
       SDL_SetRenderDrawColor(screenRender, 0, 0, 0, 255);   // Set render colour to black
       SDL_RenderClear(screenRender);                        // Clear screen
@@ -313,8 +313,12 @@ Close everything off for a graceful exit
 void ShutdownAll(void)
 {
 	CloseSDL(1);
-	setLEDs(0);                                    // restore LED status
-	if (ZVGPresent)
+	#if defined(linux) || defined(__linux)
+      setLEDs(8);
+   #else
+	   setLEDs(0);                                    // restore LED status
+   #endif
+   if (ZVGPresent)
 	{
 		zvgFrameClose();                            // fix up all the ZVG stuff
 	}

@@ -28,7 +28,7 @@ ifeq ($(target),linux)
    $(info Building for Linux ZVG)
    VPATH=VMMSrc iniparser Linux Linux/zvg VMMSDL
    INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser -I./VMMSDL
-   LIBS= `sdl2-config --libs` -lSDL2 -lm -lX11
+   LIBS= `sdl2-config --libs` -lSDL2 -lm
    EXEC = vmmenu
    RM = rm -f
    RMDIR = rm -rf
@@ -119,10 +119,10 @@ clean:
 	$(RMDIR) $(OBJ_DIR)
 
 # install
-#install:
+install:
 #	cp $(EXEC) /usr/local/sbin
-#	chown root /usr/local/sbin/$(EXEC)
-#	chmod u+s /usr/local/sbin/$(EXEC)
+	chown root $(EXEC)
+	chmod u+s $(EXEC)
 
 # Flags for linker
 $(EXEC) : $(OBJS)

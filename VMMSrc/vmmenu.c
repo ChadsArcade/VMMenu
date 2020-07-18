@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
    inifp = fopen (ini_name, "w" );
    if (inifp != NULL)
    {
-      printf("Writing cfg file... ");
+      printf("\nSaving sanitised cfg file... ");
       writecfg();
       iniparser_dump_ini(ini, inifp);
       printf("Done.\n");
@@ -537,10 +537,10 @@ int main(int argc, char *argv[])
          do
          {
             strcpy(mytext, gamelist_root->name);                                 // mytext = name of parent game
-            gamesize = 4;                                                        // fontsize for gamelist
+            gamesize = 6;                                                        // fontsize for gamelist
             if (!man_menu && (sel_game == gamelist_root))                        // if we're at the selected game...
             {
-               gamesize = 5;
+               gamesize = 8;
                if (sel_game != sel_clone) strcpy(mytext, sel_clone->name);       // change to clone name if different
                if (sel_game->nclone)
                {

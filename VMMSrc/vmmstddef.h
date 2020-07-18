@@ -86,15 +86,9 @@
 #define vwhite         6
 
 //LED codes
-#if defined(linux) || defined(__linux)
-   #define             S_LED 1      // Scroll lock LED
-   #define             N_LED 16     // Number lock LED
-   #define             C_LED 2      // Caps lock LED
-#else
-   #define             S_LED 1      // Scroll lock LED
-   #define             N_LED 2      // Number lock LED
-   #define             C_LED 4      // Caps lock LED
-#endif 
+#define                S_LED 1      // Scroll lock LED
+#define                N_LED 2      // Number lock LED
+#define                C_LED 4      // Caps lock LED
 
 // Index used to reference colour/intensity array
 #define c_col          0
