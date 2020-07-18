@@ -59,11 +59,11 @@
 #if defined(linux) || defined(__linux)
    #include "LinuxVMM.h"
    #include "VMM-SDL.h"
-   #define DefDVPort "/dev/ttyACM0"
+   #define DefDVGPort "/dev/ttyACM0"
 #elif defined(__WIN32__) || defined(_WIN32)
    #include "WinVMM.h"
    #include "VMM-SDL.h"
-   #define DefDVPort "COM3"
+   #define DefDVGPort "COM3"
 #else
    #include "DOSvmm.h"
 #endif
@@ -114,7 +114,7 @@ static int   xmax=X_MAX, ymax=Y_MAX;
 
 extern int   mdx, mdy;
 
-extern int   optz[15];                  // array of user defined menu preferences
+extern int   optz[16];                  // array of user defined menu preferences
 extern int   keyz[11];                  // array of key press codes
 static int   colours[2][7];             // array of [colours][7] and [intensities][7]
 
@@ -124,7 +124,7 @@ static int   totalnumgames=0;
 
 static char  autogame[30];
 static int   autostart=0;
-char         DVPort[15];
+char         DVGPort[15];
 
 static       dictionary* ini;
 
@@ -537,10 +537,10 @@ int main(int argc, char *argv[])
          do
          {
             strcpy(mytext, gamelist_root->name);                                 // mytext = name of parent game
-            gamesize = 6;                                                        // fontsize for gamelist
+            gamesize = optz[o_fontsize];                                                        // fontsize for gamelist
             if (!man_menu && (sel_game == gamelist_root))                        // if we're at the selected game...
             {
-               gamesize = 8;
+               gamesize = optz[o_fontsize]+2;
                if (sel_game != sel_clone) strcpy(mytext, sel_clone->name);       // change to clone name if different
                if (sel_game->nclone)
                {
@@ -1549,7 +1549,10 @@ void getsettings(void)
    optz[o_redozvg]   = iniparser_getboolean(ini, "interface:reopenzvg", 1);
    optz[o_dovga]     = iniparser_getboolean(ini, "interface:rendervga", 0);
    optz[o_attmode]   = iniparser_getboolean(ini, "interface:attractmode", 0);
-
+   optz[o_fontsize]  = iniparser_getint(ini, "interface:fontsize", 6);
+   if (optz[o_fontsize] < 4) optz[o_fontsize] = 4;
+   if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
+      
    strcpy(attractargs, iniparser_getstring(ini, "interface:attractargs", "-attract -str 30"));
    strcpy(zvgargs, iniparser_getstring(ini, "interface:zvgargs", "-video zvg"));
 
@@ -1559,7 +1562,7 @@ void getsettings(void)
 
    #if defined(linux) || defined(__linux) || (__WIN32__) || defined(_WIN32)
       // Com port for USB-DVG
-      strcpy(DVPort, iniparser_getstring(ini, "DVG:port", DefDVPort));
+      strcpy(DVGPort, iniparser_getstring(ini, "DVG:port", DefDVGPort));
    #endif
 
    // controllers
@@ -1615,6 +1618,8 @@ void getsettings(void)
 
 /******************************************************************
 Write a value to the cfg file
+  force: 0 = optional value, don;t have to write to the cfg file
+         1 = mandatory value, must bw written to the cfg file
 valtype: 0 = write value as-is
          1 = as hex
          2 = as a colour
@@ -1624,7 +1629,7 @@ void writeinival(char *key, int value, int force, int valtype)
 {
    char buffer[12];
    char cols[7][10] = {"red", "magenta", "cyan", "blue", "yellow", "green", "white"};
-   if ((iniparser_find_entry(ini, key)) || (force))
+   if ((iniparser_find_entry(ini, key)) || (force)) // Write value if the key already exists, or we set "force"
    {
       switch (valtype)
       {
@@ -1665,7 +1670,7 @@ void writecfg()
    // Com port for USB-DVG, default is /dev/ttyACM0 or COM3
    #if defined(linux) || defined(__linux) || (__WIN32__) || defined(_WIN32)
       if (!iniparser_find_entry(ini, "DVG"))       iniparser_set(ini, "DVG", NULL);
-      iniparser_set(ini, "DVG:Port",               DVPort);
+      iniparser_set(ini, "DVG:Port",               DVGPort);
    #endif
    
    // write the interface settings
@@ -1677,6 +1682,7 @@ void writecfg()
    writeinival("interface:reopenzvg",           optz[o_redozvg], 1, 3);
    writeinival("interface:rendervga",           optz[o_dovga], 0, 3);
    writeinival("interface:attractmode",         optz[o_attmode], 0, 3);
+   writeinival("interface:fontsize   ",         optz[o_fontsize], 1, 0);
    iniparser_set(ini, "interface:attractargs",  attractargs);
    iniparser_set(ini, "interface:zvgargs",      zvgargs);
 
@@ -1857,7 +1863,7 @@ void SetOptions(void)
       if (optz[o_stars]) showstars();
 
       top = 330;
-      options = 9;
+      options = 10;
 
       setcolour(vwhite, 25);
       PrintString(">", -340, (top-((cursor+1)*spacing)), 0, 6, 6, 0);
@@ -1967,26 +1973,31 @@ void SetOptions(void)
       // Edit Games List
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 3)   setcolour(vwhite, 25);
+      if (cursor == options - 4)   setcolour(vwhite, 25);
       PrintString("Show/Hide Games  ", -150, top, 0, 6, 6, 0);
-//      PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
       PrintString( ">      ", 250, top, 0, 6, 6, 0);
 
       // Edit Menu Colours
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 2)   setcolour(vwhite, 25);
+      if (cursor == options - 3)   setcolour(vwhite, 25);
       PrintString("Edit Menu Colours", -150, top, 0, 6, 6, 0);
-//      PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
       PrintString( ">      ", 250, top, 0, 6, 6, 0);
 
       // Monitor Test Patterns
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 1)   setcolour(vwhite, 25);
+      if (cursor == options - 2)   setcolour(vwhite, 25);
       PrintString("Test Patterns    ", -150, top, 0, 6, 6, 0);
-//      PrintString((edit == 1 ? "yes    " : "no     "), 250, top, 0, 6, 6, 0);
       PrintString( ">      ", 250, top, 0, 6, 6, 0);
+
+      // Font Size
+      top-=spacing;
+      setcolour(vwhite, 15);
+      if (cursor == options - 1)   setcolour(vwhite, 25);
+      PrintString("Font Size        ", -150, top, 0, 6, 6, 0);
+      itoa(optz[o_fontsize], angle, 10);
+      PrintString(angle, 199, top, 0, 6, 6, 0);
 
       // Print Keycode
       top=-ymax+80;
@@ -2149,18 +2160,31 @@ void SetOptions(void)
          }
       }
       // From here the options number can change depending on whether mouse settings are active, so we can't use switch/case...
-      if (cursor == options-3)   // Edit Games List
+      if (cursor == options-4)   // Edit Games List
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditGamesList();
       }
-      if (cursor == options-2)   // Edit Menu Colours
+      if (cursor == options-3)   // Edit Menu Colours
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditColours();
       }
 
-      if (cursor == options-1)   // Monitor Test Patterns
+      if (cursor == options-2)   // Monitor Test Patterns
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) TestPatterns();
+      }
+      if (cursor == options-1)   // Font Size
+      {
+         if (cc == keyz[k_pclone])
+         {
+            optz[o_fontsize]--;
+            if (optz[o_fontsize] < 4) optz[o_fontsize] = 4;
+         }
+         if (cc == keyz[k_nclone])
+         {
+            optz[o_fontsize]++;
+            if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
+         }
       }
       sendframe();
    }

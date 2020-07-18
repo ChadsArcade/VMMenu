@@ -128,6 +128,7 @@
 #define o_mpoint       10
 #define o_dovga        11
 #define o_attmode      12
+#define o_fontsize     13
 
 typedef struct {
    float x, y;
