@@ -597,6 +597,8 @@ int main(int argc, char *argv[])
  Scale factor x,y
  Characters rotated by charangle
  along a line rotated by lineangle
+ 
+ Todo: add flags to allow for left/right aligned?
 ********************************************************************/
 void PrintString(char *text, int xpos, int ypos, int charangle, float xScale, float yScale, int lineangle)
 {
@@ -1618,7 +1620,7 @@ void getsettings(void)
 
 /******************************************************************
 Write a value to the cfg file
-  force: 0 = optional value, don;t have to write to the cfg file
+  force: 0 = optional value, don't have to write to the cfg file
          1 = mandatory value, must bw written to the cfg file
 valtype: 0 = write value as-is
          1 = as hex
@@ -1682,7 +1684,7 @@ void writecfg()
    writeinival("interface:reopenzvg",           optz[o_redozvg], 1, 3);
    writeinival("interface:rendervga",           optz[o_dovga], 0, 3);
    writeinival("interface:attractmode",         optz[o_attmode], 0, 3);
-   writeinival("interface:fontsize   ",         optz[o_fontsize], 1, 0);
+   writeinival("interface:fontsize",            optz[o_fontsize], 1, 0);
    iniparser_set(ini, "interface:attractargs",  attractargs);
    iniparser_set(ini, "interface:zvgargs",      zvgargs);
 
@@ -1866,17 +1868,17 @@ void SetOptions(void)
       options = 10;
 
       setcolour(vwhite, 25);
-      PrintString(">", -150 - (8*4*optz[o_fontsize]), (top-((cursor+1)*spacing)), 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString(">", -150 - (7*4*optz[o_fontsize])-4, (top-((cursor+1)*spacing)), 0, optz[o_fontsize]-2, optz[o_fontsize], 0); // 7 * 4 =  7 chars * width
 
       // Screen rotation
       top-=spacing;
       setcolour(vwhite, 15);
       if (cursor == 0)   setcolour(vwhite, 25);
       PrintString("Rotation         ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_rot] == 0) strcpy(angle,"0      ");
-      if (optz[o_rot] == 1) strcpy(angle,"90     ");
-      if (optz[o_rot] == 2) strcpy(angle,"180    ");
-      if (optz[o_rot] == 3) strcpy(angle,"270    ");
+      if (optz[o_rot] == 0) strcpy(angle,"0        ");
+      if (optz[o_rot] == 1) strcpy(angle,"90       ");
+      if (optz[o_rot] == 2) strcpy(angle,"180      ");
+      if (optz[o_rot] == 3) strcpy(angle,"270      ");
       PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Stars
@@ -1884,37 +1886,37 @@ void SetOptions(void)
       setcolour(vwhite, 15);
       if (cursor == 1)   setcolour(vwhite, 25);
       PrintString("Stars            ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString(optz[o_stars] == 1 ? "yes    " : "no     ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString(optz[o_stars] == 1 ? "yes      " : "no       ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Caps
       top-=spacing;
       setcolour(vwhite, 15);
       if (cursor == 2)   setcolour(vwhite, 25);
       PrintString("All Caps         ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString((optz[o_ucase] == 1 ? "yes    " : "no     "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString((optz[o_ucase] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Show Prev and Next
       top-=spacing;
       setcolour(vwhite, 15);
       if (cursor == 3)   setcolour(vwhite, 25);
       PrintString("Show Prev/Next   ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString((optz[o_togpnm] == 1 ? "yes    " : "no     "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString((optz[o_togpnm] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Control Panel Type
       top-=spacing;
       setcolour(vwhite, 15);
       if (cursor == 4)   setcolour(vwhite, 25);
       PrintString("Control Panel    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_cpanel] == 0) PrintString("Buttons ", 259, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_cpanel] == 1) PrintString("Joystick", 259, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_cpanel] == 2) PrintString("Spinner ", 259, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (optz[o_cpanel] == 0) PrintString("Buttons  ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (optz[o_cpanel] == 1) PrintString("Joystick ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (optz[o_cpanel] == 2) PrintString("Spinner  ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Reopen ZVG
       top-=spacing;
       setcolour(vwhite, 15);
       if (cursor == 5)   setcolour(vwhite, 25);
       PrintString("Reopen ZVG       ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString((optz[o_redozvg] == 1 ? "yes    " : "no     "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString((optz[o_redozvg] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Mouse/Spinner options
       if (mousefound)
@@ -1928,7 +1930,7 @@ void SetOptions(void)
          if (optz[o_mouse] == 1) strcpy(angle,"X-Spinner");
          if (optz[o_mouse] == 2) strcpy(angle,"Y-Spinner");
          if (optz[o_mouse] == 3) strcpy(angle,"Trackball");
-         PrintString(angle, 268, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+         PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
          if (optz[o_mouse])
          {
@@ -1945,14 +1947,14 @@ void SetOptions(void)
             setcolour(vwhite, 15);
             if (cursor == 7)   setcolour(vwhite, 25);
             PrintString("- Reverse X Axis  ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-            PrintString((optz[o_mrevX] == 1 ? "yes    " : "no     "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            PrintString((optz[o_mrevX] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
             // Reverse Y Axis
             top-=spacing;
             setcolour(vwhite, 15);
             if (cursor == 8)   setcolour(vwhite, 25);
             PrintString("- Reverse Y Axis  ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-            PrintString((optz[o_mrevY] == 1 ? "yes    " : "no     "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            PrintString((optz[o_mrevY] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
             // Mouse Sensitivity
             top-=spacing;
@@ -1960,8 +1962,7 @@ void SetOptions(void)
             if (cursor == 9)   setcolour(vwhite, 25);
             PrintString("- Sensitivity     ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
             itoa(optz[o_msens], angle, 10);
-            strncpy(angle+strlen(angle), "       ", 7-strlen(angle));   // Pad out to 7 characters to align text
-            angle[7]='\0';
+            *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
             PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
             setcolour(vyellow, 25);
@@ -1977,21 +1978,21 @@ void SetOptions(void)
       setcolour(vwhite, 15);
       if (cursor == options - 4)   setcolour(vwhite, 25);
       PrintString("Show/Hide Games  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString( ">      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Edit Menu Colours
       top-=spacing;
       setcolour(vwhite, 15);
       if (cursor == options - 3)   setcolour(vwhite, 25);
       PrintString("Edit Menu Colours", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString( ">      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Monitor Test Patterns
       top-=spacing;
       setcolour(vwhite, 15);
       if (cursor == options - 2)   setcolour(vwhite, 25);
       PrintString("Test Patterns    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString( ">      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Font Size
       top-=spacing;
@@ -1999,15 +2000,14 @@ void SetOptions(void)
       if (cursor == options - 1)   setcolour(vwhite, 25);
       PrintString("Font Size        ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       itoa(optz[o_fontsize], angle, 10);
-      strncpy(angle+strlen(angle), "       ", 7-strlen(angle));   // Pad out to 7 characters to align text
-      angle[7]='\0';
+      *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
       PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Print Keycode
       top=-ymax+80;
       setcolour(vgreen, 20);
       PrintString("Last keycode     ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      sprintf(angle,"0x%04x ",lastkey);
+      sprintf(angle,"0x%04x   ",lastkey);
       PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       if (cc) lastkey = cc;                        // Record keypress
