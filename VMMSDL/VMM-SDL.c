@@ -17,8 +17,8 @@ extern void	GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B compo
 
 SDL_Window     *window = NULL;
 SDL_Renderer   *screenRender = NULL;
-int            WINDOW_WIDTH  = 1024;
-int            WINDOW_HEIGHT = 768;
+int            WINDOW_WIDTH  = 900;
+int            WINDOW_HEIGHT; // = 600;
 #if defined(linux) || defined(__linux)
 const          char* WINDOW_TITLE = "Vector Mame Menu for Linux";
 #elif defined(__WIN32__) || defined(_WIN32)
@@ -31,7 +31,7 @@ int            SDL_VB, SDL_VC;            // SDL_Vector "Brightness" and "Colour
 int            optz[15];                  // array of user defined menu preferences
 int            keyz[11];                  // array of key press codes
 extern int     mousefound;
-extern char    DVPort[15];
+extern char    DVGPort[15];
 
 
 /******************************************************************
@@ -59,7 +59,7 @@ void startZVG(void)
 	
 	InitialiseSDL(1);
    #ifdef _DVGTIMER_H_
-      printf(">>> DVG Hardware Version using port: %s <<<\n",DVPort);
+      printf(">>> DVG Hardware Version using port: %s <<<\n",DVGPort);
    #else
       printf(">>> ZVG Hardware Version <<<");
    #endif
@@ -127,6 +127,7 @@ void InitialiseSDL(int start)
 		//else printf("Init: %s\n", SDL_GetError());
 	}
 	/* Set a video mode */
+	WINDOW_HEIGHT=((WINDOW_WIDTH/4)*3);
    window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN); // || SDL_WINDOW_INPUT_GRABBED);
 
@@ -152,6 +153,7 @@ void CloseSDL(int done)
    SDL_DestroyWindow(window);
 	if (done) SDL_Quit();
 }
+
 
 /********************************************************************
 	Send a vector to the SDL surface - adjust co-ords from ZVG format
@@ -187,6 +189,7 @@ void FrameSendSDL()
 	}
 }
 
+
 /******************************************************************
 Check whether a mouse driver is installed
 *******************************************************************/
@@ -194,6 +197,7 @@ int initmouse(void)
 {
 	return 1;                                 // Let's just say yes...
 }
+
 
 /******************************************************************
 Get the amount by which the mouse has been moved since last check

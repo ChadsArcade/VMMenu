@@ -58,7 +58,7 @@ static HANDLE  s_serial_fd = INVALID_HANDLE_VALUE;
 static char    s_serial_dev[128];
 static int     s_xmin, s_xmax;
 static int     s_ymin, s_ymax;
-extern char    DVPort[15];
+extern char    DVGPort[15];
 
 enum portErrCode
 {	errOk = 0,				// no error (must be set to 0)
@@ -364,7 +364,7 @@ void zvgBanner( uint32_t speeds, void *id)
 {
    (void)speeds;
 	(void)id;
-   printf("USB DVG Hardware, using port: %s <<<\n",DVPort);
+   printf("USB DVG Hardware, using port: %s <<<\n",DVGPort);
 }
 
 
@@ -381,7 +381,7 @@ void zvgError(uint32_t err)
       printf("No Error");
 		break;
 	case errOpenCom:
-      printf("Error - Could not open Serial Port: %s, check hardware and port setting in vmmenu.cfg", DVPort);
+      printf("Error - Could not open Serial Port: %s, check hardware and port setting in vmmenu.cfg", DVGPort);
 		break;
 	case errComState:
       printf("Error - Could not get comms state");
@@ -404,8 +404,8 @@ int zvgFrameOpen(void)
 {
    int result = errOpenDevice;
 	tmrInit();					     // initialize timers
-	tmrSetFrameRate(60);         // set the frame rate
-   strncpy(s_serial_dev, DVPort, ARRAY_SIZE(s_serial_dev) - 1);
+	//tmrSetFrameRate(60);         // set the frame rate
+   strncpy(s_serial_dev, DVGPort, ARRAY_SIZE(s_serial_dev) - 1);
    s_serial_dev[ARRAY_SIZE(s_serial_dev) - 1] = 0;
    result = serial_open();
    return result;
