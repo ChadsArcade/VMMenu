@@ -116,30 +116,30 @@ char* itoa(int value, char* result, int base)
 ********************************************************************/
 void InitialiseSDL(int start)
 {
-	/* Initialise SDL */
-	if (start)
-	{
-		if( SDL_Init( SDL_INIT_VIDEO ) < 0)
-		{
-			fprintf( stderr, "Could not initialise SDL: %s\n", SDL_GetError() );
-			exit( -1 );
-		}
-		//else printf("Init: %s\n", SDL_GetError());
-	}
-	/* Set a video mode */
-	WINDOW_HEIGHT=((WINDOW_WIDTH/4)*3);
-   window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN); // || SDL_WINDOW_INPUT_GRABBED);
+   /* Initialise SDL */
+   if (start)
+   {
+      if( SDL_Init( SDL_INIT_VIDEO ) < 0)
+      {
+         fprintf( stderr, "Could not initialise SDL: %s\n", SDL_GetError() );
+         exit( -1 );
+      }
+      //else printf("Init: %s\n", SDL_GetError());
+   }
+   /* Set a video mode */
+   WINDOW_HEIGHT=((WINDOW_WIDTH/4)*3); // this ensure the window is 4:3
+   window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL); // || SDL_WINDOW_INPUT_GRABBED);
 
-   screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-   //screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+   screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+   SDL_ShowWindow(window);
 
    SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) {}				// clear event buffer
+   SDL_Event event;
+   while (SDL_PollEvent(&event)) {}				// clear event buffer
 
-	mouse_x = 0;
-	mouse_y = 0;
+   mouse_x = 0;
+   mouse_y = 0;
 }
 
 

@@ -424,7 +424,7 @@ int main(int argc, char *argv[])
             }
          }
 
-         drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 2, vwhite);                            // Draw frame around the edge of the screen
+         if (optz[o_borders]) drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 2, vwhite);                            // Draw frame around the edge of the screen
 
          // print the manufacturer name
          strcpy(mytext, vectorgames->name);
@@ -896,15 +896,16 @@ vObject intro(void)
       sendframe();
    }
 
-   mame.theta = -4;         // no rotation this time
+   mame.theta = 0;         // no rotation this time
 
    // zoom and fade logo off screen
    bright = 30;
-   for (count=0;count<60;count++)
+   for (count=0;count<30;count++)
    {
-      mame.scale.x += 1;
+      mame.scale.x += 4;
       mame.scale.y = mame.scale.x;
-      bright -= 0.5;
+      bright -= 1;
+      if (bright < 1) bright=0;
       mame.bright = bright;
       drawshape(mame);
       mame = updateobject(mame);
@@ -1554,6 +1555,7 @@ void getsettings(void)
    optz[o_fontsize]  = iniparser_getint(ini, "interface:fontsize", 6);
    if (optz[o_fontsize] < 4) optz[o_fontsize] = 4;
    if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
+   optz[o_borders]   = iniparser_getint(ini, "interface:borders", 1);
       
    strcpy(attractargs, iniparser_getstring(ini, "interface:attractargs", "-attract -str 30"));
    strcpy(zvgargs, iniparser_getstring(ini, "interface:zvgargs", "-video zvg"));
@@ -1685,6 +1687,7 @@ void writecfg()
    writeinival("interface:rendervga",           optz[o_dovga], 0, 3);
    writeinival("interface:attractmode",         optz[o_attmode], 0, 3);
    writeinival("interface:fontsize",            optz[o_fontsize], 1, 0);
+   writeinival("interface:borders",             optz[o_borders], 0, 3);
    iniparser_set(ini, "interface:attractargs",  attractargs);
    iniparser_set(ini, "interface:zvgargs",      zvgargs);
 
@@ -1860,12 +1863,15 @@ void SetOptions(void)
          if (opty > ymax) opty = -ymax;
       }
 
-      drawbox(-xmax, -ymax, xmax, ymax, vcyan, 15);
-      drawbox(-xmax+24, -ymax+24, xmax-24, ymax-24, vcyan, 15);
+      if (optz[o_borders])
+      {
+         drawbox(-xmax, -ymax, xmax, ymax, vcyan, 15);
+         drawbox(-xmax+24, -ymax+24, xmax-24, ymax-24, vcyan, 15);
+      }
       if (optz[o_stars]) showstars();
 
-      top = 330;
-      options = 10;
+      top = 372; //330;
+      options = 11;
 
       setcolour(vwhite, 25);
       PrintString(">", -150 - (7*4*optz[o_fontsize])-4, (top-((cursor+1)*spacing)), 0, optz[o_fontsize]-2, optz[o_fontsize], 0); // 7 * 4 =  7 chars * width
@@ -1976,32 +1982,39 @@ void SetOptions(void)
       // Edit Games List
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 4)   setcolour(vwhite, 25);
+      if (cursor == options - 5)   setcolour(vwhite, 25);
       PrintString("Show/Hide Games  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Edit Menu Colours
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 3)   setcolour(vwhite, 25);
+      if (cursor == options - 4)   setcolour(vwhite, 25);
       PrintString("Edit Menu Colours", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Monitor Test Patterns
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 2)   setcolour(vwhite, 25);
+      if (cursor == options - 3)   setcolour(vwhite, 25);
       PrintString("Test Patterns    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Font Size
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 1)   setcolour(vwhite, 25);
+      if (cursor == options - 2)   setcolour(vwhite, 25);
       PrintString("Font Size        ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       itoa(optz[o_fontsize], angle, 10);
       *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
       PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+
+      // Borders
+      top-=spacing;
+      setcolour(vwhite, 15);
+      if (cursor == options-1)     setcolour(vwhite, 25);
+      PrintString("Borders          ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString((optz[o_borders] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Print Keycode
       top=-ymax+80;
@@ -2164,20 +2177,20 @@ void SetOptions(void)
          }
       }
       // From here the options number can change depending on whether mouse settings are active, so we can't use switch/case...
-      if (cursor == options-4)   // Edit Games List
+      if (cursor == options-5)   // Edit Games List
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditGamesList();
       }
-      if (cursor == options-3)   // Edit Menu Colours
+      if (cursor == options-4)   // Edit Menu Colours
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditColours();
       }
 
-      if (cursor == options-2)   // Monitor Test Patterns
+      if (cursor == options-3)   // Monitor Test Patterns
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) TestPatterns();
       }
-      if (cursor == options-1)   // Font Size
+      if (cursor == options-2)   // Font Size
       {
          if (cc == keyz[k_pclone])
          {
@@ -2190,6 +2203,12 @@ void SetOptions(void)
             if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
          }
       }
+      if (cursor == options-1)   // Borders
+      {
+         if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_borders] = !optz[o_borders];
+         if (cc == keyz[k_start]) optz[o_borders]   = 1;
+      }
+
       sendframe();
    }
 }
@@ -2208,10 +2227,11 @@ void   EditGamesList(void)
    char        gamename[50];
    int         c_hide, i_game=10, i_gameinc=2, startgame=0, rows=11; // I tried 15 rows but it caused too much flicker, Make sure it's ODD.
    float       width;
-   int         descindex=0, desclen, j=0, ticks=0, LEDtimer=0;
+   int         descindex=0, desclen, j=0, ticks=0, LEDtimer=0, maxlen=45;
 
    mouse_x = 0;
    mouse_y = 0;
+   maxlen = maxlen - 5*(optz[o_fontsize] - 3); // remove 5 more chars per font increase
 
    list_root = build_games_list();
    list_cursor = list_root;
@@ -2247,16 +2267,16 @@ void   EditGamesList(void)
          else
             c_hide=vgreen;
          strcpy(gamename, list_print->desc);
-         gamename[35]=0;                                          // truncate if >35 chars just to keep things on screen
+         gamename[maxlen]=0;                                          // truncate if >35 chars just to keep things on screen
          if (!strcmp(list_print->clone, autogame)) startgame=1;   // See if we are on the autostart game
 
          if (i==(rows-1)/2)                                       // This is the selected record
          {
             desclen=strlen(list_print->desc);
 
-            if (desclen > 35 && (timer%10==0))                    // If it's a long description then we'll scroll it every 1/3 sec
+            if (desclen > maxlen && (timer%10==0))                    // If it's a long description then we'll scroll it every 1/3 sec
             {
-               if (descindex < (desclen-34))                      // If we're not at the end of the scroll...
+               if (descindex < (desclen-maxlen))                      // If we're not at the end of the scroll...
                {
                   if (descindex > 0)
                   {
@@ -2269,19 +2289,21 @@ void   EditGamesList(void)
                      ticks=0;
                   }
                }
-               if ((descindex == (desclen-34)) && ticks == 60)    // If we're at the end of the scroll and have waited for 60 ticks...
+               if ((descindex == (desclen-maxlen)) && ticks == 60)    // If we're at the end of the scroll and have waited for 60 ticks...
                {
                   descindex=0;                                    // ...reset scroll to start
                   ticks=0;
                }
             }
 
-            for (j=0; j<35; j++)                                  // Show 35 chars
+            for (j=0; j<maxlen; j++)                                  // Show (maxlen) chars
             {
                gamename[j] = list_print->desc[j+descindex];
             }
-            setcolour(vwhite, 25);
-            PrintString(gamename, 60, top, 0, 5.5, 7, 0);
+            //setcolour(vwhite, 25);
+            setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
+            //PrintString(gamename, 60, top, 0, 5.5, 7, 0);
+            PrintString(gamename, 60, top, 0, optz[o_fontsize]+1, optz[o_fontsize]+1, 0);
             PrintString(">       ", -300, top, 0, 5, 7, 0);
             PrintString("O", -305, top, 0, 16, 8, 0);
             setcolour(c_hide, 25);
@@ -2299,8 +2321,10 @@ void   EditGamesList(void)
          {
             setcolour(vwhite, i_game);
             PrintString("O", -305, top, 0, 13, 6, 0);
-            setcolour(vyellow, i_game);
-            PrintString(gamename, 60, top, 0, 4, 5, 0);
+            //setcolour(vyellow, i_game);
+            setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
+            //PrintString(gamename, 60, top, 0, 4, 5, 0);
+            PrintString(gamename, 60, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
             setcolour(c_hide, i_game);
             //PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 4, 5, 0);
             PrintString((list_print->hidden == 1 ? "         " : "    #    "), -307, top, 0, 4, 5, 0);
@@ -2316,7 +2340,7 @@ void   EditGamesList(void)
          startgame=0;
       }
       setcolour(vgreen, 20);
-      PrintString("Set/clear autorun game with 1P Start", 0, -ymax+80, 0, 6, 6, 0);
+      PrintString("Set/clear autorun game with 1P Start", 0, -ymax+80, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       cc=getkey();
       if (cc)

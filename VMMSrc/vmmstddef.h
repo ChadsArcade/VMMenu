@@ -115,20 +115,23 @@
 #define k_random       10
 
 // Index of user options
-#define o_rot          0
-#define o_stars        1
-#define o_ucase        2
-#define o_togpnm       3
-#define o_cpanel       4
-#define o_redozvg      5
-#define o_mouse        6
-#define o_msens        7
-#define o_mrevX        8
-#define o_mrevY        9
-#define o_mpoint       10
-#define o_dovga        11
-#define o_attmode      12
-#define o_fontsize     13
+enum options {
+   o_rot,
+   o_stars,
+   o_ucase,
+   o_togpnm,
+   o_cpanel,
+   o_redozvg,
+   o_mouse,
+   o_msens,
+   o_mrevX,
+   o_mrevY,
+   o_mpoint,
+   o_dovga,
+   o_attmode,
+   o_fontsize,
+   o_borders
+};
 
 typedef struct {
    float x, y;
@@ -138,11 +141,11 @@ typedef struct {
 Define a vector object, having:
    A vector shape                        (outline)
    Position                              (pos.x, pos.y)
-   Velocity                              (xinc, yinc)
-   Scale                                 (xscale, yscale)
+   Velocity                              (inc.x, inc.y)
+   Scale                                 (scale.x, scale.y)
    An angle and rotation factor          (angle, theta)
-   A point around which rotation occurs  (rot.x, rot.y)
-   Brightness / colour                   (red, green, blue)
+   A point around which rotation occurs  (cent.x, cent.y)
+   Brightness / colour                   (colour, bright)
    Edge behaviour (wrap or bounce)       (edge)
 *******************************************************/
 typedef struct {

@@ -52,7 +52,7 @@ ifeq ($(target),linuxdvg)
    $(info Building for Linux DVG)
    VPATH=VMMSrc iniparser Linux Win32/dvg VMMSDL
    INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Win32/dvg -I./iniparser -I./VMMSDL
-   LIBS= `sdl2-config --libs` -lSDL2 -lm -lX11
+   LIBS= `sdl2-config --libs` -lSDL2 -lm
    EXEC = vmmenu
    RM = rm -f
    RMDIR = rm -rf
