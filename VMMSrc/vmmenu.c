@@ -1622,12 +1622,16 @@ void getsettings(void)
 
 /******************************************************************
 Write a value to the cfg file
-  force: 0 = optional value, don't have to write to the cfg file
-         1 = mandatory value, must bw written to the cfg file
+
+  force: 0 = optional value, only write to cfg file if it was
+             already present in the file
+         1 = mandatory value, must be written to the cfg file
+
 valtype: 0 = write value as-is
          1 = as hex
          2 = as a colour
          3 = as boolean yes/no
+
 *******************************************************************/
 void writeinival(char *key, int value, int force, int valtype)
 {
@@ -1687,7 +1691,7 @@ void writecfg()
    writeinival("interface:rendervga",           optz[o_dovga], 0, 3);
    writeinival("interface:attractmode",         optz[o_attmode], 0, 3);
    writeinival("interface:fontsize",            optz[o_fontsize], 1, 0);
-   writeinival("interface:borders",             optz[o_borders], 0, 3);
+   writeinival("interface:borders",             optz[o_borders], 1, 3);
    iniparser_set(ini, "interface:attractargs",  attractargs);
    iniparser_set(ini, "interface:zvgargs",      zvgargs);
 

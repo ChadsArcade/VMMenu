@@ -79,6 +79,10 @@ Monitor type is made up of a combination of 5 bits:\
 e.g. M4 = standard colour monitor with spot killer, M12=standard B&W monitor with spot killer\
 e.g. export ZVGPORT="P378 M4"
 
+For keyboard LED support (often used to flash the start buttons) you will need to run the menu as root. Optionally, run:
+`sudo make target=linux install`
+which will set the suid bit.
+
 ## Building on DOS
 
 You will need a working DJGPP environment to compile VMMenu for DOS. There are many tutorials online for this.
