@@ -42,6 +42,12 @@
 *
 * 14-Feb-20 v1.5.1   Added Screen Test Patterns
 *
+* 08-Aug-20 v1.6     USB-DVG support added
+*                    Borders are optional
+*                    Font size is selectable
+*                    Sound effects added
+*                    Probably some other stuff as well
+*
 ***********************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -138,7 +144,7 @@ m_node       *vectorgames;
 g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 unsigned int man_menu;
 
-char         auth1[] = "VMMenu 1.5.1, Chad Gray";
+char         auth1[] = "VMMenu 1.6, Chad Gray";
 char         auth2[] = "ChadsArcade@Gmail.com";
 
 vObject      mame;

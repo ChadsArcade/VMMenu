@@ -44,9 +44,10 @@ I still get the odd query about the menu, so I decided that I'd put it up on Git
 
 ~~`sudo apt install libsdl1.2-dev libsdl-gfx1.2-dev`~~
 
-The Linux menu is now built against SDL2, you will need the SDL Lib2-dev files:
+The Linux menu is now built against SDL2, you will need the SDL Lib2-dev and mixer files:
 
 `sudo apt install libsdl2-dev`
+`sudo apt install libsdl2-mixer-2.0-0 libsdl2-mixer-dev`
 
 ~~Copy the makefile from the VMMenu/Linux directory to VMMenu~~
 The makefile now supports all OS targets, and should cater for their foibles.
