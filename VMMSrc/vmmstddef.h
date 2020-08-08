@@ -130,7 +130,8 @@ enum options {
    o_dovga,
    o_attmode,
    o_fontsize,
-   o_borders
+   o_borders,
+   o_volume
 };
 
 typedef struct {

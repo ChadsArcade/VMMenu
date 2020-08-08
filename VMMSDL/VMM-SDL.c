@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include "vmmstddef.h"
 #include "VMM-SDL.h"
 #if defined(linux) || defined(__linux)
@@ -13,12 +14,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern void	GetRGBfromColour(int, int*, int*, int*);					// Get R, G and B components of a passed colour
+extern void   GetRGBfromColour(int, int*, int*, int*);               // Get R, G and B components of a passed colour
 
 SDL_Window     *window = NULL;
 SDL_Renderer   *screenRender = NULL;
-int            WINDOW_WIDTH  = 900;
+int            WINDOW_WIDTH  = 768;
 int            WINDOW_HEIGHT; // = 600;
+#define        WINDOW_SCALE (1024.0/WINDOW_WIDTH)
+
 #if defined(linux) || defined(__linux)
 const          char* WINDOW_TITLE = "Vector Mame Menu for Linux";
 #elif defined(__WIN32__) || defined(_WIN32)
@@ -28,19 +31,30 @@ int            mdx=0, mdy=0;
 int            mouse_x=0, mouse_y=0;
 extern         int ZVGPresent;
 int            SDL_VB, SDL_VC;            // SDL_Vector "Brightness" and "Colour"
-int            optz[15];                  // array of user defined menu preferences
+int            optz[16];                  // array of user defined menu preferences
 int            keyz[11];                  // array of key press codes
 extern int     mousefound;
 extern char    DVGPort[15];
+uint32_t       timestart = 0, timenow, duration;
+
+//The sound effects that will be used
+Mix_Chunk      *gSFury   = NULL;
+Mix_Chunk      *gFire    = NULL;
+Mix_Chunk      *gFire2   = NULL;
+Mix_Chunk      *gExplode = NULL;
+Mix_Chunk      *gNuke    = NULL;
+
+#define		fps     60
+#define		fps_ms  1000/fps
 
 
 /******************************************************************
-	Start up the DVG if poss and use SDL if necessary
+   Start up the DVG if poss and use SDL if necessary
 *******************************************************************/
 void startZVG(void)
 {
-	unsigned int error;
-   #if DEBUG	
+   unsigned int error;
+   #if DEBUG
       printf("Key UP:       0x%04x\n", UP);
       printf("Key DOWN:     0x%04x\n", DOWN);
       printf("Key LEFT:     0x%04x\n", LEFT);
@@ -56,21 +70,21 @@ void startZVG(void)
       printf("Key RSHIFT:   0x%04x\n", RSHIFT);
       printf("Key LSHIFT:   0x%04x\n", LSHIFT);
    #endif
-	
-	InitialiseSDL(1);
+
+   InitialiseSDL(1);
    #ifdef _DVGTIMER_H_
       printf(">>> DVG Hardware Version using port: %s <<<\n",DVGPort);
    #else
       printf(">>> ZVG Hardware Version <<<");
    #endif
-	error = zvgFrameOpen();			// initialize ZVG/DVG
-	if (error)
-	{
-		zvgError(error);				// print error
-		printf("Vector Generator hardware not found, rendering to SDL window only.\n");
-		ZVGPresent = 0;
-	}
-	else
+   error = zvgFrameOpen();         // initialize ZVG/DVG
+   if (error)
+   {
+      zvgError(error);             // print error
+      printf("Vector Generator hardware not found, rendering to SDL window only.\n");
+      ZVGPresent = 0;
+   }
+   else
    {
       tmrSetFrameRate(FRAMES_PER_SEC);
       zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
@@ -83,31 +97,31 @@ void startZVG(void)
 }
 
 /******************************************************************
-	itoa function, which isn't ANSI though is part of DJGPP
+   itoa function, which isn't ANSI though is part of DJGPP
 *******************************************************************/
 char* itoa(int value, char* result, int base)
 {
-	// check that the base if valid
-	if (base < 2 || base > 36) { *result = '\0'; return result; }
+   // check that the base if valid
+   if (base < 2 || base > 36) { *result = '\0'; return result; }
 
-	char* ptr = result, *ptr1 = result, tmp_char;
-	int tmp_value;
+   char* ptr = result, *ptr1 = result, tmp_char;
+   int tmp_value;
 
-	do {
-		tmp_value = value;
-		value /= base;
-		*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
-	} while ( value );
+   do {
+      tmp_value = value;
+      value /= base;
+      *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+   } while ( value );
 
-	// Apply negative sign
-	if (tmp_value < 0) *ptr++ = '-';
-	*ptr-- = '\0';
-	while(ptr1 < ptr) {
-		tmp_char = *ptr;
-		*ptr--= *ptr1;
-		*ptr1++ = tmp_char;
-	}
-	return result;
+   // Apply negative sign
+   if (tmp_value < 0) *ptr++ = '-';
+   *ptr-- = '\0';
+   while(ptr1 < ptr) {
+      tmp_char = *ptr;
+      *ptr--= *ptr1;
+      *ptr1++ = tmp_char;
+   }
+   return result;
 }
 
 
@@ -119,56 +133,138 @@ void InitialiseSDL(int start)
    /* Initialise SDL */
    if (start)
    {
-      if( SDL_Init( SDL_INIT_VIDEO ) < 0)
+      if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0)
       {
          fprintf( stderr, "Could not initialise SDL: %s\n", SDL_GetError() );
          exit( -1 );
       }
-      //else printf("Init: %s\n", SDL_GetError());
+      //else printf("SDL Initialised\n");
    }
    /* Set a video mode */
    WINDOW_HEIGHT=((WINDOW_WIDTH/4)*3); // this ensure the window is 4:3
    window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL); // || SDL_WINDOW_INPUT_GRABBED);
+                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIDDEN);
 
-   screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+   screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE); // Don't use accelerated as it is tied to the screen refresh rate
    SDL_ShowWindow(window);
 
    SDL_SetRelativeMouseMode(SDL_TRUE);
    SDL_Event event;
-   while (SDL_PollEvent(&event)) {}				// clear event buffer
+   while (SDL_PollEvent(&event)) {}            // clear event buffer
 
    mouse_x = 0;
    mouse_y = 0;
+   
+   
+   //Initialize SDL_mixer
+   if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+   {
+      printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
+   //else printf("SDL Mixer initialised\n");
+   
+   //Load sound effects
+   gSFury = Mix_LoadWAV( "samples/sfury9.wav" );
+   if( gSFury == NULL )
+   {
+       printf( "Failed to load sfury9 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
+   gFire = Mix_LoadWAV( "samples/elim2.wav" );
+   if( gFire == NULL )
+   {
+       printf( "Failed to load elim2 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
+   gExplode = Mix_LoadWAV( "samples/explode1.wav" );
+   if( gExplode == NULL )
+   {
+       printf( "Failed to load explode1 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
+   gFire2 = Mix_LoadWAV( "samples/efire.wav" );
+   if( gFire == NULL )
+   {
+       printf( "Failed to load efire sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
+   gNuke = Mix_LoadWAV( "samples/nuke1.wav" );
+   if( gNuke == NULL )
+   {
+      printf( "Failed to load nuke1 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
+   Mix_Volume(-1, optz[o_volume]);
 }
 
 
 /********************************************************************
-	Close off SDL cleanly
+	Play a sound sample
+********************************************************************/
+void playsound(int picksound)
+{
+   if (optz[o_volume] > 0)
+   {
+      Mix_Volume(-1, optz[o_volume]);
+      switch(picksound)
+      {
+         case 1:
+            Mix_PlayChannel( -1, gSFury, 0 );
+            break;
+         case 2:
+            Mix_PlayChannel( -1, gFire, 0 );
+            break;
+         case 3:
+            Mix_PlayChannel( -1, gExplode, 0 );
+            break;
+         case 4:
+            Mix_PlayChannel( -1, gFire2, 0 );
+            break;
+         case 5:
+            Mix_PlayChannel( -1, gNuke, 0 );
+            break;
+         default:
+            break;
+      }
+   }
+}
+
+
+/********************************************************************
+   Close off SDL cleanly
 ********************************************************************/
 void CloseSDL(int done)
 {
    SDL_SetWindowGrab(window, SDL_FALSE);
-	SDL_ShowCursor(SDL_ENABLE);
+   SDL_ShowCursor(SDL_ENABLE);
    SDL_DestroyWindow(window);
-	if (done) SDL_Quit();
+   Mix_FreeChunk( gSFury );
+   Mix_FreeChunk( gFire );
+   Mix_FreeChunk( gExplode );
+   Mix_FreeChunk( gFire2 );
+   Mix_FreeChunk( gNuke );
+   gSFury   = NULL;
+   gFire    = NULL;
+   gExplode = NULL;
+   gFire2   = NULL;
+   gNuke    = NULL;
+   Mix_CloseAudio();
+   if (done)
+   {
+      Mix_Quit();
+      SDL_Quit();
+   }
 }
 
 
 /********************************************************************
-	Send a vector to the SDL surface - adjust co-ords from ZVG format
+   Send a vector to the SDL surface - adjust co-ords from ZVG format
 ********************************************************************/
 void SDLvector(float x1, float y1, float x2, float y2, int clr, int bright)
 {
    int r, g, b;
-   float WINDOW_SCALE = (1024.0/WINDOW_WIDTH);
 
    if (optz[o_dovga] || !ZVGPresent)
    {
       if (clr > 7) clr = vwhite;
       if (bright > 31) bright = 31;
       GetRGBfromColour(clr, &r, &g, &b);
-      SDL_SetRenderDrawColor(screenRender, r*8*bright, g*8*bright, b*8*bright, SDL_ALPHA_OPAQUE);
+      SDL_SetRenderDrawColor(screenRender, r*8*bright, g*8*bright, b*8*bright, 127); //SDL_ALPHA_OPAQUE);
       SDL_RenderDrawLine(screenRender, x1/WINDOW_SCALE+(WINDOW_WIDTH/2), -y1/WINDOW_SCALE+(WINDOW_HEIGHT/2),
                                        x2/WINDOW_SCALE+(WINDOW_WIDTH/2), -y2/WINDOW_SCALE+(WINDOW_HEIGHT/2));
    }
@@ -176,17 +272,24 @@ void SDLvector(float x1, float y1, float x2, float y2, int clr, int bright)
 
 
 /********************************************************************
-	Send a screen to the SDL surface
+   Send a screen to the SDL surface
 ********************************************************************/
 void FrameSendSDL()
 {
-	if (optz[o_dovga] || !ZVGPresent)
-	{
-		if (!ZVGPresent) SDL_Delay(100/8);	                  // 1/60 of a sec, same as frame rate, in msecs. Make it a bit faster to compensate for code running time
-      SDL_RenderPresent( screenRender );                    // Flip to rendered screen
-      SDL_SetRenderDrawColor(screenRender, 0, 0, 0, 255);   // Set render colour to black
-      SDL_RenderClear(screenRender);                        // Clear screen
-	}
+   if (optz[o_dovga] || !ZVGPresent)
+   {
+      SDL_RenderPresent(screenRender);                    // Flip to rendered screen
+      SDL_SetRenderDrawColor(screenRender, 0, 0, 0, 255); // Set render colour to black
+      SDL_RenderClear(screenRender);                      // Clear screen
+   }
+   timenow = SDL_GetTicks();
+   duration = (timenow-timestart);
+   //printf("Time now: %i Loop duration: %i Wait time:%i\n", timenow, duration, fps_ms-duration);
+   if (!ZVGPresent)
+   {
+      if ((duration < fps_ms) && ((fps_ms-duration)>0)) SDL_Delay(fps_ms-duration);
+   }
+   timestart=SDL_GetTicks();
 }
 
 
@@ -195,27 +298,27 @@ Check whether a mouse driver is installed
 *******************************************************************/
 int initmouse(void)
 {
-	return 1;                                 // Let's just say yes...
+   return 1;                                 // Let's just say yes...
 }
 
 
 /******************************************************************
 Get the amount by which the mouse has been moved since last check
-	deltas are read and accumulated by keyboard event function
-	Mouse types:   0 = No device
-	               1 = X-Axis Spinner
-	               2 = Y-Axis Spinner
-	               3 = Trackball/Mouse
+   deltas are read and accumulated by keyboard event function
+   Mouse types:   0 = No device
+                  1 = X-Axis Spinner
+                  2 = Y-Axis Spinner
+                  3 = Trackball/Mouse
 *******************************************************************/
 void processmouse(void)
 {
    if (optz[o_mouse])
    {
-	   mouse_x = mdx/optz[o_msens];           // use the integer part
-	   mouse_y = mdy/optz[o_msens];
-	   mdx = mdx%optz[o_msens];               // retain the fractional part
-	   mdy = mdy%optz[o_msens];
-	   //printf("mdx: %d mdy: %d\n", mdx, mdy);
+      mouse_x = mdx/optz[o_msens];           // use the integer part
+      mouse_y = mdy/optz[o_msens];
+      mdx = mdx%optz[o_msens];               // retain the fractional part
+      mdy = mdy%optz[o_msens];
+      //printf("mdx: %d mdy: %d\n", mdx, mdy);
 
       // If spinner selected, discard the axis not in use, the spinner might really be a mouse
       if (optz[o_mouse] == 1) mouse_y = 0;   // Spinner which moves X-axis
@@ -232,8 +335,8 @@ void processmouse(void)
    {
       mouse_x = 0;                           // if we said we don't have a mouse then
       mouse_y = 0;                           // set all the values to zero - there might
-	   mdx=0;                                 // still be a mouse connected giving values
-	   mdy=0;                                 // which we don't want to have an effect
+      mdx=0;                                 // still be a mouse connected giving values
+      mdy=0;                                 // which we don't want to have an effect
    }
 }
 
@@ -244,26 +347,26 @@ Also updates mouse x and y movements
 *******************************************************************/
 int getkey(void)
 {
-	int key=0;
+   int key=0;
 
-	SDL_Event event;
-	while(SDL_PollEvent(&event))
-	{
-		//printf("Event: %d\n", event.type);
-		switch(event.type)
-		{
-			case SDL_MOUSEMOTION:
-				mdx += event.motion.xrel;
-				mdy += event.motion.yrel;
-				break;
-			case SDL_KEYDOWN:
-				key = event.key.keysym.scancode;
+   SDL_Event event;
+   while(SDL_PollEvent(&event))
+   {
+      //printf("Event: %d\n", event.type);
+      switch(event.type)
+      {
+         case SDL_MOUSEMOTION:
+            mdx += event.motion.xrel;
+            mdy += event.motion.yrel;
+            break;
+         case SDL_KEYDOWN:
+            key = event.key.keysym.scancode;
             //printf("Key: %X\n", key);
-				break;
-			default:
-				break;
-		}
-	}
+            break;
+         default:
+            break;
+      }
+   }
 
    if (mousefound) processmouse();              // 3 Feb 2020, read every frame, ignore sample rate
    // convert mouse movement into key presses. Now built into the getkey function
@@ -274,18 +377,26 @@ int getkey(void)
    if (mouse_x < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];       // Spinner   Left  = Up
    if (mouse_x > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];       // Spinner   Right = Down
 
-	return key;
+   if (key == keyz[k_ngame])   playsound(2);
+   if (key == keyz[k_pgame])   playsound(2);
+   if (key == keyz[k_nclone])  playsound(4);
+   if (key == keyz[k_pclone])  playsound(4);
+   if (key == keyz[k_start])   playsound(3);
+   if (key == keyz[k_options]) playsound(5);
+   if (key == keyz[k_quit])    playsound(3);
+
+   return key;
 }
 
 
 /******************************************************************
-	Set Mouse Position
+   Set Mouse Position
 *******************************************************************/
 void mousepos(int *mx, int *my)
 {
-	SDL_GetMouseState(mx, my);
+   SDL_GetMouseState(mx, my);
    *mx = (*mx - (WINDOW_WIDTH/2 -22));
-	*my = -(*my - (WINDOW_HEIGHT/2 -22));
+   *my = -(*my - (WINDOW_HEIGHT/2 -22));
 }
 
 
@@ -294,20 +405,20 @@ Send the frame to the ZVG, exit if it went pear shaped
 *******************************************************/
 int sendframe(void)
 {
-	unsigned int	err=0;
-	if (ZVGPresent)
-	{
-		tmrWaitForFrame();		// wait for next frame time
-		err = zvgFrameSend();	// send next frame
-		if (err)
-		{
-			zvgError( err);
-			zvgFrameClose();		// fix up all the ZVG stuff
-			exit(1);
-		}
-	}
-	FrameSendSDL();
-	return err;
+   unsigned int   err=0;
+   if (ZVGPresent)
+   {
+      //tmrWaitForFrame();      // wait for next frame time
+      err = zvgFrameSend();     // send next frame
+      if (err)
+      {
+         zvgError( err);
+         zvgFrameClose();       // fix up all the ZVG stuff
+         exit(1);
+      }
+   }
+   FrameSendSDL();
+   return err;
 }
 
 
@@ -316,16 +427,16 @@ Close everything off for a graceful exit
 *******************************************************/
 void ShutdownAll(void)
 {
-	CloseSDL(1);
-	#if defined(linux) || defined(__linux)
+   CloseSDL(1);
+   #if defined(linux) || defined(__linux)
       setLEDs(8);
    #else
-	   setLEDs(0);                                    // restore LED status
+      setLEDs(0);                                 // restore LED status
    #endif
    if (ZVGPresent)
-	{
-		zvgFrameClose();                            // fix up all the ZVG stuff
-	}
+   {
+      zvgFrameClose();                            // fix up all the ZVG stuff
+   }
 }
 
 
@@ -354,77 +465,77 @@ void setcolour(int clr, int bright)
 ********************************************************************/
 void drawvector(point p1, point p2, float x_trans, float y_trans)
 {
-	// Standard - no rotation
-	if (optz[o_rot] == 0)
-	{
-		if (ZVGPresent)
-		{
-			zvgFrameVector(p1.x + x_trans, p1.y + y_trans, p2.x + x_trans, p2.y + y_trans);
-		}
-		SDLvector(p1.x + x_trans, p1.y + y_trans, p2.x + x_trans, p2.y + y_trans, SDL_VC, SDL_VB);
-	}
-	// rotated LEFT (90ø CW)
-	if (optz[o_rot] == 1)
-	{
-		if (ZVGPresent)
-		{
-			zvgFrameVector(p1.y + y_trans, -(p1.x + x_trans), p2.y + y_trans, -(p2.x + x_trans));
-		}
-		SDLvector(p1.y + y_trans, -(p1.x + x_trans), p2.y + y_trans, -(p2.x + x_trans), SDL_VC, SDL_VB);
-	}
-	// Rotated 180ø
-	if (optz[o_rot] == 2)
-	{
-		if (ZVGPresent)
-		{
-			zvgFrameVector(-(p1.x + x_trans), -(p1.y + y_trans), -(p2.x + x_trans), -(p2.y + y_trans));
-		}
-		SDLvector(-(p1.x + x_trans), -(p1.y + y_trans), -(p2.x + x_trans), -(p2.y + y_trans), SDL_VC, SDL_VB);
-	}
-	// rotated RIGHT (90ø CCW)
-	if (optz[o_rot] == 3)
-	{
-		if (ZVGPresent)
-		{
-			zvgFrameVector(-(p1.y + y_trans), (p1.x + x_trans), -(p2.y + y_trans), (p2.x + x_trans));
-		}
-		SDLvector(-(p1.y + y_trans), (p1.x + x_trans), -(p2.y + y_trans), (p2.x + x_trans), SDL_VC, SDL_VB);
-	}
+   // Standard - no rotation
+   if (optz[o_rot] == 0)
+   {
+      if (ZVGPresent)
+      {
+         zvgFrameVector(p1.x + x_trans, p1.y + y_trans, p2.x + x_trans, p2.y + y_trans);
+      }
+      SDLvector(p1.x + x_trans, p1.y + y_trans, p2.x + x_trans, p2.y + y_trans, SDL_VC, SDL_VB);
+   }
+   // rotated LEFT (90° CW)
+   if (optz[o_rot] == 1)
+   {
+      if (ZVGPresent)
+      {
+         zvgFrameVector(p1.y + y_trans, -(p1.x + x_trans), p2.y + y_trans, -(p2.x + x_trans));
+      }
+      SDLvector(p1.y + y_trans, -(p1.x + x_trans), p2.y + y_trans, -(p2.x + x_trans), SDL_VC, SDL_VB);
+   }
+   // Rotated 180°
+   if (optz[o_rot] == 2)
+   {
+      if (ZVGPresent)
+      {
+         zvgFrameVector(-(p1.x + x_trans), -(p1.y + y_trans), -(p2.x + x_trans), -(p2.y + y_trans));
+      }
+      SDLvector(-(p1.x + x_trans), -(p1.y + y_trans), -(p2.x + x_trans), -(p2.y + y_trans), SDL_VC, SDL_VB);
+   }
+   // rotated RIGHT (90° CCW)
+   if (optz[o_rot] == 3)
+   {
+      if (ZVGPresent)
+      {
+         zvgFrameVector(-(p1.y + y_trans), (p1.x + x_trans), -(p2.y + y_trans), (p2.x + x_trans));
+      }
+      SDLvector(-(p1.y + y_trans), (p1.x + x_trans), -(p2.y + y_trans), (p2.x + x_trans), SDL_VC, SDL_VB);
+   }
 }
 
 
 /********************************************************************
-	Close SDL and execute MAME, restart SDL when done
+   Close SDL and execute MAME, restart SDL when done
 ********************************************************************/
 void RunGame(char *gameargs, char *zvgargs)
 {
-	unsigned int	err;
-	char	command[80];
+   unsigned int   err;
+   char   command[80];
 
-	setLEDs(0);
-	CloseSDL(1);								// Close windows etc but don't quit SDL
-	if (ZVGPresent)
-	{
-		if (optz[o_redozvg])
-		{
-			zvgFrameClose();					// Close the ZVG
-		}
-		sprintf(command, "./vmm.sh '%s %s'", gameargs, zvgargs);
-	}
-	else
-	{
-		sprintf(command, "./vmm.sh '%s'", gameargs);
-	}
-	printf("Launching: [%s]\n", command);
-	err = system(command);
-	if (optz[o_redozvg] && ZVGPresent)	// Re-open the ZVG if MAME closed it
-	{
-		err = zvgFrameOpen();				// initialize everything
-		if (err)
-		{
-			zvgError( err);					// if it went wrong print error
-			exit(0);								// and return to OS
-		}
-	}
-	InitialiseSDL(1);							// re-open windows etc
+   setLEDs(0);
+   CloseSDL(0);                        // Close windows etc but don't quit SDL
+   if (ZVGPresent)
+   {
+      if (optz[o_redozvg])
+      {
+         zvgFrameClose();              // Close the ZVG
+      }
+      sprintf(command, "./vmm.sh '%s %s'", gameargs, zvgargs);
+   }
+   else
+   {
+      sprintf(command, "./vmm.sh '%s'", gameargs);
+   }
+   printf("Launching: [%s]\n", command);
+   err = system(command);
+   if (optz[o_redozvg] && ZVGPresent)  // Re-open the ZVG if MAME closed it
+   {
+      err = zvgFrameOpen();            // initialize everything
+      if (err)
+      {
+         zvgError( err);               // if it went wrong print error
+         exit(0);                      // and return to OS
+      }
+   }
+   InitialiseSDL(1);                   // re-open windows etc
 }

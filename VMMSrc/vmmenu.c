@@ -54,6 +54,7 @@
 #include <time.h>
 #include "vmmstddef.h"
 #include "editlist.h"
+#include "zvgFrame.h"
 
 //OS Specific Headers
 #if defined(linux) || defined(__linux)
@@ -184,7 +185,9 @@ int main(int argc, char *argv[])
    }
    getsettings();
 
-//##########################################
+// *********************************************************************************
+// Save a sanitised version of the cfg file, it may have been edited by the user
+// This also ensures a cfg file is created even if the menu does not run 
 
    inifp = fopen (ini_name, "w" );
    if (inifp != NULL)
@@ -196,7 +199,7 @@ int main(int argc, char *argv[])
       fclose(inifp);
    }
 
-//##########################################
+// *********************************************************************************
 
    // Set up rotation
    if ((optz[o_rot] == 1) || (optz[o_rot] == 3))
@@ -211,7 +214,6 @@ int main(int argc, char *argv[])
    }
 
    startZVG();
-//   srandom(time(NULL));
    srand(time(NULL));
    setLEDs(0);
 
@@ -268,7 +270,7 @@ int main(int argc, char *argv[])
       printf("\nAutostart configured to run \"%s\"...\n", autogame);
       RunGame(autogame, zvgargs);
    }
-   // If we exit the auto started game or aren't autostarting lets go with the menu intro and loop
+   // If we exit the auto started game, or aren't autostarting, lets go with the menu intro and loop
 
    /*** At this point we have a blank screen. Run an intro with the mame logo ***/
    mame = intro();
@@ -339,7 +341,7 @@ int main(int argc, char *argv[])
          {
             if ((ticks%60 == 5) || (ticks%60 == 35)) setLEDs(ticks%60 <30 ? 0 : N_LED);
          }
-         else   setLEDs(0);
+         //else   setLEDs(0);
          if (cc)
          {
             timeout = 0;                                                   // reset screensaver timer
@@ -390,11 +392,13 @@ int main(int argc, char *argv[])
                {
                   man_menu = 1;
                   cc = 0;
+                  setLEDs(0);
                }
                if ((cc == keyz[k_ngame]) && (sel_game == vectorgames->firstgame->prev))      // [Down]: Go to Man Menu if at bottom of list
                {
                   man_menu = 1;
                   cc = 0;
+                  setLEDs(0);
                }
                if (cc == keyz[k_pgame])                                                      // [Up]: go to previous game
                {
@@ -564,6 +568,7 @@ int main(int argc, char *argv[])
       }
       timeout ++;                                       // screensaver timer
       ticks=(ticks+1)%360;                              // counter
+
       err = sendframe();
       if (err) break;
    }
@@ -585,7 +590,7 @@ int main(int argc, char *argv[])
    printf("\n%s, (c) 2009-2020\n", auth1);
    printf("%s\n", auth2);
    ShutdownAll();
-   if (cc == START1)
+   if (cc == keyz[k_start])
       return (1);
    else
       return (0);
@@ -782,7 +787,10 @@ vObject updateobject(vObject shape)
          break;
       case -1:       // bounce at edge
          if ((shape.pos.x + shape.cent.x) > xmax || (shape.pos.x - shape.cent.x) < -xmax)
+         {
             shape.inc.x = -shape.inc.x;
+            playsound(3);
+         }
          break;
       default:       // stop at edge
          if (shape.pos.x > xmax || shape.pos.x < -xmax) shape.inc.x = 0;
@@ -800,7 +808,10 @@ vObject updateobject(vObject shape)
          break;
       case -1:       // bounce at edge
          if ((shape.pos.y + shape.cent.y) > ymax || (shape.pos.y - shape.cent.y) < -ymax)
+         {
             shape.inc.y = -shape.inc.y;
+            playsound(3);
+         }
          break;
       default:       // stop at edge
          if (shape.pos.y > ymax || shape.pos.y < -ymax) shape.inc.y = 0;
@@ -860,8 +871,8 @@ vObject intro(void)
    mame.pos.y = 0;         // centre screen
    mame.inc.x = 0;         // don't move
    mame.inc.y = 0;         // don't move
-   mame.angle = 0;         // normal orientation
-   mame.theta = -3;        // rotate clockwise 3 degrees per increment
+   mame.angle = 180;         // normal orientation
+   mame.theta = -6;        // rotate clockwise 3 degrees per increment
    mame.cent.x = 195;      // defines centre of logo
    mame.cent.y = 55;       // centre of logo (rotation origin)
    mame.colour = vcyan;
@@ -870,12 +881,15 @@ vObject intro(void)
    mame.scale.x = 0.01;    //starting scale factor
    mame.scale.y = mame.scale.x;
 
+   playsound(1);
+   
    // Zoom from 0 to x1.5 whilst rotating clockwise through 720 degrees
-   for (count=0;count<120;count++)
+   for (count=0;count<150;count++)
    {
       drawshape(mame);
       mame = updateobject(mame);
-      mame.scale.x += (1.5/120);
+      //printf("Loop: %i Angle:%d\n", count, mame.angle);
+      mame.scale.x += (1.5/150);
       mame.scale.y = mame.scale.x;
       author(EDGE_BRI);
       if (optz[o_stars]) showstars();
@@ -898,17 +912,27 @@ vObject intro(void)
 
    mame.theta = 0;         // no rotation this time
 
+   playsound(3);
    // zoom and fade logo off screen
    bright = 30;
-   for (count=0;count<30;count++)
+   for (count=0;count<31;count++)
    {
-      mame.scale.x += 4;
-      mame.scale.y = mame.scale.x;
+      mame.scale.x += 0.75;//-= 0.05;
+      mame.scale.y +=0.75;//-= 0.05;; // = mame.scale.x;
+      //printf("ScaleY: %f\n", mame.scale.y);
+      //SDL_Delay(250);
       bright -= 1;
       if (bright < 1) bright=0;
       mame.bright = bright;
       drawshape(mame);
       mame = updateobject(mame);
+      author(EDGE_BRI);
+      if (optz[o_stars]) showstars();
+      sendframe();
+   }
+
+   for (count=0;count<30;count++)
+   {
       author(EDGE_BRI);
       if (optz[o_stars]) showstars();
       sendframe();
@@ -1340,6 +1364,18 @@ int credits(void)
    int bnw = 0; //(ZvgIO.envMonitor & MONF_BW) && ZVGPresent;    // Black'n'White monitor
    char credits[lines][60];
 
+#ifdef _DVGTIMER_H_
+   strcpy(credits[0], "DVG Vector Mame Menu, Chad Gray 2020");
+   strcpy(credits[1], " ");
+   strcpy(credits[2], "Thanks go to the following");
+   strcpy(credits[3], "Mario Montminy and Fred Konopaska for the USB-DVG");
+   strcpy(credits[4], "The MAME team");
+   strcpy(credits[5], "Ian Boffin for the original menu and artwork");
+   strcpy(credits[6], "Danny Pearson and Barry Shilmover for testing");
+   strcpy(credits[7], "Haywood for the additional logos");
+   strcpy(credits[8], "Atari, Sega, Cinematronics et al for the games");
+   strcpy(credits[9], "And all the vectorheads for keeping them alive");
+#else
    strcpy(credits[0], "ZVG Vector Mame Menu, Chad Gray 2011");
    strcpy(credits[1], " ");
    strcpy(credits[2], "Thanks go to the following");
@@ -1350,6 +1386,7 @@ int credits(void)
    strcpy(credits[7], "Haywood for the additional logos");
    strcpy(credits[8], "Atari, Sega, Cinematronics et al for the games");
    strcpy(credits[9], "And all the vectorheads for keeping them alive");
+#endif
 
    for (t=0; t<lines*(period/2);t++)
    {
@@ -1359,7 +1396,7 @@ int credits(void)
          finish=start+period;
          count=((t-start)%period);            // count = 0 to 59 - how far through anim time we are
 
-         if ((t > start) && (t < finish))      // we are in animation time
+         if ((t > start) && (t < finish))     // we are in animation time
          {
             //angle=fall-((fall/period)*count);
             angle=0;
@@ -1375,6 +1412,7 @@ int credits(void)
             bright=18;
             x=0;
          }
+         if ((t==finish) && (l!=1)) playsound(3);
          if (t>start)
          {
             //printf("t: %d Line: %d value: %d Colour: %s\n", t, l, (((t/2)%7)+l)%7, cols[(((t/2)%7)+l)%7]);
@@ -1421,6 +1459,7 @@ int credits(void)
             bright=18;
             x=0;
          }
+         //if ((t==finish) && (l!=1)) playsound(3);
          if (t>start)
          {
             if (bnw) colour = (l%7);
@@ -1548,25 +1587,26 @@ void getsettings(void)
    optz[o_stars]     = iniparser_getboolean(ini, "interface:stars", 0);
    optz[o_ucase]     = iniparser_getboolean(ini, "interface:caps", 0);
    optz[o_togpnm]    = iniparser_getboolean(ini, "interface:showpnm", 0);
-   optz[o_cpanel]    = iniparser_getint(ini, "interface:paneltype", 0);       // 0 Buttons, 1 Joystick, 2 Spinner
+   optz[o_cpanel]    = iniparser_getint(ini,     "interface:paneltype", 0);       // 0 Buttons, 1 Joystick, 2 Spinner
    optz[o_redozvg]   = iniparser_getboolean(ini, "interface:reopenzvg", 1);
    optz[o_dovga]     = iniparser_getboolean(ini, "interface:rendervga", 0);
    optz[o_attmode]   = iniparser_getboolean(ini, "interface:attractmode", 0);
-   optz[o_fontsize]  = iniparser_getint(ini, "interface:fontsize", 6);
+   optz[o_fontsize]  = iniparser_getint(ini,     "interface:fontsize", 6);
    if (optz[o_fontsize] < 4) optz[o_fontsize] = 4;
    if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
-   optz[o_borders]   = iniparser_getint(ini, "interface:borders", 1);
+   optz[o_borders]   = iniparser_getboolean(ini, "interface:borders", 1);
+   optz[o_volume]    = iniparser_getint(ini,     "interface:volume", 64);
       
-   strcpy(attractargs, iniparser_getstring(ini, "interface:attractargs", "-attract -str 30"));
-   strcpy(zvgargs, iniparser_getstring(ini, "interface:zvgargs", "-video zvg"));
+   strcpy(attractargs, iniparser_getstring(ini,  "interface:attractargs", "-attract -str 30"));
+   strcpy(zvgargs, iniparser_getstring(ini,      "interface:zvgargs", "-video zvg"));
 
     // autostart settings
-   strcpy(autogame, iniparser_getstring(ini, "autostart:game", ""));
+   strcpy(autogame, iniparser_getstring(ini,     "autostart:game", ""));
    autostart         = iniparser_getboolean(ini, "autostart:start", 0);
 
    #if defined(linux) || defined(__linux) || (__WIN32__) || defined(_WIN32)
       // Com port for USB-DVG
-      strcpy(DVGPort, iniparser_getstring(ini, "DVG:port", DefDVGPort));
+      strcpy(DVGPort, iniparser_getstring(ini,   "DVG:port", DefDVGPort));
    #endif
 
    // controllers
@@ -1692,6 +1732,8 @@ void writecfg()
    writeinival("interface:attractmode",         optz[o_attmode], 0, 3);
    writeinival("interface:fontsize",            optz[o_fontsize], 1, 0);
    writeinival("interface:borders",             optz[o_borders], 1, 3);
+   writeinival("interface:volume",              optz[o_volume], 1, 0);
+
    iniparser_set(ini, "interface:attractargs",  attractargs);
    iniparser_set(ini, "interface:zvgargs",      zvgargs);
 
@@ -1874,8 +1916,8 @@ void SetOptions(void)
       }
       if (optz[o_stars]) showstars();
 
-      top = 372; //330;
-      options = 11;
+      top = 385;//372; //330;
+      options = 12;
 
       setcolour(vwhite, 25);
       PrintString(">", -150 - (7*4*optz[o_fontsize])-4, (top-((cursor+1)*spacing)), 0, optz[o_fontsize]-2, optz[o_fontsize], 0); // 7 * 4 =  7 chars * width
@@ -1986,28 +2028,28 @@ void SetOptions(void)
       // Edit Games List
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 5)   setcolour(vwhite, 25);
+      if (cursor == options - 6)   setcolour(vwhite, 25);
       PrintString("Show/Hide Games  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Edit Menu Colours
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 4)   setcolour(vwhite, 25);
+      if (cursor == options - 5)   setcolour(vwhite, 25);
       PrintString("Edit Menu Colours", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Monitor Test Patterns
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 3)   setcolour(vwhite, 25);
+      if (cursor == options - 4)   setcolour(vwhite, 25);
       PrintString("Test Patterns    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Font Size
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options - 2)   setcolour(vwhite, 25);
+      if (cursor == options - 3)   setcolour(vwhite, 25);
       PrintString("Font Size        ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       itoa(optz[o_fontsize], angle, 10);
       *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
@@ -2016,12 +2058,21 @@ void SetOptions(void)
       // Borders
       top-=spacing;
       setcolour(vwhite, 15);
-      if (cursor == options-1)     setcolour(vwhite, 25);
+      if (cursor == options-2)     setcolour(vwhite, 25);
       PrintString("Borders          ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString((optz[o_borders] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
+      // Sounds
+      top-=spacing;
+      setcolour(vwhite, 15);
+      if (cursor == options-1)     setcolour(vwhite, 25);
+      PrintString("Sounds / Volume  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      itoa(optz[o_volume], angle, 10);
+      *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
+      PrintString(optz[o_volume] > 0 ? angle : "Off      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+
       // Print Keycode
-      top=-ymax+80;
+      top=-ymax+50;
       setcolour(vgreen, 20);
       PrintString("Last keycode     ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       sprintf(angle,"0x%04x   ",lastkey);
@@ -2181,20 +2232,20 @@ void SetOptions(void)
          }
       }
       // From here the options number can change depending on whether mouse settings are active, so we can't use switch/case...
-      if (cursor == options-5)   // Edit Games List
+      if (cursor == options-6)   // Edit Games List
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditGamesList();
       }
-      if (cursor == options-4)   // Edit Menu Colours
+      if (cursor == options-5)   // Edit Menu Colours
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditColours();
       }
 
-      if (cursor == options-3)   // Monitor Test Patterns
+      if (cursor == options-4)   // Monitor Test Patterns
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) TestPatterns();
       }
-      if (cursor == options-2)   // Font Size
+      if (cursor == options-3)   // Font Size
       {
          if (cc == keyz[k_pclone])
          {
@@ -2207,10 +2258,23 @@ void SetOptions(void)
             if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
          }
       }
-      if (cursor == options-1)   // Borders
+      if (cursor == options-2)   // Borders
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_borders] = !optz[o_borders];
          if (cc == keyz[k_start]) optz[o_borders]   = 1;
+      }
+      if (cursor == options-1)   // Sound Volume
+      {
+         if (cc == keyz[k_pclone])
+         {
+            optz[o_volume]--;
+            if (optz[o_volume] < 0) optz[o_volume] = 0;
+         }
+         if (cc == keyz[k_nclone])
+         {
+            optz[o_volume]++;
+            if (optz[o_volume] > 127) optz[o_volume] = 127;
+         }
       }
 
       sendframe();
@@ -2380,7 +2444,7 @@ void   EditGamesList(void)
             strcpy(autogame," ");
          }
       }
-      if (cc == START1)                                  // [Start1]: Set autostart game
+      if (cc == keyz[k_start])                           // [Start1]: Set autostart game
       {
          if (!autostart)                                 // If autostart was off, ensure current game is visible and set it to autostart
          {

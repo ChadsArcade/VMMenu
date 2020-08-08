@@ -302,3 +302,12 @@ void RunGame(char *gameargs, char *zvgargs)
    }
 }
 
+
+/********************************************************************
+	Play a sound sample
+   Doesn't do anything, just to keep the compiler happy
+********************************************************************/
+void playsound(int picksound)
+{
+   picksound = 0;
+}

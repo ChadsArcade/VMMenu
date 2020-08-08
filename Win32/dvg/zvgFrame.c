@@ -1,5 +1,5 @@
 /******************************************************************
-	USB-DVG drivers for Win32 and Linux
+   USB-DVG drivers for Win32 and Linux
    
    Code by Mario Montminy, 2020
    Amendments for VMMenu Chad Gray
@@ -31,17 +31,21 @@
 #define FLAG_XY         0x2
 #define FLAG_EXIT       0x7
 #define FLAG_FRAME      0x4
+#define FLAG_QUALITY    0x3
 
-#define DVG_RES_MIN     0
-#define DVG_RES_MAX     4095
+#define DVG_RES_MIN        0
+#define DVG_RES_MAX        4095
+#define DVG_RENDER_QUALITY 5
 
-#define CONVX(x)        ((((x) - X_MIN) * DVG_RES_MAX) / (X_MAX - X_MIN))
-#define CONVY(y)        ((((y) - Y_MIN) * DVG_RES_MAX) / (Y_MAX - Y_MIN))
+#define CONVX(x)  ((((x) - X_MIN) * DVG_RES_MAX) / (X_MAX - X_MIN))
+#define CONVY(y)  ((((y) - Y_MIN) * DVG_RES_MAX) / (Y_MAX - Y_MIN))
+#define MAX(x, y) (((int)(x) > (int)(y)) ? (int)(x) : (int)(y))
+#define MIN(x, y) (((int)(x) < (int)(y)) ? (int)(x) : (int)(y))
 
-#define TOP 	8
+#define TOP    8
 #define BOTTOM 4
-#define RIGHT 	2
-#define LEFT 	1
+#define RIGHT  2
+#define LEFT   1
 
 static int     s_cmd_offs;
 static uint8_t s_cmd_buf[CMD_BUF_SIZE];
@@ -61,16 +65,16 @@ static int     s_ymin, s_ymax;
 extern char    DVGPort[15];
 
 enum portErrCode
-{	errOk = 0,				// no error (must be set to 0)
-	errOpenCom,				// Could not open Serial Port
-	errComState,			// Could not get comms state
-	errSetComTimeout,		// Could not set comms timeouts
-   errOpenDevice        // Could not open the DVG
+{  errOk = 0,        // no error (must be set to 0)
+   errOpenCom,       // Could not open Serial Port
+   errComState,      // Could not get comms state
+   errSetComTimeout, // Could not set comms timeouts
+   errOpenDevice     // Could not open the DVG
 };
 
 
 /******************************************************************
-	Calculate the length of a vector from the start and end points
+   Calculate the length of a vector from the start and end points
 *******************************************************************/
 static int vector_length(int x0, int y0, int x1, int y1)
 {
@@ -83,7 +87,7 @@ static int vector_length(int x0, int y0, int x1, int y1)
 
 
 /******************************************************************
-	Reset command
+   Reset command
 *******************************************************************/
 static void cmd_reset()
 {
@@ -95,7 +99,7 @@ static void cmd_reset()
 
 
 /******************************************************************
-	Open the serial port and initialise it
+   Open the serial port and initialise it
 *******************************************************************/
 static int serial_open()
 {
@@ -167,7 +171,7 @@ static int serial_open()
 
 
 /******************************************************************
-	Write to the serial port
+   Write to the serial port
 *******************************************************************/
 static int serial_write(void *buf, uint32_t size)
 {
@@ -180,13 +184,17 @@ static int serial_write(void *buf, uint32_t size)
       }
    #else
       result = write(s_serial_fd, buf, size);
+      if (result != size)
+      {
+         printf("DVG: Write error %d \n", result);
+      }
    #endif
    return result > 0;
 }
 
 
 /******************************************************************
-	Close the serial port
+   Close the serial port
 *******************************************************************/
 static int serial_close()
 {
@@ -215,12 +223,18 @@ static int serial_close()
 
 
 /******************************************************************
-	Send data to the serial port
+   Send data to the serial port
 *******************************************************************/
 static int serial_send()
 {
    int      result = -1;
-   uint32_t cmd;
+   uint32_t cmd, chunk, size, offset;
+
+   cmd = (FLAG_QUALITY << 29) | DVG_RENDER_QUALITY;
+   s_cmd_buf[0] = cmd >> 24;
+   s_cmd_buf[1] = cmd >> 16;
+   s_cmd_buf[2] = cmd >>  8;
+   s_cmd_buf[3] = cmd >>  0;
 
    cmd = (FLAG_FRAME << 29) | s_vector_length;
    s_cmd_buf[0] = cmd >> 24;
@@ -233,7 +247,14 @@ static int serial_send()
    s_cmd_buf[s_cmd_offs++] = cmd >> 16;
    s_cmd_buf[s_cmd_offs++] = cmd >>  8;
    s_cmd_buf[s_cmd_offs++] = cmd >>  0;
-   result = serial_write(s_cmd_buf, s_cmd_offs);
+   size = s_cmd_offs;
+   offset = 0;
+   while (size) {
+        chunk   = MIN(size, 1024);
+        result  = serial_write(&s_cmd_buf[offset], chunk);
+        size   -= chunk;
+        offset += chunk;
+   }
    cmd_reset();
    return result;
 }
@@ -247,11 +268,11 @@ uint32_t compute_code(int32_t x, int32_t y)
     // initialized as being inside
     uint32_t code = 0;
 
-    if (x < s_xmin) // to the left of rectangle
+    if (x < s_xmin)      // to the left of rectangle
         code |= LEFT;
     else if (x > s_xmax) // to the right of rectangle
         code |= RIGHT;
-    if (y < s_ymin) // below the rectangle
+    if (y < s_ymin)      // below the rectangle
         code |= BOTTOM;
     else if (y > s_ymax) // above the rectangle
         code |= TOP;
@@ -358,42 +379,42 @@ uint32_t line_clip(int32_t *pX1, int32_t *pY1, int32_t *pX2, int32_t *pY2)
 
 
 /******************************************************************
-	Print DVG Info
+   Print DVG Info
 *******************************************************************/
 void zvgBanner( uint32_t speeds, void *id)
 {
    (void)speeds;
-	(void)id;
+   (void)id;
    printf("USB DVG Hardware, using port: %s <<<\n",DVGPort);
 }
 
 
 /******************************************************************
-	Print any error messages
+   Print any error messages
 *******************************************************************/
 void zvgError(uint32_t err)
 {
-	printf("DVG: ");
+   printf("DVG: ");
 
-	switch (err)
-	{
-	case errOk:
+   switch (err)
+   {
+   case errOk:
       printf("No Error");
-		break;
-	case errOpenCom:
+      break;
+   case errOpenCom:
       printf("Error - Could not open Serial Port: %s, check hardware and port setting in vmmenu.cfg", DVGPort);
-		break;
-	case errComState:
+      break;
+   case errComState:
       printf("Error - Could not get comms state");
-		break;
-	case errSetComTimeout:
+      break;
+   case errSetComTimeout:
       printf("Error - Could not set comms timeouts");
-		break;
-	case errOpenDevice:
+      break;
+   case errOpenDevice:
       printf("Error - Could not open the USB-DVG");
-		break;
+      break;
    }
-	printf("\n");
+   printf("\n");
 }
 
 
@@ -403,8 +424,8 @@ void zvgError(uint32_t err)
 int zvgFrameOpen(void)
 {
    int result = errOpenDevice;
-	tmrInit();					     // initialize timers
-	//tmrSetFrameRate(60);         // set the frame rate
+   tmrInit();                    // initialize timers
+   //tmrSetFrameRate(60);         // set the frame rate
    strncpy(s_serial_dev, DVGPort, ARRAY_SIZE(s_serial_dev) - 1);
    s_serial_dev[ARRAY_SIZE(s_serial_dev) - 1] = 0;
    result = serial_open();
@@ -534,3 +555,4 @@ uint32_t zvgFrameSend(void)
     serial_send();
     return 0;
 }
+

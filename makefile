@@ -22,13 +22,13 @@ OBJ_DIR =obj
 
 # Set the default target bulld here if not specified
 ifndef target
-   target=DOS
+   target=linuxdvg
 endif
 ifeq ($(target),linux)
    $(info Building for Linux ZVG)
    VPATH=VMMSrc iniparser Linux Linux/zvg VMMSDL
    INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser -I./VMMSDL
-   LIBS= `sdl2-config --libs` -lSDL2 -lm
+   LIBS= `sdl2-config --libs` -lSDL2 -lSDL2_mixer -lm
    EXEC = vmmenu
    RM = rm -f
    RMDIR = rm -rf
@@ -52,7 +52,7 @@ ifeq ($(target),linuxdvg)
    $(info Building for Linux DVG)
    VPATH=VMMSrc iniparser Linux Win32/dvg VMMSDL
    INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Win32/dvg -I./iniparser -I./VMMSDL
-   LIBS= `sdl2-config --libs` -lSDL2 -lm
+   LIBS= `sdl2-config --libs` -lSDL2 -lSDL2_mixer -lm
    EXEC = vmmenu
    RM = rm -f
    RMDIR = rm -rf

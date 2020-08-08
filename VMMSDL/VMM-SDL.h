@@ -22,7 +22,7 @@ void  CloseSDL(int);
 char* itoa(int, char*, int);
 void  mousepos(int*, int*);
 void  setcolour(int, int);                                    // set colour and brightness
-
+void  playsound(int);
 
 #endif
 
