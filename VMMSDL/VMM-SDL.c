@@ -37,12 +37,26 @@ extern int     mousefound;
 extern char    DVGPort[15];
 uint32_t       timestart = 0, timenow, duration;
 
+enum vsounds
+{ 
+  sSFury,
+  sNuke,
+  sExplode1,
+  sFire1,
+  sExplode2,
+  sFire2,
+  sExplode3
+};
+
+
 //The sound effects that will be used
-Mix_Chunk      *gSFury   = NULL;
-Mix_Chunk      *gFire    = NULL;
-Mix_Chunk      *gFire2   = NULL;
-Mix_Chunk      *gExplode = NULL;
-Mix_Chunk      *gNuke    = NULL;
+Mix_Chunk      *gSFury    = NULL;
+Mix_Chunk      *gFire1    = NULL;
+Mix_Chunk      *gFire2    = NULL;
+Mix_Chunk      *gExplode1 = NULL;
+Mix_Chunk      *gExplode2 = NULL;
+Mix_Chunk      *gExplode3 = NULL;
+Mix_Chunk      *gNuke     = NULL;
 
 #define		fps     60
 #define		fps_ms  1000/fps
@@ -169,18 +183,28 @@ void InitialiseSDL(int start)
    {
        printf( "Failed to load sfury9 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gFire = Mix_LoadWAV( "samples/elim2.wav" );
-   if( gFire == NULL )
+   gFire1 = Mix_LoadWAV( "samples/elim2.wav" );
+   if( gFire1 == NULL )
    {
        printf( "Failed to load elim2 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gExplode = Mix_LoadWAV( "samples/explode1.wav" );
-   if( gExplode == NULL )
+   gExplode1 = Mix_LoadWAV( "samples/explode1.wav" );
+   if( gExplode1 == NULL )
    {
        printf( "Failed to load explode1 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
+   gExplode2 = Mix_LoadWAV( "samples/explode2.wav" );
+   if( gExplode2 == NULL )
+   {
+       printf( "Failed to load explode2 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
+   gExplode3 = Mix_LoadWAV( "samples/explode3.wav" );
+   if( gExplode3 == NULL )
+   {
+       printf( "Failed to load explode3 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
    gFire2 = Mix_LoadWAV( "samples/efire.wav" );
-   if( gFire == NULL )
+   if( gFire2 == NULL )
    {
        printf( "Failed to load efire sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
@@ -203,20 +227,26 @@ void playsound(int picksound)
       Mix_Volume(-1, optz[o_volume]);
       switch(picksound)
       {
-         case 1:
+         case 0:
             Mix_PlayChannel( -1, gSFury, 0 );
             break;
+         case 1:
+            Mix_PlayChannel( -1, gNuke, 0 );
+            break;
          case 2:
-            Mix_PlayChannel( -1, gFire, 0 );
+            Mix_PlayChannel( -1, gExplode1, 0 );
             break;
          case 3:
-            Mix_PlayChannel( -1, gExplode, 0 );
+            Mix_PlayChannel( -1, gFire1, 0 );
             break;
          case 4:
-            Mix_PlayChannel( -1, gFire2, 0 );
+            Mix_PlayChannel( -1, gExplode2, 0 );
             break;
          case 5:
-            Mix_PlayChannel( -1, gNuke, 0 );
+            Mix_PlayChannel( -1, gFire2, 0 );
+            break;
+         case 6:
+            Mix_PlayChannel( -1, gExplode3, 0 );
             break;
          default:
             break;
@@ -234,15 +264,19 @@ void CloseSDL(int done)
    SDL_ShowCursor(SDL_ENABLE);
    SDL_DestroyWindow(window);
    Mix_FreeChunk( gSFury );
-   Mix_FreeChunk( gFire );
-   Mix_FreeChunk( gExplode );
+   Mix_FreeChunk( gFire1 );
+   Mix_FreeChunk( gExplode1 );
+   Mix_FreeChunk( gExplode2 );
+   Mix_FreeChunk( gExplode3 );
    Mix_FreeChunk( gFire2 );
    Mix_FreeChunk( gNuke );
-   gSFury   = NULL;
-   gFire    = NULL;
-   gExplode = NULL;
-   gFire2   = NULL;
-   gNuke    = NULL;
+   gSFury    = NULL;
+   gFire1    = NULL;
+   gExplode1 = NULL;
+   gExplode2 = NULL;
+   gExplode3 = NULL;
+   gFire2    = NULL;
+   gNuke     = NULL;
    Mix_CloseAudio();
    if (done)
    {
@@ -377,13 +411,13 @@ int getkey(void)
    if (mouse_x < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];       // Spinner   Left  = Up
    if (mouse_x > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];       // Spinner   Right = Down
 
-   if (key == keyz[k_ngame])   playsound(2);
-   if (key == keyz[k_pgame])   playsound(2);
-   if (key == keyz[k_nclone])  playsound(4);
-   if (key == keyz[k_pclone])  playsound(4);
-   if (key == keyz[k_start])   playsound(3);
-   if (key == keyz[k_options]) playsound(5);
-   if (key == keyz[k_quit])    playsound(3);
+   if (key == keyz[k_ngame])   playsound(sFire1);
+   if (key == keyz[k_pgame])   playsound(sFire1);
+   if (key == keyz[k_nclone])  playsound(sFire2);
+   if (key == keyz[k_pclone])  playsound(sFire2);
+   if (key == keyz[k_start])   playsound(NewScale());
+   if (key == keyz[k_options]) playsound(sNuke);
+   if (key == keyz[k_quit])    playsound(NewScale());
 
    return key;
 }

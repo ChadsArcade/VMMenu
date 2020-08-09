@@ -795,7 +795,7 @@ vObject updateobject(vObject shape)
          if ((shape.pos.x + shape.cent.x) > xmax || (shape.pos.x - shape.cent.x) < -xmax)
          {
             shape.inc.x = -shape.inc.x;
-            playsound(3);
+            playsound(NewScale());
          }
          break;
       default:       // stop at edge
@@ -816,7 +816,7 @@ vObject updateobject(vObject shape)
          if ((shape.pos.y + shape.cent.y) > ymax || (shape.pos.y - shape.cent.y) < -ymax)
          {
             shape.inc.y = -shape.inc.y;
-            playsound(3);
+            playsound(NewScale());
          }
          break;
       default:       // stop at edge
@@ -887,7 +887,7 @@ vObject intro(void)
    mame.scale.x = 0.01;    //starting scale factor
    mame.scale.y = mame.scale.x;
 
-   playsound(1);
+   playsound(0);
    
    // Zoom from 0 to x1.5 whilst rotating clockwise through 720 degrees
    for (count=0;count<150;count++)
@@ -918,7 +918,7 @@ vObject intro(void)
 
    mame.theta = 0;         // no rotation this time
 
-   playsound(3);
+   playsound(NewScale());
    // zoom and fade logo off screen
    bright = 30;
    for (count=0;count<31;count++)
@@ -1418,7 +1418,7 @@ int credits(void)
             bright=18;
             x=0;
          }
-         if ((t==finish) && (l!=1)) playsound(3);
+         if ((t==finish) && (l!=1)) playsound(NewScale());
          if (t>start)
          {
             //printf("t: %d Line: %d value: %d Colour: %s\n", t, l, (((t/2)%7)+l)%7, cols[(((t/2)%7)+l)%7]);
@@ -1465,7 +1465,7 @@ int credits(void)
             bright=18;
             x=0;
          }
-         //if ((t==finish) && (l!=1)) playsound(3);
+         if ((t==finish) && (l!=1)) playsound(NewScale());
          if (t>start)
          {
             if (bnw) colour = (l%7);
