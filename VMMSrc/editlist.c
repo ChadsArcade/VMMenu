@@ -23,7 +23,7 @@ list_node* build_games_list(void)
 {
    char        temp[200];
    char        *nl;
-   char        smanuf[30], sdesc[60], smame[15], sclone[15];
+   char        smanuf[30], sdesc[60], smame[40], sclone[40];
    char        *manuf=smanuf, *desc=sdesc, *mame=smame, *clone=sclone;
    int         hidden, total=0, i=0, len=0;
    FILE        *fp;

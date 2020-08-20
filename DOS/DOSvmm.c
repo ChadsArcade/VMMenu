@@ -20,7 +20,7 @@ extern void writecfg(void);                                       // write the c
 
 union       REGS in, out;
 int         LEDstate=0;
-int         mouse_x=0, mouse_y=0;
+int         MouseX=0, MouseY=0;
 int         mdx=0, mdy=0;
 int         optz[15];                        // array of user defined menu preferences
 int         f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
@@ -92,12 +92,12 @@ int getkey(void)
 
    if (mousefound) readmouse();              // 3 Feb 2020, read every frame, ignore sample rate
    // Convert mouse movement into key presses. Makes things so much easier.
-   if (mouse_y < 0 && optz[o_mouse]==3) key = keyz[k_pgame];   // Trackball Up    = Up
-   if (mouse_y > 0 && optz[o_mouse]==3) key = keyz[k_ngame];   // Trackball Down  = Down
-   if (mouse_x < 0 && optz[o_mouse]==3) key = keyz[k_pclone];  // Trackball Left  = Left
-   if (mouse_x > 0 && optz[o_mouse]==3) key = keyz[k_nclone];  // Trackball Right = Right
-   if (mouse_x < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];   // Spinner   Left  = Up
-   if (mouse_x > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];   // Spinner   Right = Down
+   if (MouseY < 0 && optz[o_mouse]==3) key = keyz[k_pgame];   // Trackball Up    = Up
+   if (MouseY > 0 && optz[o_mouse]==3) key = keyz[k_ngame];   // Trackball Down  = Down
+   if (MouseX < 0 && optz[o_mouse]==3) key = keyz[k_pclone];  // Trackball Left  = Left
+   if (MouseX > 0 && optz[o_mouse]==3) key = keyz[k_nclone];  // Trackball Right = Right
+   if (MouseX < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];   // Spinner   Left  = Up
+   if (MouseX > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];   // Spinner   Right = Down
 
    return key;
 }
@@ -134,27 +134,27 @@ void readmouse()
 
    if (optz[o_mouse])
    {
-      mouse_x = mdx/optz[o_msens];           // use the integer part
-      mouse_y = mdy/optz[o_msens];
+      MouseX = mdx/optz[o_msens];           // use the integer part
+      MouseY = mdy/optz[o_msens];
       mdx = mdx%optz[o_msens];               // retain the fractional part
       mdy = mdy%optz[o_msens];
       //printf("mdx: %d mdy: %d\n", mdx, mdy);
 
       // If spinner selected, discard the axis not in use (it might really be a mouse)
-      if (optz[o_mouse] == 1) mouse_y = 0;   // Spinner which moves X-axis
+      if (optz[o_mouse] == 1) MouseY = 0;   // Spinner which moves X-axis
       if (optz[o_mouse] == 2)                // Spinner which moves Y-axis
       {
-         mouse_x = mouse_y;                  // Convert to X axis
-         mouse_y = 0;                        // Discard Y axis
+         MouseX = MouseY;                  // Convert to X axis
+         MouseY = 0;                        // Discard Y axis
       }
 
-      if (optz[o_mrevX]) mouse_x = -mouse_x;
-      if (optz[o_mrevY]) mouse_y = -mouse_y;
+      if (optz[o_mrevX]) MouseX = -MouseX;
+      if (optz[o_mrevY]) MouseY = -MouseY;
    }
    else
    {
-      mouse_x = 0;
-      mouse_y = 0;
+      MouseX = 0;
+      MouseY = 0;
       mdx=0;
       mdy=0;
    }

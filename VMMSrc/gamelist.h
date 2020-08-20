@@ -12,8 +12,8 @@ typedef struct gamenode
    struct gamenode   *next, *prev;
    struct gamenode   *nclone, *pclone;
    char              name[50];
-   char              parent[10];
-   char              clone[10];
+   char              parent[40];
+   char              clone[40];
 } g_node;
 
 typedef struct manufnode

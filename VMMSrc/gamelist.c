@@ -201,7 +201,7 @@ m_node* createlist()
 {
    char     temp[200];
    char     *nl;
-   char     smanuf[30], sdesc[60], smame[15], sclone[15];
+   char     smanuf[30], sdesc[60], smame[40], sclone[40];
    char     *manuf=smanuf, *desc=sdesc, *mame=smame, *clone=sclone;
    FILE     *fp;
    m_node   *man_root = NULL, *man_cursor = NULL, *man_last = NULL;

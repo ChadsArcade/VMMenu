@@ -28,7 +28,7 @@ const          char* WINDOW_TITLE = "Vector Mame Menu for Linux";
 const          char* WINDOW_TITLE = "Vector Mame Menu for Win32";
 #endif
 int            mdx=0, mdy=0;
-int            mouse_x=0, mouse_y=0;
+int            MouseX=0, MouseY=0;
 extern         int ZVGPresent;
 int            SDL_VB, SDL_VC;            // SDL_Vector "Brightness" and "Colour"
 int            optz[16];                  // array of user defined menu preferences
@@ -166,8 +166,8 @@ void InitialiseSDL(int start)
    SDL_Event event;
    while (SDL_PollEvent(&event)) {}            // clear event buffer
 
-   mouse_x = 0;
-   mouse_y = 0;
+   MouseX = 0;
+   MouseY = 0;
    
    
    //Initialize SDL_mixer
@@ -348,27 +348,27 @@ void processmouse(void)
 {
    if (optz[o_mouse])
    {
-      mouse_x = mdx/optz[o_msens];           // use the integer part
-      mouse_y = mdy/optz[o_msens];
+      MouseX = mdx/optz[o_msens];           // use the integer part
+      MouseY = mdy/optz[o_msens];
       mdx = mdx%optz[o_msens];               // retain the fractional part
       mdy = mdy%optz[o_msens];
       //printf("mdx: %d mdy: %d\n", mdx, mdy);
 
       // If spinner selected, discard the axis not in use, the spinner might really be a mouse
-      if (optz[o_mouse] == 1) mouse_y = 0;   // Spinner which moves X-axis
+      if (optz[o_mouse] == 1) MouseY = 0;   // Spinner which moves X-axis
       if (optz[o_mouse] == 2)                // Spinner which moves Y-axis
       {
-         mouse_x = mouse_y;                  // Convert to X axis
-         mouse_y = 0;                        // Discard Y axis
+         MouseX = MouseY;                  // Convert to X axis
+         MouseY = 0;                        // Discard Y axis
       }
 
-      if (optz[o_mrevX]) mouse_x = -mouse_x; // Reverse X axis if selected
-      if (optz[o_mrevY]) mouse_y = -mouse_y; // Reverse Y axis if selected
+      if (optz[o_mrevX]) MouseX = -MouseX; // Reverse X axis if selected
+      if (optz[o_mrevY]) MouseY = -MouseY; // Reverse Y axis if selected
    }
    else
    {
-      mouse_x = 0;                           // if we said we don't have a mouse then
-      mouse_y = 0;                           // set all the values to zero - there might
+      MouseX = 0;                           // if we said we don't have a mouse then
+      MouseY = 0;                           // set all the values to zero - there might
       mdx=0;                                 // still be a mouse connected giving values
       mdy=0;                                 // which we don't want to have an effect
    }
@@ -404,12 +404,12 @@ int getkey(void)
 
    if (mousefound) processmouse();              // 3 Feb 2020, read every frame, ignore sample rate
    // convert mouse movement into key presses. Now built into the getkey function
-   if (mouse_y < 0 && optz[o_mouse]==3) key = keyz[k_pgame];       // Trackball Up    = Up
-   if (mouse_y > 0 && optz[o_mouse]==3) key = keyz[k_ngame];       // Trackball Down  = Down
-   if (mouse_x < 0 && optz[o_mouse]==3) key = keyz[k_pclone];      // Trackball Left  = Left
-   if (mouse_x > 0 && optz[o_mouse]==3) key = keyz[k_nclone];      // Trackball Right = Right
-   if (mouse_x < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];       // Spinner   Left  = Up
-   if (mouse_x > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];       // Spinner   Right = Down
+   if (MouseY < 0 && optz[o_mouse]==3) key = keyz[k_pgame];       // Trackball Up    = Up
+   if (MouseY > 0 && optz[o_mouse]==3) key = keyz[k_ngame];       // Trackball Down  = Down
+   if (MouseX < 0 && optz[o_mouse]==3) key = keyz[k_pclone];      // Trackball Left  = Left
+   if (MouseX > 0 && optz[o_mouse]==3) key = keyz[k_nclone];      // Trackball Right = Right
+   if (MouseX < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];       // Spinner   Left  = Up
+   if (MouseX > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];       // Spinner   Right = Down
 
    if (key == keyz[k_ngame])   playsound(sFire1);
    if (key == keyz[k_pgame])   playsound(sFire1);
@@ -554,7 +554,7 @@ void RunGame(char *gameargs, char *zvgargs)
       {
          zvgFrameClose();              // Close the ZVG
       }
-      sprintf(command, "./vmm.sh '%s %s'", gameargs, zvgargs);
+      sprintf(command, "./vmm.sh '%s' '%s'", gameargs, zvgargs);
    }
    else
    {

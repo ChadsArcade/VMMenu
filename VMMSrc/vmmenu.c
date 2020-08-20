@@ -48,6 +48,10 @@
 *                    Sound effects added
 *                    Probably some other stuff as well
 *
+* 19-Aug-20 v1.6.1   Vectrex Support added.
+*                    Long (scrolling) games lists supported.
+*                    Some things may be broken...
+*
 ***********************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -112,6 +116,7 @@ void     EditColours(void);                                      // Settings pag
 void     drawbox(int, int, int, int, int, int);                  // xmin, ymin, xmax, ymax, colout, intensity
 void     TestPatterns(void);                                     // Monitor Test Patterns
 void     BrightnessBars(int, int, int, int);
+int      numofgames(m_node *);
 
 // Global variables (there are quite a few...)
 
@@ -135,7 +140,7 @@ char         DVGPort[15];
 
 static       dictionary* ini;
 
-extern int   mouse_x, mouse_y;
+extern int   MouseX, MouseY;
 int          ZVGPresent = 1;
 int          SDL_VC, SDL_VB;            // colour and brightness for SDL vectors
 int          mousefound=0;
@@ -144,7 +149,7 @@ m_node       *vectorgames;
 g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 unsigned int man_menu;
 
-char         auth1[] = "VMMenu 1.6, Chad Gray";
+char         auth1[] = "VMMenu 1.6.1, Chad Gray";
 char         auth2[] = "ChadsArcade@Gmail.com";
 
 vObject      mame;
@@ -157,9 +162,9 @@ int main(int argc, char *argv[])
    (void)       argc;
    (void)       argv;
    unsigned int err;
-   int          count, top, timeout = 0, ticks = 0, gamesize;
+   int          count, top, timeout = 0, ticks = 0, gamesize, totgames;
    int          pressx=0, pressy=0;
-   int          cc;
+   int          cc, gamenum, gamenumtemp;
    float        width=0.0;
    char         mytext[100];
    int          mpx = 0, mpy = 0;
@@ -173,6 +178,7 @@ int main(int argc, char *argv[])
    sel_game = vectorgames->firstgame;
    sel_clone = sel_game;
    man_menu = 1;
+   totgames=numofgames(vectorgames);
 
    inifp = fopen (ini_name, "r" );
    if (inifp != NULL)
@@ -280,7 +286,7 @@ int main(int argc, char *argv[])
 
    /*** At this point we have a blank screen. Run an intro with the mame logo ***/
    mame = intro();
-
+   gamenum=1;
    // Start main loop
    while (1)
    {
@@ -368,12 +374,16 @@ int main(int argc, char *argv[])
                   vectorgames = vectorgames->pmanuf;
                   sel_game = vectorgames->firstgame;
                   sel_clone = sel_game;
+                  gamenum=1;
+                  totgames=numofgames(vectorgames);
                }
                if (cc == keyz[k_nman])                                     // [Right]: Go to next manufacturer
                {
                   vectorgames = vectorgames->nmanuf;
                   sel_game = vectorgames->firstgame;
                   sel_clone = sel_game;
+                  gamenum=1;
+                  totgames=numofgames(vectorgames);
                }
                if (cc == keyz[k_ngame])                                    // [Down]: Move to top of game list if smart menu is enabled
                {
@@ -381,6 +391,7 @@ int main(int argc, char *argv[])
                   sel_clone = sel_game;
                   man_menu = 0;
                   cc = 0;
+                  gamenum=1;
                }
                if (cc == keyz[k_pgame])                                    // [Up]: Move to bottom of game list if smart menu is enabled
                {
@@ -388,6 +399,13 @@ int main(int argc, char *argv[])
                   sel_clone = sel_game;
                   man_menu = 0;
                   cc = 0;
+                  gamenum=1;
+                  while (vectorgames->firstgame != sel_game)
+                  {
+                     gamenum++;
+                     sel_game=sel_game->prev;
+                  }
+                  sel_game=vectorgames->firstgame->prev;
                }
             }
 
@@ -410,11 +428,13 @@ int main(int argc, char *argv[])
                {
                   sel_game = sel_game->prev;
                   sel_clone = sel_game;
+                  gamenum--;
                }
                if (cc == keyz[k_ngame])                                                      // [Down]: go to next game
                {
                   sel_game = sel_game->next;
                   sel_clone = sel_game;
+                  gamenum++;
                }
                if (cc == keyz[k_start])                                                      // launch VMAME
                {
@@ -543,7 +563,36 @@ int main(int argc, char *argv[])
 
          // Now print the games list menu
          top = 150;
+         int printed=0;
+         
          gamelist_root = vectorgames->firstgame;                                 // point to game list for current manufacturer
+
+
+         // If we have a long list then we scroll it...
+         if (totgames>13)
+         {
+            if (gamenum<(totgames-5))                                            // print a down arrow if there are games off the bottom
+            {
+               setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
+               PrintString(">", 0, -330, 270, 6, 6, 0);
+            }
+            gamenumtemp=gamenum;
+            while ((gamenumtemp>7) && (gamenumtemp<(totgames-5)))                // If we are in the middle zone, scroll the list
+
+            {
+               gamelist_root = gamelist_root->next;
+               gamenumtemp--;
+            }
+            if (gamenumtemp>=(totgames-5))                                       // If we are in the last 5 games of the list, stop scrolling
+            {
+               for (gamenumtemp=0;gamenumtemp<(totgames-13);gamenumtemp++)
+               {
+                  gamelist_root = gamelist_root->next;
+               }
+            }
+         }
+
+         
          do
          {
             strcpy(mytext, gamelist_root->name);                                 // mytext = name of parent game
@@ -569,8 +618,9 @@ int main(int argc, char *argv[])
             PrintString(mytext, 0, top, 0, gamesize, gamesize, 0);
             gamelist_root = gamelist_root->next;
             top -= 35;
+            printed++;
          }
-         while (gamelist_root != vectorgames->firstgame);
+         while ((gamelist_root != vectorgames->firstgame) && (printed<13));
       }
       timeout ++;                                       // screensaver timer
       ticks=(ticks+1)%360;                              // counter
@@ -1856,9 +1906,12 @@ void PlayAttractGame(m_node *gameslist)
    size_t ls = strlen(selectedgame->clone);
    char *args = (char*) malloc((lf + ls + 2) * sizeof(char));
 
-   strcpy(args, attractargs);
-   args[lf] = ' ';
-   strcpy(&args[lf+1], selectedgame->clone);
+   //strcpy(args, attractargs);
+   //args[lf] = ' ';
+   //strcpy(&args[lf+1], selectedgame->clone);
+   strcpy(args, selectedgame->clone);
+   args[ls] = ' ';
+   strcpy(&args[ls+1], attractargs);
 
    RunGame(args, zvgargs);
 }
@@ -1894,22 +1947,22 @@ void SetOptions(void)
       if ((LEDtimer%60 == 5) || (LEDtimer%60 == 35)) setLEDs(LEDtimer%60 <30 ? C_LED : N_LED);
 
       cc=getkey();
-      if (mouse_x < 0)                    // Mouse Left
+      if (MouseX < 0)                    // Mouse Left
       {
          optx = optx - 15;
          if (optx < -xmax) optx = xmax;
       }
-      if (mouse_x > 0)                    // Mouse Right
+      if (MouseX > 0)                    // Mouse Right
       {
          optx = optx + 15;
          if (optx > xmax) optx = -xmax;
       }
-      if (mouse_y > 0)                    // Mouse Up
+      if (MouseY > 0)                    // Mouse Up
       {
          opty = opty - 15;
          if (opty < -ymax) opty = ymax;
       }
-      if (mouse_y < 0)                    // Mouse Down
+      if (MouseY < 0)                    // Mouse Down
       {
          opty = opty + 15;
          if (opty > ymax) opty = -ymax;
@@ -2195,8 +2248,8 @@ void SetOptions(void)
                if (optz[o_mouse] < 0) optz[o_mouse] = 3;
             }
             if (cc == keyz[k_start]) optz[o_mouse] = 0;
-            mouse_x = 0;
-            mouse_y = 0;
+            MouseX = 0;
+            MouseY = 0;
             break;
          }
 
@@ -2220,8 +2273,8 @@ void SetOptions(void)
             {
                optz[o_msens]--;                                   // decrease sensitivity
                if (optz[o_msens] < 1) optz[o_msens] = 1;
-               mouse_x=0;                                         // reset mouse counters
-               mouse_y=0;
+               MouseX=0;                                         // reset mouse counters
+               MouseY=0;
                mdx=0;
                mdy=0;
             }
@@ -2229,8 +2282,8 @@ void SetOptions(void)
             {
                optz[o_msens]++;                                   // increase sensitivity
                if (optz[o_msens] > 100) optz[o_msens] = 100;
-               mouse_x=0;                                         // reset mouse counters
-               mouse_y=0;
+               MouseX=0;                                         // reset mouse counters
+               MouseY=0;
                mdx=0;
                mdy=0;
             }
@@ -2303,8 +2356,8 @@ void   EditGamesList(void)
    float       width;
    int         descindex=0, desclen, j=0, ticks=0, LEDtimer=0, maxlen=45;
 
-   mouse_x = 0;
-   mouse_y = 0;
+   MouseX = 0;
+   MouseY = 0;
    maxlen = maxlen - 5*(optz[o_fontsize] - 3); // remove 5 more chars per font increase
 
    list_root = build_games_list();
@@ -2511,8 +2564,8 @@ void EditColours(void)
    int items=6, ci_toggle=0, item_col=0, item_int=0, lk=0;
    char colval[10], intval[10], desc[50];
 
-   mouse_x = 0;
-   mouse_y = 0;
+   MouseX = 0;
+   MouseY = 0;
 
    item_col=colours[c_col][c_man];
    item_int=colours[c_int][c_man];
@@ -2940,3 +2993,17 @@ void BrightnessBars(int x, int y, int height, int colour)
    end.y=start.y;
    drawvector(start, end, 0, 0);
 }
+
+
+int numofgames(m_node *manlist)
+{
+   int total= 1;
+   g_node *templist = manlist->firstgame;
+   while (templist->next != manlist->firstgame)
+   {
+      total++;
+      templist = templist->next;
+   }
+   return total;
+}
+
