@@ -12,8 +12,8 @@ typedef struct listnode
    struct listnode   *next, *prev;
    char              manuf[20];
    char              desc[50];
-   char              parent[40];
-   char              clone[40];
+   char              parent[128];
+   char              clone[128];
    int               hidden;
 } list_node;
 

@@ -21,9 +21,9 @@
 *******************************************************************/
 list_node* build_games_list(void)
 {
-   char        temp[200];
+   char        temp[260];
    char        *nl;
-   char        smanuf[30], sdesc[60], smame[40], sclone[40];
+   char        smanuf[30], sdesc[60], smame[128], sclone[128];
    char        *manuf=smanuf, *desc=sdesc, *mame=smame, *clone=sclone;
    int         hidden, total=0, i=0, len=0;
    FILE        *fp;
@@ -39,7 +39,7 @@ list_node* build_games_list(void)
 #ifdef DEBUG
    printf("Building games list...\n");
 #endif
-   while (fgets(temp, 99, fp) != NULL)
+   while (fgets(temp, 250, fp) != NULL)
    {
       total++;
       if ((strlen(temp) > 1) && ((strchr(temp, '#') - temp) != 0 ))

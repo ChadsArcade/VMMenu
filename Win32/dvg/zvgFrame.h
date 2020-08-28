@@ -1,3 +1,7 @@
+/******************************************************************
+   USB-DVG drivers for Win32 and Linux
+   Code by Mario Montminy, 2020
+*******************************************************************/
 #ifndef _ZVGFRAME_H_
 #define _ZVGFRAME_H_
 
@@ -9,10 +13,10 @@ extern "C" {
 #endif
 
 
-#define	X_MIN			(-512)
-#define	X_MAX			511
-#define	Y_MIN			(-384)
-#define	Y_MAX			383
+#define X_MIN   (-512)
+#define X_MAX   511
+#define Y_MIN   (-384)
+#define Y_MAX   383
 
 // Prototypes
 

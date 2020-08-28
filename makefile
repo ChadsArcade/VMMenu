@@ -1,6 +1,6 @@
 ##################################
 #                                #
-#   VMMenu MAKEFILE for ALL OS   #
+#   VMMenu MAKEFILE for all OS   #
 #     For use with GNU Make      #
 #                                #
 #      Chad Gray, July 2020      #
@@ -9,9 +9,11 @@
 #                                #
 # usage:                         #
 #                                #
-# make target=linux or           #
-# make target=Win32 or           #
-# make target=DOS (default)      #
+# make target=linux              #
+# make target=linuxdvg(default)  #
+# make target=Win32              #
+# make target=DOS                #
+# make target=DOSAud             #
 #                                #
 ##################################
 
@@ -85,6 +87,29 @@ ifeq ($(target),Win32)
 	       $(OBJ_DIR)/WinVMM.o \
 	       $(OBJ_DIR)/VMM-SDL.o \
 			 $(OBJ_DIR)/vchars.o \
+	       $(OBJ_DIR)/gamelist.o \
+          $(OBJ_DIR)/editlist.o
+endif
+ifeq ($(target),DOSAud)
+   $(info Building for DOS with SEAL audio)
+   VPATH=VMMSrc iniparser DOS DOS/zvg
+   INC = -IC:\djgpp\seal-1.07\src -I./DOS/zvg -I./DOS -I./iniparser -I./VMMSrc
+   LIBS = -LC:\djgpp\seal-1.07\lib\DOS -laudio
+   EXEC = svmmenu.exe
+   RM = del
+   RMDIR = cmd /c rd /s /q
+   MKDIR = mkdir -p $(1)
+   OBJS = $(OBJ_DIR)/vmmenu.o \
+	       $(OBJ_DIR)/zvgFrame.o \
+	       $(OBJ_DIR)/zvgPort.o \
+	       $(OBJ_DIR)/timer.o \
+	       $(OBJ_DIR)/zvgEnc.o \
+	       $(OBJ_DIR)/zvgError.o \
+	       $(OBJ_DIR)/zvgBan.o \
+	       $(OBJ_DIR)/iniparser.o \
+	       $(OBJ_DIR)/dictionary.o \
+	       $(OBJ_DIR)/DOSvmmSL.o \
+	       $(OBJ_DIR)/vchars.o \
 	       $(OBJ_DIR)/gamelist.o \
           $(OBJ_DIR)/editlist.o
 endif

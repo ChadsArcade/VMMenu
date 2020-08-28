@@ -199,9 +199,9 @@ g_node* gotolastclone(g_node *gamelist)
 **************************************/
 m_node* createlist()
 {
-   char     temp[200];
+   char     temp[260];
    char     *nl;
-   char     smanuf[30], sdesc[60], smame[40], sclone[40];
+   char     smanuf[30], sdesc[60], smame[128], sclone[128];
    char     *manuf=smanuf, *desc=sdesc, *mame=smame, *clone=sclone;
    FILE     *fp;
    m_node   *man_root = NULL, *man_cursor = NULL, *man_last = NULL;
@@ -214,7 +214,7 @@ m_node* createlist()
       printf("Please run makeini.exe >vmmenu.ini\n");
       exit(1) ;
    }
-   while (fgets(temp, 99, fp) != NULL)
+   while (fgets(temp, 250, fp) != NULL)
    {
       if ((strlen(temp) > 1) && ((strchr(temp, '#') - temp) != 0 ) && (strchr(temp, '|') != 0))
       {

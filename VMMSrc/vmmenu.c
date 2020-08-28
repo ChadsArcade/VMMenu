@@ -52,6 +52,12 @@
 *                    Long (scrolling) games lists supported.
 *                    Some things may be broken...
 *
+* 28-Aug-20 v1.6.2   Sound added to DOS port (needs SEAL, make target=DOSAud)
+*                    Sound samples now in directory VMMsnd
+*                    Vectrex manufacturer logo added
+*                    Tweaks to support very long Vectrex cart filenames
+*                    cartlist util added to help adding Vectrex games to ini file
+*
 ***********************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,6 +100,7 @@ vObject  make_atari(void);                                       // define atari
 vObject  make_centuri(void);                                     // define centuri logo
 vObject  make_vbeam(void);                                       // define vectorbeam logo
 vObject  make_midway(void);                                      // define midway logo
+vObject  make_vectrex(void);                                     // define vectrex logo
 int      reallyescape(void);                                     // See if you really want to quit
 void     author(int);                                            // Print author info
 int      credits(void);                                          // print credits
@@ -149,7 +156,7 @@ m_node       *vectorgames;
 g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 unsigned int man_menu;
 
-char         auth1[] = "VMMenu 1.6.1, Chad Gray";
+char         auth1[] = "VMMenu 1.6.2, Chad Gray";
 char         auth2[] = "ChadsArcade@Gmail.com";
 
 vObject      mame;
@@ -168,7 +175,7 @@ int main(int argc, char *argv[])
    float        width=0.0;
    char         mytext[100];
    int          mpx = 0, mpy = 0;
-   vObject      sega, cinematronics, atari, centuri, vbeam, midway;
+   vObject      sega, cinematronics, atari, centuri, vbeam, midway, vectrex;
    FILE         *inifp;
    char         *ini_name = "vmmenu.cfg";
 
@@ -276,6 +283,7 @@ int main(int argc, char *argv[])
    centuri        = make_centuri();
    vbeam          = make_vbeam();
    midway         = make_midway();
+   vectrex        = make_vectrex();
 
    if (autostart)
    {
@@ -502,6 +510,16 @@ int main(int argc, char *argv[])
             sega.pos.x = xmax-80;
             sega.angle = 270;
             drawshape(sega);
+         }
+         else if (!strcmp(mytext, "VECTREX"))
+         {
+            vectrex.pos.x = -(xmax-80);
+            vectrex.angle = 90;
+            vectrex.scale.y = width*1.5;
+            drawshape(vectrex);
+            vectrex.pos.x = xmax-80;
+            vectrex.angle = 270;
+            drawshape(vectrex);
          }
          else if (!strcmp(mytext, "CENTURI"))
          {
@@ -975,8 +993,6 @@ vObject intro(void)
    {
       mame.scale.x += 0.75;//-= 0.05;
       mame.scale.y +=0.75;//-= 0.05;; // = mame.scale.x;
-      //printf("ScaleY: %f\n", mame.scale.y);
-      //SDL_Delay(250);
       bright -= 1;
       if (bright < 1) bright=0;
       mame.bright = bright;
@@ -1364,6 +1380,53 @@ vObject make_midway(void)
 }
 
 
+/***********************************
+ Initialise the Vectrex Logo graphic
+************************************/
+vObject make_vectrex(void)
+{
+   //x = 0 - 328, y= 0 - 44
+   static int vectrexlogo[] = {
+   // V
+   0,44,17,44,    17,44,29,26,   29,26,41,44,   41,44,57,44,   57,44,30,0,    30,0,0,44,
+   // E
+   61,0,61,44,    61,44,94,44,   94,44,99,32,   99,32,73,32,   73,32,73,27,   73,27,86,27,   86,27,86,17,   86,17,73,17,   73,17,73,12,   73,12,99,12,   99,12,94,0,    94,0,61,0,
+   // C
+   132,28,141,36, 141,36,135,42, 135,42,127,44, 127,44,119,44, 119,44,112,42, 112,42,106,36, 106,36,102,28, 102,28,101,20,
+   101,20,103,12, 103,12,107,7,  107,7,113,3,   113,3,119,0,   119,0,126,0,   126,0,133,2,   133,2,141,8,   141,8,132,17,
+   132,17,127,13, 127,13,120,13, 120,13,116,16, 116,16,114,22, 114,22,115,27, 115,27,119,31, 119,31,124,32, 124,32,129,31, 129,31,132,28,
+   // T
+   156,0,171,0,   171,0,171,29,  171,29,183,29, 183,29,180,44, 180,44,147,44, 147,44,144,29, 144,29,156,29, 156,29,156,0,
+   // R
+   188,0,188,44,  188,44,219,44, 219,44,226,41, 226,41,229,36, 229,36,230,30, 230,30,229,24, 229,24,225,20, 225,20,223,18, 223,18,233,0,
+   233,0,215,0,   215,0,208,10,  208,10,208,24, 208,24,211,24, 211,24,213,26, 213,26,213,29, 213,29,211,32, 211,32,204,32, 204,32,204,0,  204,0,188,0,
+   // E
+   236,0,236,44,  236,44,269,44, 269,44,273,32, 273,32,248,32, 248,32,248,27, 248,27,262,27, 262,27,262,17, 262,17,248,17, 248,17,248,12, 248,12,274,12, 274,12,269,0,  269,0,236,0,
+   // X
+   274,44,293,44, 293,44,301,33, 301,33,309,44, 309,44,328,44, 328,44,311,22, 311,22,328,0,  328,0,309,0,   309,0,301,10,  301,10,293,0,  293,0,274,0,   274,0,291,22,  291,22,274,44
+   };
+
+   vObject   vectrex;
+   vectrex.outline.array = vectrexlogo;
+   vectrex.outline.size = sizeof(vectrexlogo)/sizeof(*vectrexlogo);
+   vectrex.pos.x = -350;
+   vectrex.pos.y = 0;
+   vectrex.inc.x = 0;
+   vectrex.inc.y = 0;
+   vectrex.scale.x = 1.5;
+   vectrex.scale.y = 1.5;
+   vectrex.angle = 90;
+   vectrex.theta = 0;
+   vectrex.cent.x = 164;
+   vectrex.cent.y = 22;
+   vectrex.colour = vwhite;
+   vectrex.bright = EDGE_BRI;
+   vectrex.edge  = 1;             // wrap
+
+   return vectrex;
+}
+
+
 /***********************************************
  Print author information at the bottom of the screen
 ************************************************/
@@ -1421,7 +1484,7 @@ int credits(void)
    char credits[lines][60];
 
 #ifdef _DVGTIMER_H_
-   strcpy(credits[0], "DVG Vector Mame Menu, Chad Gray 2020");
+   strcpy(credits[0], "DVG Vector Mame Menu, Chad Gray 2011-2020");
    strcpy(credits[1], " ");
    strcpy(credits[2], "Thanks go to the following");
    strcpy(credits[3], "Mario Montminy and Fred Konopaska for the USB-DVG");
@@ -1432,7 +1495,7 @@ int credits(void)
    strcpy(credits[8], "Atari, Sega, Cinematronics et al for the games");
    strcpy(credits[9], "And all the vectorheads for keeping them alive");
 #else
-   strcpy(credits[0], "ZVG Vector Mame Menu, Chad Gray 2011");
+   strcpy(credits[0], "ZVG Vector Mame Menu, Chad Gray 2011-2020");
    strcpy(credits[1], " ");
    strcpy(credits[2], "Thanks go to the following");
    strcpy(credits[3], "Zektor for the ZVG");
@@ -2351,7 +2414,7 @@ void   EditGamesList(void)
    list_node   *list_root=NULL, *list_cursor=NULL, *list_print=NULL, *list_active=NULL;
    int         cc=0, timer=0, i=0;
    int         top=300, spacing=50; //42;
-   char        gamename[50];
+   char        gamename[50], manufname[50];
    int         c_hide, i_game=10, i_gameinc=2, startgame=0, rows=11; // I tried 15 rows but it caused too much flicker, Make sure it's ODD.
    float       width;
    int         descindex=0, desclen, j=0, ticks=0, LEDtimer=0, maxlen=45;
@@ -2395,12 +2458,12 @@ void   EditGamesList(void)
             c_hide=vgreen;
          strcpy(gamename, list_print->desc);
          gamename[maxlen]=0;                                          // truncate if >35 chars just to keep things on screen
-         if (!strcmp(list_print->clone, autogame)) startgame=1;   // See if we are on the autostart game
+         if (!strcmp(list_print->clone, autogame)) startgame=1;       // See if we are on the autostart game
 
-         if (i==(rows-1)/2)                                       // This is the selected record
+         if (i==(rows-1)/2)                                           // This is the selected record
          {
+            //printf("Manufacturer: %s\n", list_print->manuf);
             desclen=strlen(list_print->desc);
-
             if (desclen > maxlen && (timer%10==0))                    // If it's a long description then we'll scroll it every 1/3 sec
             {
                if (descindex < (desclen-maxlen))                      // If we're not at the end of the scroll...
@@ -2431,6 +2494,7 @@ void   EditGamesList(void)
             setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
             //PrintString(gamename, 60, top, 0, 5.5, 7, 0);
             PrintString(gamename, 60, top, 0, optz[o_fontsize]+1, optz[o_fontsize]+1, 0);
+            strcpy(manufname, list_print->manuf);
             PrintString(">       ", -300, top, 0, 5, 7, 0);
             PrintString("O", -305, top, 0, 16, 8, 0);
             setcolour(c_hide, 25);
@@ -2466,6 +2530,9 @@ void   EditGamesList(void)
          top-=spacing;
          startgame=0;
       }
+      setcolour(vwhite, 20);
+      PrintString("Selected Manufacturer:", -125, -ymax+120, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString(manufname, 200, -ymax+120, 0, optz[o_fontsize], optz[o_fontsize], 0);
       setcolour(vgreen, 20);
       PrintString("Set/clear autorun game with 1P Start", 0, -ymax+80, 0, optz[o_fontsize], optz[o_fontsize], 0);
 

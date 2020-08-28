@@ -11,9 +11,9 @@ typedef struct gamenode
 {
    struct gamenode   *next, *prev;
    struct gamenode   *nclone, *pclone;
-   char              name[50];
-   char              parent[40];
-   char              clone[40];
+   char              name[60];
+   char              parent[128];
+   char              clone[128];
 } g_node;
 
 typedef struct manufnode
@@ -21,7 +21,7 @@ typedef struct manufnode
    struct manufnode  *nmanuf;
    struct manufnode  *pmanuf;
    struct gamenode   *firstgame;
-   char              name[20];
+   char              name[30];
 } m_node;
 
 m_node*  createlist();

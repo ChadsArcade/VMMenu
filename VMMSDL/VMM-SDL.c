@@ -178,37 +178,37 @@ void InitialiseSDL(int start)
    //else printf("SDL Mixer initialised\n");
    
    //Load sound effects
-   gSFury = Mix_LoadWAV( "samples/sfury9.wav" );
+   gSFury = Mix_LoadWAV( "VMMsnd/sfury9.wav" );
    if( gSFury == NULL )
    {
        printf( "Failed to load sfury9 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gFire1 = Mix_LoadWAV( "samples/elim2.wav" );
+   gFire1 = Mix_LoadWAV( "VMMsnd/elim2.wav" );
    if( gFire1 == NULL )
    {
        printf( "Failed to load elim2 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gExplode1 = Mix_LoadWAV( "samples/explode1.wav" );
+   gExplode1 = Mix_LoadWAV( "VMMsnd/explode1.wav" );
    if( gExplode1 == NULL )
    {
        printf( "Failed to load explode1 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gExplode2 = Mix_LoadWAV( "samples/explode2.wav" );
+   gExplode2 = Mix_LoadWAV( "VMMsnd/explode2.wav" );
    if( gExplode2 == NULL )
    {
        printf( "Failed to load explode2 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gExplode3 = Mix_LoadWAV( "samples/explode3.wav" );
+   gExplode3 = Mix_LoadWAV( "VMMsnd/explode3.wav" );
    if( gExplode3 == NULL )
    {
        printf( "Failed to load explode3 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gFire2 = Mix_LoadWAV( "samples/efire.wav" );
+   gFire2 = Mix_LoadWAV( "VMMsnd/efire.wav" );
    if( gFire2 == NULL )
    {
        printf( "Failed to load efire sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
-   gNuke = Mix_LoadWAV( "samples/nuke1.wav" );
+   gNuke = Mix_LoadWAV( "VMMsnd/nuke1.wav" );
    if( gNuke == NULL )
    {
       printf( "Failed to load nuke1 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
@@ -418,6 +418,7 @@ int getkey(void)
    if (key == keyz[k_start])   playsound(NewScale());
    if (key == keyz[k_options]) playsound(sNuke);
    if (key == keyz[k_quit])    playsound(NewScale());
+   if (key == keyz[k_menu])    playsound(sNuke);
 
    return key;
 }
@@ -544,7 +545,7 @@ void drawvector(point p1, point p2, float x_trans, float y_trans)
 void RunGame(char *gameargs, char *zvgargs)
 {
    unsigned int   err;
-   char   command[80];
+   char   command[200];
 
    setLEDs(0);
    CloseSDL(0);                        // Close windows etc but don't quit SDL
@@ -558,7 +559,7 @@ void RunGame(char *gameargs, char *zvgargs)
    }
    else
    {
-      sprintf(command, "./vmm.sh '%s'", gameargs);
+      sprintf(command, "./vmm.sh \"%s\"", gameargs);
    }
    printf("Launching: [%s]\n", command);
    err = system(command);
