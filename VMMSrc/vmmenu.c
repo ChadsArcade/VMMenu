@@ -324,6 +324,7 @@ int main(int argc, char *argv[])
             pressy = NewYPos();
          }
          if ((timeout % 300) > 150)      pressakey(pressx, pressy);
+         if ((timeout % 1800) == 1500)   playsound(1);
          if ((timeout % 1800) > 1500)
             author(37.5-(abs(((timeout % 1800)-1650)/4)));
          if (cc)
@@ -1112,7 +1113,7 @@ int reallyescape(void)
       if (optz[o_stars]) showstars();
       if ((timer % 120 == 0) || (timer % 120 == 60)) setLEDs(timer % 120 < 60 ? (N_LED | C_LED) : 0); // flash LEDs
       drawborders(200, 80, -200, -80, 1, 1, vwhite);
-      itoa(30 -(timer/60), timeout, 10);
+      sprintf(timeout, "%i", 30 -(timer/60));
       setcolour(vblue, EDGE_BRI);
       PrintString("Press quit again to exit", 0, 40, 0, 5, 5, 0);
       PrintString("Any other key to return", 0, 0, 0, 5, 5, 0);
@@ -2001,7 +2002,7 @@ void SetOptions(void)
    int   optx = 0, opty = 0, timer = 0, LEDtimer=0;
    int   lastkey = keyz[k_options], spacing = 42;
    point p1, p2;
-   char  angle[10];
+   char  buffer[10];
    setLEDs(0);
    while ((cc != keyz[k_options] && cc != keyz[k_quit] && cc != START2) && timer < 1800)
    {
@@ -2049,11 +2050,11 @@ void SetOptions(void)
       setcolour(vwhite, 15);
       if (cursor == 0)   setcolour(vwhite, 25);
       PrintString("Rotation         ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_rot] == 0) strcpy(angle,"0        ");
-      if (optz[o_rot] == 1) strcpy(angle,"90       ");
-      if (optz[o_rot] == 2) strcpy(angle,"180      ");
-      if (optz[o_rot] == 3) strcpy(angle,"270      ");
-      PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (optz[o_rot] == 0) strcpy(buffer,"0        ");
+      if (optz[o_rot] == 1) strcpy(buffer,"90       ");
+      if (optz[o_rot] == 2) strcpy(buffer,"180      ");
+      if (optz[o_rot] == 3) strcpy(buffer,"270      ");
+      PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Stars
       top-=spacing;
@@ -2100,11 +2101,11 @@ void SetOptions(void)
          setcolour(vwhite, 15);
          if (cursor == 6)   setcolour(vwhite, 25);
          PrintString("Optical Control  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-         if (optz[o_mouse] == 0) strcpy(angle,"None     ");
-         if (optz[o_mouse] == 1) strcpy(angle,"X-Spinner");
-         if (optz[o_mouse] == 2) strcpy(angle,"Y-Spinner");
-         if (optz[o_mouse] == 3) strcpy(angle,"Trackball");
-         PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+         if (optz[o_mouse] == 0) strcpy(buffer,"None     ");
+         if (optz[o_mouse] == 1) strcpy(buffer,"X-Spinner");
+         if (optz[o_mouse] == 2) strcpy(buffer,"Y-Spinner");
+         if (optz[o_mouse] == 3) strcpy(buffer,"Trackball");
+         PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
          if (optz[o_mouse])
          {
@@ -2135,9 +2136,8 @@ void SetOptions(void)
             setcolour(vwhite, 15);
             if (cursor == 9)   setcolour(vwhite, 25);
             PrintString("- Sensitivity     ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-            itoa(optz[o_msens], angle, 10);
-            *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
-            PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            sprintf(buffer, "%-9i", optz[o_msens]);
+            PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
             setcolour(vyellow, 25);
             PrintString("X", optx, ymax-12, 0, 10, 5, 0);
@@ -2173,9 +2173,8 @@ void SetOptions(void)
       setcolour(vwhite, 15);
       if (cursor == options - 3)   setcolour(vwhite, 25);
       PrintString("Font Size        ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      itoa(optz[o_fontsize], angle, 10);
-      *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
-      PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      sprintf(buffer, "%-9i", optz[o_fontsize]);
+      PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Borders
       top-=spacing;
@@ -2189,16 +2188,15 @@ void SetOptions(void)
       setcolour(vwhite, 15);
       if (cursor == options-1)     setcolour(vwhite, 25);
       PrintString("Sounds / Volume  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      itoa(optz[o_volume], angle, 10);
-      *stpncpy(angle+strlen(angle), "         ", 9-strlen(angle)) = '\0';   // Pad out to 7 characters to align text
-      PrintString(optz[o_volume] > 0 ? angle : "Off      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      sprintf(buffer, "%-9i", optz[o_volume]);
+      PrintString(optz[o_volume] > 0 ? buffer : "Off      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       // Print Keycode
       top=-ymax+50;
       setcolour(vgreen, 20);
       PrintString("Last keycode     ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      sprintf(angle,"0x%04x   ",lastkey);
-      PrintString(angle, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      sprintf(buffer,"0x%04x   ",lastkey);
+      PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
       if (cc) lastkey = cc;                        // Record keypress
       if (cc) timer = 0;                           // Reset timer if we pressed something

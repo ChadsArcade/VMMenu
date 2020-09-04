@@ -2,7 +2,7 @@
 
 #include <fcntl.h>
 #include <SDL.h>
-#include <SDL2/SDL_mixer.h>
+#include <SDL_mixer.h>
 #include "vmmstddef.h"
 #include "VMM-SDL.h"
 #if defined(linux) || defined(__linux)
@@ -18,8 +18,8 @@ extern void   GetRGBfromColour(int, int*, int*, int*);               // Get R, G
 
 SDL_Window     *window = NULL;
 SDL_Renderer   *screenRender = NULL;
-int            WINDOW_WIDTH  = 768;
-int            WINDOW_HEIGHT; // = 600;
+int            WINDOW_WIDTH  = 1024;
+int            WINDOW_HEIGHT; // = 768;
 #define        WINDOW_SCALE (1024.0/WINDOW_WIDTH)
 
 #if defined(linux) || defined(__linux)

@@ -74,7 +74,7 @@ ifeq ($(target),Win32)
    $(info Building for Win32)
    VPATH=VMMSrc iniparser Win32 Win32/dvg VMMSDL
    INC = -IC:/mingw_dev_lib/include/SDL2 -I./VMMSrc -I./Win32/dvg -I./iniparser -I./Win32 -I./VMMSDL
-   LIBS = -LC:\mingw_dev_lib\lib -lmingw32 -lSDL2main -lSDL2 -lm
+   LIBS = -LC:\mingw_dev_lib\lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_mixer -lm
    EXEC = vmmenu.exe
    RM = del
    RMDIR = cmd /c rd /s /q
