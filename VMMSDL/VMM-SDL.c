@@ -45,7 +45,8 @@ enum vsounds
   sFire1,
   sExplode2,
   sFire2,
-  sExplode3
+  sExplode3,
+  sFire3
 };
 
 
@@ -53,6 +54,7 @@ enum vsounds
 Mix_Chunk      *gSFury    = NULL;
 Mix_Chunk      *gFire1    = NULL;
 Mix_Chunk      *gFire2    = NULL;
+Mix_Chunk      *gFire3    = NULL;
 Mix_Chunk      *gExplode1 = NULL;
 Mix_Chunk      *gExplode2 = NULL;
 Mix_Chunk      *gExplode3 = NULL;
@@ -110,34 +112,6 @@ void startZVG(void)
 //   #endif
 }
 
-/******************************************************************
-   itoa function, which isn't ANSI though is part of DJGPP
-*******************************************************************/
-char* itoa(int value, char* result, int base)
-{
-   // check that the base if valid
-   if (base < 2 || base > 36) { *result = '\0'; return result; }
-
-   char* ptr = result, *ptr1 = result, tmp_char;
-   int tmp_value;
-
-   do {
-      tmp_value = value;
-      value /= base;
-      *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
-   } while ( value );
-
-   // Apply negative sign
-   if (tmp_value < 0) *ptr++ = '-';
-   *ptr-- = '\0';
-   while(ptr1 < ptr) {
-      tmp_char = *ptr;
-      *ptr--= *ptr1;
-      *ptr1++ = tmp_char;
-   }
-   return result;
-}
-
 
 /********************************************************************
  Initialise SDL and screen
@@ -155,7 +129,7 @@ void InitialiseSDL(int start)
       //else printf("SDL Initialised\n");
    }
    /* Set a video mode */
-   WINDOW_HEIGHT=((WINDOW_WIDTH/4)*3); // this ensure the window is 4:3
+   WINDOW_HEIGHT=((WINDOW_WIDTH/4)*3); // this ensures the window is 4:3
    window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIDDEN);
 
@@ -168,8 +142,7 @@ void InitialiseSDL(int start)
 
    MouseX = 0;
    MouseY = 0;
-   
-   
+
    //Initialize SDL_mixer
    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
    {
@@ -213,6 +186,11 @@ void InitialiseSDL(int start)
    {
       printf( "Failed to load nuke1 sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
    }
+   gFire3 = Mix_LoadWAV( "VMMsnd/fire.wav" );
+   if( gFire3 == NULL )
+   {
+       printf( "Failed to load fire sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+   }
    Mix_Volume(-1, optz[o_volume]);
 }
 
@@ -247,6 +225,9 @@ void playsound(int picksound)
             break;
          case 6:
             Mix_PlayChannel( -1, gExplode3, 0 );
+            break;
+         case 7:
+            Mix_PlayChannel( -1, gFire3, 0 );
             break;
          default:
             break;
@@ -416,6 +397,7 @@ int getkey(void)
    if (key == keyz[k_nclone])  playsound(sFire2);
    if (key == keyz[k_pclone])  playsound(sFire2);
    if (key == keyz[k_start])   playsound(NewScale());
+   if (key == keyz[k_random])  playsound(sFire3);
    if (key == keyz[k_options]) playsound(sNuke);
    if (key == keyz[k_quit])    playsound(NewScale());
    if (key == keyz[k_menu])    playsound(sNuke);

@@ -184,7 +184,7 @@ int main(int argc, char **argv)
    else
    {
       dir_str = ROMDIR;
-      printf("Using default ROM DIR: %s\n", dir_str);
+      //printf("Using default ROM DIR: %s\n", dir_str);
    }
    d = opendir(dir_str);
    if (d == NULL)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo $1
-echo $2
+#echo $1
+#echo $2
 
 game="${1,,}"
 if [[ $game == *.vec ]] || [[ $game == *.gam ]] || [[ $game == *.bin ]]

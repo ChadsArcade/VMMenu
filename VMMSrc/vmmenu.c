@@ -1810,13 +1810,18 @@ void writeinival(char *key, int value, int force, int valtype)
          break;
       case 2:                                    // Decimal value
          if (value != 99990) iniparser_set(ini, key, cols[abs(value%7)]);
-         else iniparser_set(ini, key, itoa(value, buffer, 10));
+         else
+         {
+            sprintf(buffer, "%i", value);
+            iniparser_set(ini, key, buffer);
+         }
          break;
       case 3:                                    // Yes / No
          iniparser_set(ini, key, ((value == 0) ? "no" : "yes"));
          break;
       default:
-         iniparser_set(ini, key, itoa(value, buffer, 10));
+         sprintf(buffer, "%i", value);
+         iniparser_set(ini, key, buffer);
          break;
       }
    }
