@@ -138,7 +138,6 @@ extern int   keyz[11];                  // array of key press codes
 static int   colours[2][7];             // array of [colours][7] and [intensities][7]
 
 static char  attractargs[30];
-static char  zvgargs[30];
 static int   totalnumgames=0;
 
 static char  autogame[30];
@@ -288,7 +287,7 @@ int main(int argc, char *argv[])
    if (autostart)
    {
       printf("\nAutostart configured to run \"%s\"...\n", autogame);
-      RunGame(autogame, zvgargs);
+      RunGame(autogame);
    }
    // If we exit the auto started game, or aren't autostarting, lets go with the menu intro and loop
 
@@ -369,7 +368,7 @@ int main(int argc, char *argv[])
             /*** Keys when in any menu ***/
             if (cc == keyz[k_options])       SetOptions();                 // Go to Settings page
             if (cc == keyz[k_menu])          man_menu = !man_menu;         // Toggle between manufacturer and game menus
-            if (cc == keyz[k_random])        RunGame(GetRandomGame(vectorgames)->clone, zvgargs);
+            if (cc == keyz[k_random])        RunGame(GetRandomGame(vectorgames)->clone);
             if (cc == keyz[k_quit])                                        // See if you want to quit
             {
                if (reallyescape()) break;                                  // if [ESC] confirmed, exit menu
@@ -447,7 +446,7 @@ int main(int argc, char *argv[])
                }
                if (cc == keyz[k_start])                                                      // launch VMAME
                {
-                  RunGame(sel_clone->clone, zvgargs);
+                  RunGame(sel_clone->clone);
                }
                if (cc == keyz[k_nclone])                                                     // [Right]: go to next clone in list
                {
@@ -1718,7 +1717,6 @@ void getsettings(void)
    optz[o_volume]    = iniparser_getint(ini,     "interface:volume", 64);
       
    strcpy(attractargs, iniparser_getstring(ini,  "interface:attractargs", "-attract -str 30"));
-   strcpy(zvgargs, iniparser_getstring(ini,      "interface:zvgargs", "-video zvg"));
 
     // autostart settings
    strcpy(autogame, iniparser_getstring(ini,     "autostart:game", ""));
@@ -1860,7 +1858,6 @@ void writecfg()
    writeinival("interface:volume",              optz[o_volume], 1, 0);
 
    iniparser_set(ini, "interface:attractargs",  attractargs);
-   iniparser_set(ini, "interface:zvgargs",      zvgargs);
 
    // write the autostart settings, default is blank and autostart is off
    iniparser_set(ini, "autostart:game",         autogame);
@@ -1982,7 +1979,7 @@ void PlayAttractGame(m_node *gameslist)
    args[ls] = ' ';
    strcpy(&args[ls+1], attractargs);
 
-   RunGame(args, zvgargs);
+   RunGame(args);
 }
 
 

@@ -19,7 +19,7 @@ extern void   GetRGBfromColour(int, int*, int*, int*);               // Get R, G
 SDL_Window     *window = NULL;
 SDL_Renderer   *screenRender = NULL;
 int            WINDOW_WIDTH  = 1024;
-int            WINDOW_HEIGHT; // = 768;
+int            WINDOW_HEIGHT = 768;
 #define        WINDOW_SCALE (1024.0/WINDOW_WIDTH)
 
 #if defined(linux) || defined(__linux)
@@ -38,7 +38,7 @@ extern char    DVGPort[15];
 uint32_t       timestart = 0, timenow, duration;
 
 enum vsounds
-{ 
+{
   sSFury,
   sNuke,
   sExplode1,
@@ -48,7 +48,6 @@ enum vsounds
   sExplode3,
   sFire3
 };
-
 
 //The sound effects that will be used
 Mix_Chunk      *gSFury    = NULL;
@@ -105,11 +104,6 @@ void startZVG(void)
       tmrSetFrameRate(FRAMES_PER_SEC);
       zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
    }
-//   #if DEBUG
-//      //print out a ZVG banner, indicating version etc.
-//      zvgBanner( ZvgSpeeds, &ZvgID);
-//      printf("\n\n");
-//   #endif
 }
 
 
@@ -128,13 +122,17 @@ void InitialiseSDL(int start)
       }
       //else printf("SDL Initialised\n");
    }
-   /* Set a video mode */
-   WINDOW_HEIGHT=((WINDOW_WIDTH/4)*3); // this ensures the window is 4:3
+   // Create SDL Window
+   WINDOW_WIDTH=((WINDOW_HEIGHT/3)*4); // this ensures the window is 4:3
    window = SDL_CreateWindow( WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIDDEN);
 
    screenRender = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE); // Don't use accelerated as it is tied to the screen refresh rate
    SDL_ShowWindow(window);
+
+   SDL_SetRenderDrawColor(screenRender, 0, 0, 0, 255); // Set render colour to black
+   SDL_RenderClear(screenRender);                      // Clear screen
+   SDL_RenderPresent(screenRender);                    // Flip to rendered screen
 
    SDL_SetRelativeMouseMode(SDL_TRUE);
    SDL_Event event;
@@ -149,7 +147,7 @@ void InitialiseSDL(int start)
       printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
    }
    //else printf("SDL Mixer initialised\n");
-   
+
    //Load sound effects
    gSFury = Mix_LoadWAV( "VMMsnd/sfury9.wav" );
    if( gSFury == NULL )
@@ -524,7 +522,7 @@ void drawvector(point p1, point p2, float x_trans, float y_trans)
 /********************************************************************
    Close SDL and execute MAME, restart SDL when done
 ********************************************************************/
-void RunGame(char *gameargs, char *zvgargs)
+void RunGame(char *gameargs)
 {
    unsigned int   err;
    char   command[200];
@@ -537,12 +535,12 @@ void RunGame(char *gameargs, char *zvgargs)
       {
          zvgFrameClose();              // Close the ZVG
       }
-      sprintf(command, "./vmm.sh '%s' '%s'", gameargs, zvgargs);
    }
-   else
-   {
+   #if defined(linux) || defined(__linux)
       sprintf(command, "./vmm.sh \"%s\"", gameargs);
-   }
+   #elif defined(__WIN32__) || defined(_WIN32)
+      sprintf(command, "vmmwin.bat \"%s\"", gameargs);
+   #endif
    printf("Launching: [%s]\n", command);
    err = system(command);
    if (optz[o_redozvg] && ZVGPresent)  // Re-open the ZVG if MAME closed it
@@ -556,3 +554,4 @@ void RunGame(char *gameargs, char *zvgargs)
    }
    InitialiseSDL(1);                   // re-open windows etc
 }
+

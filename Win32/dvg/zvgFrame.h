@@ -20,7 +20,6 @@ extern "C" {
 
 // Prototypes
 
-extern void     zvgBanner(uint32_t speeds, void *id);
 extern void     zvgError(uint32_t err);
 extern int      zvgFrameOpen(void);
 extern void     zvgFrameClose(void);

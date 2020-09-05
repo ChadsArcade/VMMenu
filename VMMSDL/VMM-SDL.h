@@ -14,7 +14,7 @@ void  processmouse(void);                               // Process mouse/spinner
 int   sendframe(void);                                  // Send a frame to the VG and/or SDL
 void  ShutdownAll(void);                                // Shutdown the VG and SDL
 void  drawvector(point, point, float, float);           // draw a vector between 2 points
-void	RunGame(char*, char*);                            // Generate command to run a game
+void	RunGame(char*);                                   // Generate command to run a game
 void  FrameSendSDL(void);                               // Send a frame to the SDL surface
 void  SDLvector(float, float, float, float, int, int);  // Draw a vector on the SDL surface
 void  InitialiseSDL(int);                               // Start up SDL

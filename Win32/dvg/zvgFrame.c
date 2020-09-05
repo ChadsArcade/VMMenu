@@ -148,6 +148,7 @@ static int serial_open()
          zvgError(errSetComTimeout);
          goto END;
       }
+      result = 0;
    #else                   // Linux Code
       struct termios attr;
 
@@ -377,17 +378,6 @@ uint32_t line_clip(int32_t *pX1, int32_t *pY1, int32_t *pX2, int32_t *pY2)
    *pX2 = x2;
    *pY2 = y2;
    return accept;
-}
-
-
-/******************************************************************
-   Print DVG Info
-*******************************************************************/
-void zvgBanner( uint32_t speeds, void *id)
-{
-   (void)speeds;
-   (void)id;
-   printf("USB DVG Hardware, using port: %s <<<\n",DVGPort);
 }
 
 

@@ -24,7 +24,6 @@ int         MouseX=0, MouseY=0;
 int         mdx=0, mdy=0;
 int         optz[15];                        // array of user defined menu preferences
 int         f1_press = 0, f2_press = 0, f3_press = 0, f4_press = 0;
-//char      zvgargs[30];
 extern int  ZVGPresent;
 extern char auth1[], auth2[];
 int         keyz[11];                        // array of key press codes
@@ -323,9 +322,8 @@ void drawvector(point p1, point p2, float x_trans, float y_trans)
 /********************************************************************
    (Optionally) close ZVG and execute MAME, restart ZVG when done
 ********************************************************************/
-void RunGame(char *gameargs, char *zvgargs)
+void RunGame(char *gameargs)
 {
-   (void)         zvgargs;
    unsigned int   err;
    char           command[80];
    //setLEDs(0);
@@ -338,12 +336,8 @@ void RunGame(char *gameargs, char *zvgargs)
       {
          zvgFrameClose();              // Close the ZVG
       }
-      sprintf(command, "./vmm.bat %s %s", gameargs, zvgargs);
    }
-   else
-   {
-      sprintf(command, "./vmm.bat %s", gameargs);
-   }
+   sprintf(command, "./vmm.bat %s", gameargs);
    printf("Launching: [%s]\n", command);
    err = system(command);
    if (optz[o_redozvg] && ZVGPresent)  // Re-open the ZVG if MAME closed it
