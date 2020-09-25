@@ -58,6 +58,12 @@
 *                    Tweaks to support very long Vectrex cart filenames
 *                    cartlist util added to help adding Vectrex games to ini file
 *
+* 12-Sep-20 v1.7     Added graticule test screen to help with linearity checks
+*                    Some code cleanup and optimisation
+*                    Debug code added showing total vectors and colour changes sent
+*                    DOS SEAL build should work with no sound if no soundcard found
+*                    Game list code cleanup, max games in list is now a define
+*
 ***********************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -155,8 +161,10 @@ m_node       *vectorgames;
 g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 unsigned int man_menu;
 
-char         auth1[] = "VMMenu 1.6.2, Chad Gray";
+char         auth1[] = "VMMenu 1.7, Chad Gray";
 char         auth2[] = "ChadsArcade@Gmail.com";
+
+#define      maxgamesonlist 13          // Must be ODD and (ideally) > 5 else you don't get the scroll effect
 
 vObject      mame;
 
@@ -342,7 +350,7 @@ int main(int argc, char *argv[])
             else timeout++;
          }
          #if defined(linux) || defined(__linux)
-          if ((timeout%4500 == 0) && (timeout > 900) && optz[o_attmode])   // show random game every 1:15
+         if ((timeout%4500 == 0) && (timeout > 900) && optz[o_attmode])    // show random game every 1:15
          {
             PlayAttractGame(vectorgames);
          }
@@ -366,7 +374,14 @@ int main(int argc, char *argv[])
          {
             timeout = 0;                                                   // reset screensaver timer
             /*** Keys when in any menu ***/
-            if (cc == keyz[k_options])       SetOptions();                 // Go to Settings page
+            if (cc == keyz[k_options])
+            {
+               SetOptions();                 // Go to Settings page
+               gamenum = 1;
+               sel_game       = vectorgames->firstgame;
+               sel_clone      = sel_game;
+               man_menu       = 1;
+            }
             if (cc == keyz[k_menu])          man_menu = !man_menu;         // Toggle between manufacturer and game menus
             if (cc == keyz[k_random])        RunGame(GetRandomGame(vectorgames)->clone);
             if (cc == keyz[k_quit])                                        // See if you want to quit
@@ -407,13 +422,7 @@ int main(int argc, char *argv[])
                   sel_clone = sel_game;
                   man_menu = 0;
                   cc = 0;
-                  gamenum=1;
-                  while (vectorgames->firstgame != sel_game)
-                  {
-                     gamenum++;
-                     sel_game=sel_game->prev;
-                  }
-                  sel_game=vectorgames->firstgame->prev;
+                  gamenum=totgames;
                }
             }
 
@@ -455,14 +464,14 @@ int main(int argc, char *argv[])
                }
                if (cc == keyz[k_pclone])                                                     // [Left]: go to previous clone in list
                {
-                  if      (sel_clone == sel_game) sel_clone = gotolastclone(sel_game);
-                  else   sel_clone = sel_clone->pclone;
-                  if (sel_clone == NULL)   sel_clone = sel_game;
+                  if   (sel_clone == sel_game) sel_clone = gotolastclone(sel_game);
+                  else sel_clone = sel_clone->pclone;
+                  if   (sel_clone == NULL)     sel_clone = sel_game;
                }
             }
          }
 
-         if (optz[o_borders]) drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 2, vwhite);                            // Draw frame around the edge of the screen
+         if (optz[o_borders]) drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 2, vwhite);       // Draw frame around the edge of the screen
 
          // print the manufacturer name
          strcpy(mytext, vectorgames->name);
@@ -474,15 +483,17 @@ int main(int argc, char *argv[])
          else PrintString(mytext, 0, 300, 0, 8+(4*(1-man_menu)), 8+(4*(1-man_menu)), 0);
 
          setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
-         if (man_menu)                                                                       // Print Arrow pointing to games list
+         if (man_menu)                                                                       // Print Arrow pointing to games list, or...
             PrintString(">", 0, 220, 270, 6, 6, 0);
-         if (!man_menu)                                                                      // Print Arrow pointing to manufacturer list
+         else                                                                                // Print Arrow pointing to manufacturer list
             PrintString(">", 0, 210, 90, 6, 6, 0);
+
+         if ((totgames>maxgamesonlist) && gamenum<(totgames- ((maxgamesonlist-1)/2) ))       // print a down arrow if there are games off the bottom
+            PrintString(">", 0, -330, 270, 6, 6, 0);
 
          // print the next and previous manufacturers at the sides and arrows
          if (man_menu)
          {
-            setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
             PrintString("<", -((strlen(mytext)*(36-(12*optz[o_togpnm])))/2) - 40, 300, 0, 7, 7, 0);
             PrintString(">", ((strlen(mytext)*(36-(12*optz[o_togpnm])))/2) + 20, 300, 0, 7, 7, 0);
 
@@ -571,12 +582,12 @@ int main(int argc, char *argv[])
             setcolour(vcyan, EDGE_BRI-4);
             PrintString(mytext, -(xmax-80), 0, 90, 14, width*14, 90);
             PrintString(mytext, xmax-80, 0, 270, 14, width*14, 270);
-            setcolour(vcyan, EDGE_BRI-8);
-            PrintString(mytext, -(xmax-82), 2, 90, 14, width*14, 90);
-            PrintString(mytext, xmax-82, 2, 270, 14, width*14, 270);
-            setcolour(vcyan, EDGE_BRI-12);
-            PrintString(mytext, -(xmax-84), 4, 90, 14, width*14, 90);
-            PrintString(mytext, xmax-84, 4, 270, 14, width*14, 270);
+            //setcolour(vcyan, EDGE_BRI-8);
+            //PrintString(mytext, -(xmax-82), 2, 90, 14, width*14, 90);
+            //PrintString(mytext, xmax-82, 2, 270, 14, width*14, 270);
+            //setcolour(vcyan, EDGE_BRI-12);
+            //PrintString(mytext, -(xmax-84), 4, 90, 14, width*14, 90);
+            //PrintString(mytext, xmax-84, 4, 270, 14, width*14, 270);
          }
 
          // Now print the games list menu
@@ -585,60 +596,55 @@ int main(int argc, char *argv[])
          
          gamelist_root = vectorgames->firstgame;                                 // point to game list for current manufacturer
 
-
-         // If we have a long list then we scroll it...
-         if (totgames>13)
+         if (totgames>maxgamesonlist)                                            // If we have a long list then we scroll it...
          {
-            if (gamenum<(totgames-5))                                            // print a down arrow if there are games off the bottom
-            {
-               setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
-               PrintString(">", 0, -330, 270, 6, 6, 0);
-            }
             gamenumtemp=gamenum;
-            while ((gamenumtemp>7) && (gamenumtemp<(totgames-5)))                // If we are in the middle zone, scroll the list
-
+            // maxgamesonlist+1)/2         is half way down the list - the scroll point
+            // ((maxgamesonlist-1)/2)-1    is the last n games where we don't need to scroll
+            while ((gamenumtemp>((maxgamesonlist+1)/2)) && (gamenumtemp<(totgames-(((maxgamesonlist-1)/2)-1))))                // If we are in the middle zone, scroll the list
             {
                gamelist_root = gamelist_root->next;
                gamenumtemp--;
             }
-            if (gamenumtemp>=(totgames-5))                                       // If we are in the last 5 games of the list, stop scrolling
+            if (gamenumtemp>=(totgames-(((maxgamesonlist-1)/2)-1)))              // If we are in the last 5 games of the list, stop scrolling
             {
-               for (gamenumtemp=0;gamenumtemp<(totgames-13);gamenumtemp++)
+               for (gamenumtemp=0;gamenumtemp<(totgames-maxgamesonlist);gamenumtemp++)
                {
                   gamelist_root = gamelist_root->next;
                }
             }
          }
 
-         
+         setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);            // Set the colour outside of the loop to prevent repeated calls
          do
          {
             strcpy(mytext, gamelist_root->name);                                 // mytext = name of parent game
-            gamesize = optz[o_fontsize];                                                        // fontsize for gamelist
+            gamesize = optz[o_fontsize];                                         // fontsize for gamelist
             if (!man_menu && (sel_game == gamelist_root))                        // if we're at the selected game...
             {
-               gamesize = optz[o_fontsize]+1;
-               if (sel_game != sel_clone) strcpy(mytext, sel_clone->name);       // change to clone name if different
+               gamesize = optz[o_fontsize]+1;                                    // ...make font a bit bigger,
+               if (sel_game != sel_clone) strcpy(mytext, sel_clone->name);       // ...change to clone name if different
                if (sel_game->nclone)
                {
                   setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
-                  PrintString(">", ((strlen(mytext)*3*gamesize)/2) + 3*gamesize, top, 0, gamesize-1, gamesize-1, 0);
-                  PrintString("<", -((strlen(mytext)*3*gamesize)/2) - 6*gamesize, top, 0, gamesize-1, gamesize-1, 0);
+                  PrintString(">", ((strlen(mytext)*3*gamesize)/2) + 3*gamesize, top, 0, gamesize-1, gamesize-1, 0);  // Arrows right showing there are clones
+                  PrintString("<", -((strlen(mytext)*3*gamesize)/2) - 6*gamesize, top, 0, gamesize-1, gamesize-1, 0); // Arrowa left showing there are clones
                }
                setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
+               PrintString(mytext, 0, top, 0, gamesize, gamesize, 0);            // This prevent needless "setcolour" calls per loop
+               setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
             }
             else
             {
-               setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
                if (strstr(mytext, " (") != NULL)
                   mytext[strstr(mytext, " (") - mytext] = 0;                     // ... and strip off version info
+               PrintString(mytext, 0, top, 0, gamesize, gamesize, 0);
             }
-            PrintString(mytext, 0, top, 0, gamesize, gamesize, 0);
             gamelist_root = gamelist_root->next;
             top -= 35;
             printed++;
          }
-         while ((gamelist_root != vectorgames->firstgame) && (printed<13));
+         while ((gamelist_root != vectorgames->firstgame) && (printed<maxgamesonlist));
       }
       timeout ++;                                       // screensaver timer
       ticks=(ticks+1)%360;                              // counter
@@ -664,10 +670,10 @@ int main(int argc, char *argv[])
    printf("\n%s, (c) 2009-2020\n", auth1);
    printf("%s\n", auth2);
    ShutdownAll();
-   if (cc == keyz[k_start])
-      return (1);
-   else
-      return (0);
+   if (cc == keyz[k_start])    // If we press 1P start on exit credits...
+      return (1);              // We can check errorlevel on exit and
+   else                        // e.g. shutdown the system or
+      return (0);              // just exit to the OS
 }
 
 
@@ -690,12 +696,12 @@ void PrintString(char *text, int xpos, int ypos, int charangle, float xScale, fl
 
    // calculate halfway point of string to centre it around given x position
    length = strlen(text);
-   halfstring = (length * (width + 1) * xScale) / 2;      // 3 = char width + 1px space
+   halfstring = (length * (width + 1) * xScale) / 2;      // char width + 1px space
 
    // Calculate the start and endpoints of the line we are writing on
    // and then rotate the line about the centre point.
    line_start   = fnrotate(lineangle, xpos - halfstring, ypos, xpos, ypos);
-   line_end   = fnrotate(lineangle, xpos + halfstring, ypos, xpos, ypos);
+   line_end     = fnrotate(lineangle, xpos + halfstring, ypos, xpos, ypos);
 
    // The difference between start and end X and Y values divided by the number of chars
    // gives us the increment in x and y to the print position of the next character
@@ -1795,18 +1801,18 @@ void writeinival(char *key, int value, int force, int valtype)
 {
    char buffer[12];
    char cols[7][10] = {"red", "magenta", "cyan", "blue", "yellow", "green", "white"};
-   if ((iniparser_find_entry(ini, key)) || (force)) // Write value if the key already exists, or we set "force"
+   if ((iniparser_find_entry(ini, key)) || (force)) // Write the value if the key already exists, or if we have set "force"
    {
       switch (valtype)
       {
-      case 1:
-         if (value > 0)                           // Hex value
+      case 1:                                    // Hex value
+         if (value > 0)
          {
             sprintf(buffer, "0x%04x", value);
             iniparser_set(ini, key, buffer);
          }
          break;
-      case 2:                                    // Decimal value
+      case 2:                                    // Colour name
          if (value != 99990) iniparser_set(ini, key, cols[abs(value%7)]);
          else
          {
@@ -1817,7 +1823,7 @@ void writeinival(char *key, int value, int force, int valtype)
       case 3:                                    // Yes / No
          iniparser_set(ini, key, ((value == 0) ? "no" : "yes"));
          break;
-      default:
+      default:                                   // Write value as-is
          sprintf(buffer, "%i", value);
          iniparser_set(ini, key, buffer);
          break;
@@ -1926,9 +1932,9 @@ int getcolour(const char *colval)
 ********************************************************************/
 g_node* GetRandomGame(m_node *gameslist)
 {
-   int         x=0, rf;
-   m_node      *randommanuf;
-   g_node      *randomgame, *randomclone;
+   int          x=0, rf;
+   m_node       *randommanuf;
+   g_node       *randomgame, *randomclone;
    randommanuf = gameslist;
    randomgame  = randommanuf->firstgame;
    randomclone = randomgame;
@@ -1937,7 +1943,7 @@ g_node* GetRandomGame(m_node *gameslist)
 
    while (x < rf)
    {
-      if (randomclone->nclone != NULL)                     // if not at last clone, next clone
+      if (randomclone->nclone != NULL)                   // if not at last clone, next clone
       {
          randomclone = randomclone->nclone;
       }
@@ -1990,7 +1996,7 @@ void PlayAttractGame(m_node *gameslist)
 void PrintPointer(int mx, int my)
 {
    //printf("m_x: %d m_y: %d\n", mx, my);
-   setcolour(6, 25); // white, EDGE_BRI
+   setcolour(6, 25); // white, Bright
    PrintString(">", mx, my, 135, 8, 4, 0);
 }
 
@@ -2005,6 +2011,7 @@ void SetOptions(void)
    int   lastkey = keyz[k_options], spacing = 42;
    point p1, p2;
    char  buffer[10];
+   
    setLEDs(0);
    while ((cc != keyz[k_options] && cc != keyz[k_quit] && cc != START2) && timer < 1800)
    {
@@ -2057,50 +2064,50 @@ void SetOptions(void)
       if (optz[o_rot] == 2) strcpy(buffer,"180      ");
       if (optz[o_rot] == 3) strcpy(buffer,"270      ");
       PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == 0)   setcolour(vwhite, 15);
 
       // Stars
       top-=spacing;
-      setcolour(vwhite, 15);
-      if (cursor == 1)   setcolour(vwhite, 25);
+      if (cursor == 1)   setcolour(vwhite, 25);      // Set the colour to bright if we're at this option
       PrintString("Stars            ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString(optz[o_stars] == 1 ? "yes      " : "no       ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == 1)   setcolour(vwhite, 15);      // Doing this prevents having to reset the colour for every option 
 
       // Caps
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == 2)   setcolour(vwhite, 25);
       PrintString("All Caps         ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString((optz[o_ucase] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == 2)   setcolour(vwhite, 15);
 
       // Show Prev and Next
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == 3)   setcolour(vwhite, 25);
       PrintString("Show Prev/Next   ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString((optz[o_togpnm] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == 3)   setcolour(vwhite, 15);
 
       // Control Panel Type
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == 4)   setcolour(vwhite, 25);
       PrintString("Control Panel    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       if (optz[o_cpanel] == 0) PrintString("Buttons  ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       if (optz[o_cpanel] == 1) PrintString("Joystick ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       if (optz[o_cpanel] == 2) PrintString("Spinner  ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == 4)   setcolour(vwhite, 15);
 
-      // Reopen ZVG
+      // Reopen ZVG - this can probably be removed actually... just reopen it regardless
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == 5)   setcolour(vwhite, 25);
       PrintString("Reopen ZVG       ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString((optz[o_redozvg] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == 5)   setcolour(vwhite, 15);
 
       // Mouse/Spinner options
       if (mousefound)
       {
          options+=1;                  // Mouse found so we have an extra option to consider
          top-=spacing;
-         setcolour(vwhite, 15);
          if (cursor == 6)   setcolour(vwhite, 25);
          PrintString("Optical Control  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
          if (optz[o_mouse] == 0) strcpy(buffer,"None     ");
@@ -2108,12 +2115,12 @@ void SetOptions(void)
          if (optz[o_mouse] == 2) strcpy(buffer,"Y-Spinner");
          if (optz[o_mouse] == 3) strcpy(buffer,"Trackball");
          PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+         if (cursor == 6)   setcolour(vwhite, 15);
 
          if (optz[o_mouse])
          {
             options+=3;               // Mouse set to true so there are 3 (was 4, 5) more mouse settings
             top-=spacing;
-            setcolour(vwhite, 15);
             p1.x = -136-(26*optz[o_fontsize]);
             p1.y = top + 20;
             p2.x = p1.x;
@@ -2121,77 +2128,79 @@ void SetOptions(void)
             drawvector(p1, p2, 0, 0);
 
             // Reverse X Axis
-            setcolour(vwhite, 15);
             if (cursor == 7)   setcolour(vwhite, 25);
             PrintString("- Reverse X Axis  ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
             PrintString((optz[o_mrevX] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            if (cursor == 7)   setcolour(vwhite, 15);
 
             // Reverse Y Axis
             top-=spacing;
-            setcolour(vwhite, 15);
             if (cursor == 8)   setcolour(vwhite, 25);
             PrintString("- Reverse Y Axis  ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
             PrintString((optz[o_mrevY] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            if (cursor == 8)   setcolour(vwhite, 15);
 
             // Mouse Sensitivity
             top-=spacing;
-            setcolour(vwhite, 15);
             if (cursor == 9)   setcolour(vwhite, 25);
             PrintString("- Sensitivity     ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
             sprintf(buffer, "%-9i", optz[o_msens]);
             PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-
-            setcolour(vyellow, 25);
-            PrintString("X", optx, ymax-12, 0, 10, 5, 0);
-            PrintString("X", optx, -ymax+12, 0, 10, 5, 0);
-            PrintString("X", xmax-12, opty, 0, 10, 5, 0);
-            PrintString("X", -xmax+12, opty, 0, 10, 5, 0);
+            if (cursor == 9)   setcolour(vwhite, 15);
          }
       }
 
       // Edit Games List
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == options - 6)   setcolour(vwhite, 25);
       PrintString("Show/Hide Games  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == options - 6)   setcolour(vwhite, 15);
 
       // Edit Menu Colours
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == options - 5)   setcolour(vwhite, 25);
       PrintString("Edit Menu Colours", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == options - 5)   setcolour(vwhite, 15);
 
       // Monitor Test Patterns
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == options - 4)   setcolour(vwhite, 25);
       PrintString("Test Patterns    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == options - 4)   setcolour(vwhite, 15);
 
       // Font Size
       top-=spacing;
-      setcolour(vwhite, 15);
       if (cursor == options - 3)   setcolour(vwhite, 25);
       PrintString("Font Size        ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       sprintf(buffer, "%-9i", optz[o_fontsize]);
       PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == options - 3)   setcolour(vwhite, 15);
 
       // Borders
       top-=spacing;
-      setcolour(vwhite, 15);
-      if (cursor == options-2)     setcolour(vwhite, 25);
+      if (cursor == options - 2)   setcolour(vwhite, 25);
       PrintString("Borders          ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       PrintString((optz[o_borders] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      if (cursor == options - 2)   setcolour(vwhite, 15);
 
       // Sounds
       top-=spacing;
-      setcolour(vwhite, 15);
-      if (cursor == options-1)     setcolour(vwhite, 25);
+      if (cursor == options - 1)   setcolour(vwhite, 25);
       PrintString("Sounds / Volume  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
       sprintf(buffer, "%-9i", optz[o_volume]);
       PrintString(optz[o_volume] > 0 ? buffer : "Off      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+
+      if (mousefound && optz[o_mouse])
+      {
+         setcolour(vyellow, 25);
+         PrintString("X", optx, ymax-12, 0, 10, 5, 0);
+         PrintString("X", optx, -ymax+12, 0, 10, 5, 0);
+         PrintString("X", xmax-12, opty, 0, 10, 5, 0);
+         PrintString("X", -xmax+12, opty, 0, 10, 5, 0);
+       }
 
       // Print Keycode
       top=-ymax+50;
@@ -2429,6 +2438,7 @@ void   EditGamesList(void)
    {
       list_cursor = list_cursor->prev;
    }
+
 #if DEBUG
    dump_list(list_root);
 #endif
@@ -2438,7 +2448,7 @@ void   EditGamesList(void)
       timer++;
       ticks++;
       LEDtimer++;
-//      drawborders(-X_MAX, -Y_MAX, X_MAX, Y_MAX, 0, 2, vgreen);                  // Draw frame around the edge of the screen
+
       //if (optz[o_stars]) showstars();
 
       if ((LEDtimer%60 == 5) || (LEDtimer%60 == 35)) setLEDs(LEDtimer%60 <30 ? C_LED : N_LED);
@@ -2457,44 +2467,41 @@ void   EditGamesList(void)
          else
             c_hide=vgreen;
          strcpy(gamename, list_print->desc);
-         gamename[maxlen]=0;                                          // truncate if >35 chars just to keep things on screen
-         if (!strcmp(list_print->clone, autogame)) startgame=1;       // See if we are on the autostart game
+         gamename[maxlen]=0;                                       // truncate if >maxlen chars just to keep things on screen
+         if (!strcmp(list_print->clone, autogame)) startgame=1;    // See if we are on the autostart game
 
-         if (i==(rows-1)/2)                                           // This is the selected record
+         if (i==(rows-1)/2)                                        // This is the selected record
          {
-            //printf("Manufacturer: %s\n", list_print->manuf);
             desclen=strlen(list_print->desc);
-            if (desclen > maxlen && (timer%10==0))                    // If it's a long description then we'll scroll it every 1/3 sec
+            if (desclen > maxlen && (timer%10==0))                 // If it's a long description then we'll scroll it every 1/3 sec
             {
-               if (descindex < (desclen-maxlen))                      // If we're not at the end of the scroll...
+               if (descindex < (desclen-maxlen))                   // If we're not at the end of the scroll...
                {
                   if (descindex > 0)
                   {
-                     descindex++;                                 // ...scroll another character
+                     descindex++;                                  // ...scroll another character
                      ticks=0;
                   }
-                  if ((descindex == 0) && (ticks > 60))           // if we haven't started scrolling and we've waited for 60 ticks...
+                  if ((descindex == 0) && (ticks > 60))            // if we haven't started scrolling and we've waited for 60 ticks...
                   {
-                     descindex++;                                 // ...then we start scrolling
+                     descindex++;                                  // ...then we start scrolling
                      ticks=0;
                   }
                }
-               if ((descindex == (desclen-maxlen)) && ticks == 60)    // If we're at the end of the scroll and have waited for 60 ticks...
+               if ((descindex == (desclen-maxlen)) && ticks == 60) // If we're at the end of the scroll and have waited for 60 ticks...
                {
-                  descindex=0;                                    // ...reset scroll to start
+                  descindex=0;                                     // ...reset scroll to start
                   ticks=0;
                }
             }
 
-            for (j=0; j<maxlen; j++)                                  // Show (maxlen) chars
+            for (j=0; j<maxlen; j++)                               // Show (maxlen) chars
             {
                gamename[j] = list_print->desc[j+descindex];
             }
-            //setcolour(vwhite, 25);
             setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
-            //PrintString(gamename, 60, top, 0, 5.5, 7, 0);
             PrintString(gamename, 60, top, 0, optz[o_fontsize]+1, optz[o_fontsize]+1, 0);
-            strcpy(manufname, list_print->manuf);
+            sprintf(manufname, "(%s)", list_print->manuf);
             PrintString(">       ", -300, top, 0, 5, 7, 0);
             PrintString("O", -305, top, 0, 16, 8, 0);
             setcolour(c_hide, 25);
@@ -2511,11 +2518,13 @@ void   EditGamesList(void)
          else
          {
             setcolour(vwhite, i_game);
+            //setcolour(vwhite, colours[c_int][c_glist]);
             PrintString("O", -305, top, 0, 13, 6, 0);
-            //setcolour(vyellow, i_game);
-            setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
-            //PrintString(gamename, 60, top, 0, 4, 5, 0);
+
+            //setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
+            setcolour(colours[c_col][c_glist], i_game);
             PrintString(gamename, 60, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+
             setcolour(c_hide, i_game);
             //PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 4, 5, 0);
             PrintString((list_print->hidden == 1 ? "         " : "    #    "), -307, top, 0, 4, 5, 0);
@@ -2531,8 +2540,7 @@ void   EditGamesList(void)
          startgame=0;
       }
       setcolour(vwhite, 20);
-      PrintString("Selected Manufacturer:", -125, -ymax+120, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString(manufname, 200, -ymax+120, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString(manufname, 60, -ymax+120, 0, optz[o_fontsize], optz[o_fontsize], 0);
       setcolour(vgreen, 20);
       PrintString("Set/clear autorun game with 1P Start", 0, -ymax+80, 0, optz[o_fontsize], optz[o_fontsize], 0);
 
@@ -2615,13 +2623,13 @@ void   EditGamesList(void)
    Edit Menu Colours
 
 colours and intensities are:
-c_gamelist, i_gamelist  = the games list
-c_selgame, i_selgame    = the selected game
-c_selman, i_selman      = the selected manufacturer
-c_man, i_man            = manufacturer
-c_pnman, i_pnman        = prev/next manufacturer
-c_arrow, i_arrow        = arrows
-c_asteroids, i_asteroids= asteroids
+c_gamelist, i_gamelist   = the games list
+c_selgame, i_selgame     = the selected game
+c_selman, i_selman       = the selected manufacturer
+c_man, i_man             = manufacturer
+c_pnman, i_pnman         = prev/next manufacturer
+c_arrow, i_arrow         = arrows
+c_asteroids, i_asteroids = asteroids
 
 *******************************************************************/
 void EditColours(void)
@@ -2882,7 +2890,7 @@ void drawbox(int x1, int y1, int x2, int y2, int colour, int intensity)
 *******************************************************************/
 void TestPatterns()
 {
-   int cc=0, col=6, pattern=0, rotation=0, x=0, showchars=0, timer=0;
+   int cc=0, col=6, pattern=0, rotation=0, x=0, tick=0, showchars=0, timer=0;
    int a_cols[7] = {vwhite, vred, vgreen, vblue, vmagenta, vcyan, vyellow};
    char* a_cnames[7] = { "W", "R", "G", "B", "M", "C", "Y"};
    int mono = 0; //(ZvgIO.envMonitor & MONF_BW); // && ZVGPresent;    // Black & White monitor
@@ -2895,62 +2903,62 @@ void TestPatterns()
       cc=getkey();
       if (cc == keyz[k_pclone]) if (--col < 0) col = 6;
       if (cc == keyz[k_nclone]) if (++col > 6) col = 0;
-      if (cc == keyz[k_pgame])  if (--pattern < 0) pattern=4;
-      if (cc == keyz[k_ngame])  if (++pattern > 4) pattern=0;
+      if (cc == keyz[k_pgame])  if (--pattern < 0) pattern=5;
+      if (cc == keyz[k_ngame])  if (++pattern > 5) pattern=0;
       if (cc == keyz[k_start]) showchars = !showchars;
       //if (cc == START2) mono = !mono;        // For test purposes
 
       rotation = optz[o_rot];
       optz[o_rot] = 0;
-      setcolour(col, EDGE_NRM);
+      //setcolour(col, EDGE_NRM);
       drawbox(X_MIN, Y_MIN, X_MAX, Y_MAX, col, EDGE_NRM);
 
       switch (pattern)
       {
 
-         case 0:                             // Diagonal boxes
+         case 0:                           // Diagonal boxes
          {
             start.x = -512;
-            start.y = 128;
-            end.x = -256;
-            end.y = 384;
+            start.y = -384;
+            end.x   =  256;
+            end.y   =  384;
             drawvector(start, end, 0, 0);
-            start.y -= 256;
-            end.x += 256;
+            start.x =  512;
+            start.y =  128;
+            drawvector(end, start, 0, 0);
+            end.x   =  0;
+            end.y   = -384;
             drawvector(start, end, 0, 0);
-            start.y -= 256;
-            end.x += 256;
+            start.x = -512;
+            start.y =  128;
+            drawvector(end, start, 0, 0);
+            end.x   = -256;
+            end.y   =  384;
             drawvector(start, end, 0, 0);
-            start.x += 256;
-            end.x   += 256;
-            drawvector(start, end, 0, 0);
-            start.x += 256;
-            end.y   -= 256;
-            drawvector(start, end, 0, 0);
-            start.x += 256;
-            end.y   -= 256;
-            drawvector(start, end, 0, 0);
+            start.x =  512;
+            start.y = -384;
+            drawvector(end, start, 0, 0);
 
             start.x = -512;
+            start.y =  384;
+            end.x   =  256;
+            end.y   = -384;
+            drawvector(start, end, 0, 0);
+            start.x =  512;
             start.y = -128;
-            end.x = -256;
-            end.y = -384;
+            drawvector(end, start, 0, 0);
+            end.x   =  0;
+            end.y   =  384;
             drawvector(start, end, 0, 0);
-            start.y += 256;
-            end.x += 256;
+            start.x = -512;
+            start.y = -128;
+            drawvector(end, start, 0, 0);
+            end.x   = -256;
+            end.y   = -384;
             drawvector(start, end, 0, 0);
-            start.y += 256;
-            end.x += 256;
-            drawvector(start, end, 0, 0);
-            start.x += 256;
-            end.x   += 256;
-            drawvector(start, end, 0, 0);
-            start.x += 256;
-            end.y   += 256;
-            drawvector(start, end, 0, 0);
-            start.x += 256;
-            end.y   += 256;
-            drawvector(start, end, 0, 0);
+            start.x =  512;
+            start.y =  384;
+            drawvector(end, start, 0, 0);
             break;
          }
 
@@ -3020,11 +3028,48 @@ void TestPatterns()
             }
             break;
          }
+         case 5: // Linearlity Graticules
+         {
+            start.x = -512;
+            start.y =  0;
+            end.x   =  512;
+            end.y   =  0;
+            drawvector(start, end, 0, 0);
+            start.x =  0;
+            start.y =  -384;
+            end.x   =  0;
+            end.y   =  384;
+            drawvector(start, end, 0, 0);
+            for(x=-512;x<512;x+=8)
+            {
+               if (x%8  == 0) tick = 10;
+               if (x%16 == 0) tick = 20;
+               if (x%32 == 0) tick = 30;
+               if (x%64 == 0) tick = 50;
+               start.y =-tick;
+               end.y   = tick;
+               start.x = x;
+               end.x   = x;
+               drawvector(start, end, 0, 0);
+            }
+            for(x=-384;x<384;x+=8)
+            {
+               if (x%8  == 0) tick = 10;
+               if (x%16 == 0) tick = 20;
+               if (x%32 == 0) tick = 30;
+               if (x%64 == 0) tick = 50;
+               start.x =-tick;
+               end.x   = tick;
+               start.y = x;
+               end.y   = x;
+               drawvector(start, end, 0, 0);
+            }
+         }
 
       }                                      //end of switch/case
       optz[o_rot] = rotation;
-      // Draw character set on all screens if 1P pressed
-      setcolour(col, EDGE_NRM);
+      // Draw character set on all screens if 1P Start was pressed
+      //setcolour(col, EDGE_NRM);
       if (showchars) PrintString("0123456789-+()*ABCDEFGHIJKLMNOPQRSTUVWXYZ",0 , -ymax+64, 0, 6, 6, 0);
 
       sendframe();
@@ -3062,6 +3107,10 @@ void BrightnessBars(int x, int y, int height, int colour)
 }
 
 
+/******************************************************************
+   Return the number of games in the current list, so we can
+   determine whether the list needs to be scrolled
+*******************************************************************/
 int numofgames(m_node *manlist)
 {
    int total= 1;

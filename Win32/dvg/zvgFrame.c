@@ -22,7 +22,7 @@
 #endif
 
 #include "zvgFrame.h"
-#include "timer.h"
+//#include "timer.h"
 
 #define ARRAY_SIZE(a)   (sizeof(a)/sizeof((a)[0]))
 #define CMD_BUF_SIZE    0x20000
@@ -250,6 +250,8 @@ static int serial_send()
    s_cmd_buf[s_cmd_offs++] = cmd >>  8;
    s_cmd_buf[s_cmd_offs++] = cmd >>  0;
    size = s_cmd_offs;
+   //printf("Buffer: %i\n",size); 
+   
    offset = 0;
    while (size)
    {
@@ -416,7 +418,7 @@ void zvgError(uint32_t err)
 int zvgFrameOpen(void)
 {
    int result = errOpenDevice;
-   tmrInit();                     // initialize timers
+   //tmrInit();                   // initialize timers
    //tmrSetFrameRate(60);         // set the frame rate
    strncpy(s_serial_dev, DVGPort, ARRAY_SIZE(s_serial_dev) - 1);
    s_serial_dev[ARRAY_SIZE(s_serial_dev) - 1] = 0;
@@ -453,11 +455,12 @@ void zvgFrameSetRGB15( uint8_t red, uint8_t green, uint8_t blue)
    uint32_t cmd;
    uint16_t r, g, b;
 
-   r = red << 4;
+   // Menu uses 5 bit colour (0-31) so we multiply by 8 to make it 8 bit (0-248)
+   r = red << 3;
    if (r > 255) r = 255;
-   g = green << 4;
+   g = green << 3;
    if (g > 255) g = 255;
-   b = blue << 4;
+   b = blue << 3;
    if (b > 255) b = 255;
 
    s_last_r = r;

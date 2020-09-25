@@ -44,17 +44,19 @@ enum vsounds
   sFire1,
   sExplode2,
   sFire2,
-  sExplode3
+  sExplode3,
+  sFire3
 };
 
 //The sound effects that will be used
-LPAUDIOWAVE    gSFury;
-LPAUDIOWAVE    gFire1;
-LPAUDIOWAVE    gFire2;
-LPAUDIOWAVE    gExplode1;
-LPAUDIOWAVE    gExplode2;
-LPAUDIOWAVE    gExplode3;
-LPAUDIOWAVE    gNuke;
+LPAUDIOWAVE    aSFury;
+LPAUDIOWAVE    aFire1;
+LPAUDIOWAVE    aFire2;
+LPAUDIOWAVE    aFire3;
+LPAUDIOWAVE    aExplode1;
+LPAUDIOWAVE    aExplode2;
+LPAUDIOWAVE    aExplode3;
+LPAUDIOWAVE    aNuke;
 //=========================================
 
 
@@ -120,24 +122,30 @@ int getkey(void)
       else f4_press=0;
    }
    
-   if (mousefound) processmouse();              // 3 Feb 2020, read every frame, ignore sample rate
-   // Convert mouse movement into key presses. Makes things so much easier.
-   if (MouseY < 0 && optz[o_mouse]==3) key = keyz[k_pgame];   // Trackball Up    = Up
-   if (MouseY > 0 && optz[o_mouse]==3) key = keyz[k_ngame];   // Trackball Down  = Down
-   if (MouseX < 0 && optz[o_mouse]==3) key = keyz[k_pclone];  // Trackball Left  = Left
-   if (MouseX > 0 && optz[o_mouse]==3) key = keyz[k_nclone];  // Trackball Right = Right
-   if (MouseX < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];   // Spinner   Left  = Up
-   if (MouseX > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];   // Spinner   Right = Down
+   if (mousefound)
+   {
+      processmouse();              // 3 Feb 2020, read every frame, ignore sample rate
+      // Convert mouse movement into key presses. Makes things so much easier.
+      if (MouseY < 0 && optz[o_mouse]==3) key = keyz[k_pgame];   // Trackball Up    = Up
+      if (MouseY > 0 && optz[o_mouse]==3) key = keyz[k_ngame];   // Trackball Down  = Down
+      if (MouseX < 0 && optz[o_mouse]==3) key = keyz[k_pclone];  // Trackball Left  = Left
+      if (MouseX > 0 && optz[o_mouse]==3) key = keyz[k_nclone];  // Trackball Right = Right
+      if (MouseX < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];   // Spinner   Left  = Up
+      if (MouseX > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];   // Spinner   Right = Down
+   }
 
-   if (key == keyz[k_ngame])   playsound(sFire1);
-   if (key == keyz[k_pgame])   playsound(sFire1);
-   if (key == keyz[k_nclone])  playsound(sFire2);
-   if (key == keyz[k_pclone])  playsound(sFire2);
-   if (key == keyz[k_start])   playsound(NewScale());
-   if (key == keyz[k_options]) playsound(sNuke);
-   if (key == keyz[k_quit])    playsound(NewScale());
-   if (key == keyz[k_menu])    playsound(sNuke);
-
+   if (SoundActivated)
+   {
+      if (key == keyz[k_ngame])   playsound(sFire1);
+      if (key == keyz[k_pgame])   playsound(sFire1);
+      if (key == keyz[k_nclone])  playsound(sFire2);
+      if (key == keyz[k_pclone])  playsound(sFire2);
+      if (key == keyz[k_random])  playsound(sFire3);
+      if (key == keyz[k_start])   playsound(NewScale());
+      if (key == keyz[k_options]) playsound(sNuke);
+      if (key == keyz[k_quit])    playsound(NewScale());
+      if (key == keyz[k_menu])    playsound(sFire3);
+   }
    return key;
 }
 
@@ -364,25 +372,28 @@ void playsound(int picksound)
       switch(picksound)
       {
          case sSFury:
-            APlayVoice(hVoice, gSFury);
+            APlayVoice(hVoice, aSFury);
             break;
          case sNuke:
-            APlayVoice(hVoice, gNuke);
+            APlayVoice(hVoice, aNuke);
             break;
          case sExplode1:
-            APlayVoice(hVoice, gExplode1);
+            APlayVoice(hVoice, aExplode1);
             break;
          case sFire1:
-            APlayVoice(hVoice, gFire1);
+            APlayVoice(hVoice, aFire1);
             break;
          case sExplode2:
-            APlayVoice(hVoice, gExplode2);
+            APlayVoice(hVoice, aExplode2);
             break;
          case sFire2:
-            APlayVoice(hVoice, gFire2);
+            APlayVoice(hVoice, aFire2);
             break;
          case sExplode3:
-            APlayVoice(hVoice, gExplode3);
+            APlayVoice(hVoice, aExplode3);
+            break;
+         case sFire3:
+            APlayVoice(hVoice, aFire3);
             break;
          default:
             break;
@@ -408,7 +419,7 @@ int InitialiseSEAL(void)
       CHAR szText[80];
       AGetErrorText(rc, szText, sizeof(szText) - 1);
       printf("ERROR: %s\n", szText);
-      exit(0);
+      return 0;
    }
 
    /* print information */
@@ -419,13 +430,14 @@ int InitialiseSEAL(void)
    info.wFormat & AUDIO_FORMAT_STEREO ? "stereo" : "mono",
    info.nSampleRate);
 
-   if (ALoadWaveFile("vmmsnd/sfury9.wav",   &gSFury, 0))     printf("Error loading sfury9\n");
-   if (ALoadWaveFile("vmmsnd/elim2.wav",    &gFire1, 0))     printf("Error loading elim2\n");
-   if (ALoadWaveFile("vmmsnd/efire.wav",    &gFire2, 0))     printf("Error loading efire\n");
-   if (ALoadWaveFile("vmmsnd/explode1.wav", &gExplode1, 0))  printf("Error loading explode1\n");
-   if (ALoadWaveFile("vmmsnd/explode2.wav", &gExplode2, 0))  printf("Error loading explode2\n");
-   if (ALoadWaveFile("vmmsnd/explode3.wav", &gExplode3, 0))  printf("Error loading explode3\n");
-   if (ALoadWaveFile("vmmsnd/nuke1.wav",    &gNuke, 0))      printf("Error loading nuke1\n");
+   if (ALoadWaveFile("vmmsnd/sfury9.wav",   &aSFury, 0))     printf("Error loading sfury9.wav\n");
+   if (ALoadWaveFile("vmmsnd/elim2.wav",    &aFire1, 0))     printf("Error loading elim2.wav\n");
+   if (ALoadWaveFile("vmmsnd/efire.wav",    &aFire2, 0))     printf("Error loading efire.wav\n");
+   if (ALoadWaveFile("vmmsnd/fire.wav",     &aFire3, 0))     printf("Error loading fire.wav\n");
+   if (ALoadWaveFile("vmmsnd/explode1.wav", &aExplode1, 0))  printf("Error loading explode1.wav\n");
+   if (ALoadWaveFile("vmmsnd/explode2.wav", &aExplode2, 0))  printf("Error loading explode2.wav\n");
+   if (ALoadWaveFile("vmmsnd/explode3.wav", &aExplode3, 0))  printf("Error loading explode3.wav\n");
+   if (ALoadWaveFile("vmmsnd/nuke1.wav",    &aNuke, 0))      printf("Error loading nuke1.wav\n");
 
    AOpenVoices(1);
    ACreateAudioVoice(&hVoice);
@@ -441,13 +453,14 @@ int InitialiseSEAL(void)
 ********************************************************************/
 void CloseSEAL(void)
 {
-   AFreeWaveFile(gSFury);
-   AFreeWaveFile(gFire1);
-   AFreeWaveFile(gFire2);
-   AFreeWaveFile(gExplode1);
-   AFreeWaveFile(gExplode2);
-   AFreeWaveFile(gExplode3);
-   AFreeWaveFile(gNuke);
+   AFreeWaveFile(aSFury);
+   AFreeWaveFile(aFire1);
+   AFreeWaveFile(aFire2);
+   AFreeWaveFile(aFire3);
+   AFreeWaveFile(aExplode1);
+   AFreeWaveFile(aExplode2);
+   AFreeWaveFile(aExplode3);
+   AFreeWaveFile(aNuke);
 
    AStopVoice(hVoice);
    ADestroyAudioVoice(hVoice);

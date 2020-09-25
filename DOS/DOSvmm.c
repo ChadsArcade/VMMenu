@@ -64,39 +64,44 @@ Check for a keypress, return code of key (or modifier)
 int getkey(void)
 {
    int key=0, shift=0;
-   if (bioskey(1))
+   if (bioskey(1))                              // There is a key waiting to be pressed
    {
-      key=bioskey(0);
-      return key;
+      key=bioskey(0);                           // Get the key press
    }
-   shift=bioskey(2) & 15;                    // only want bits 0-3 so mask off higher 4 bits
-   if (shift)   key=shift;
-   // Disable autorepeat of modifiers
-   if (key==FIRE)                            // LCTRL
-      if (f1_press==1) key=0;
-      else f1_press=1;
-   else f1_press=0;
-   if (key==THRUST)                          // L_ALT
-      if (f2_press==1) key=0;
-      else f2_press=1;
-   else f2_press=0;
-   if (key==RSHIFT)                          // R_SHIFT
-      if (f3_press==1) key=0;
-      else f3_press=1;
-   else f3_press=0;
-   if (key==LSHIFT)                          // L_SHIFT
-      if (f4_press==1) key=0;
-      else f4_press=1;
-   else f4_press=0;
-
-   if (mousefound) processmouse();              // 3 Feb 2020, read every frame, ignore sample rate
-   // Convert mouse movement into key presses. Makes things so much easier.
-   if (MouseY < 0 && optz[o_mouse]==3) key = keyz[k_pgame];   // Trackball Up    = Up
-   if (MouseY > 0 && optz[o_mouse]==3) key = keyz[k_ngame];   // Trackball Down  = Down
-   if (MouseX < 0 && optz[o_mouse]==3) key = keyz[k_pclone];  // Trackball Left  = Left
-   if (MouseX > 0 && optz[o_mouse]==3) key = keyz[k_nclone];  // Trackball Right = Right
-   if (MouseX < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];   // Spinner   Left  = Up
-   if (MouseX > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];   // Spinner   Right = Down
+   else
+   {
+      shift=bioskey(2) & 15;                    // only want bits 0-3 so mask off higher 4 bits
+      if (shift)   key=shift;
+      // Disable autorepeat of modifiers
+      if (key==FIRE)                            // LCTRL
+         if (f1_press==1) key=0;
+         else f1_press=1;
+      else f1_press=0;
+      if (key==THRUST)                          // L_ALT
+         if (f2_press==1) key=0;
+         else f2_press=1;
+      else f2_press=0;
+      if (key==RSHIFT)                          // R_SHIFT
+         if (f3_press==1) key=0;
+         else f3_press=1;
+      else f3_press=0;
+      if (key==LSHIFT)                          // L_SHIFT
+         if (f4_press==1) key=0;
+         else f4_press=1;
+      else f4_press=0;
+   }
+   
+   if (mousefound)
+   {
+      processmouse();              // 3 Feb 2020, read every frame, ignore sample rate
+      // Convert mouse movement into key presses. Makes things so much easier.
+      if (MouseY < 0 && optz[o_mouse]==3) key = keyz[k_pgame];   // Trackball Up    = Up
+      if (MouseY > 0 && optz[o_mouse]==3) key = keyz[k_ngame];   // Trackball Down  = Down
+      if (MouseX < 0 && optz[o_mouse]==3) key = keyz[k_pclone];  // Trackball Left  = Left
+      if (MouseX > 0 && optz[o_mouse]==3) key = keyz[k_nclone];  // Trackball Right = Right
+      if (MouseX < 0 && optz[o_mouse]!=3) key = keyz[k_pgame];   // Spinner   Left  = Up
+      if (MouseX > 0 && optz[o_mouse]!=3) key = keyz[k_ngame];   // Spinner   Right = Down
+   }
 
    return key;
 }
