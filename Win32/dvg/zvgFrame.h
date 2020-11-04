@@ -20,13 +20,16 @@ extern "C" {
 
 // Prototypes
 
+
 extern void     zvgError(uint32_t err);
 extern int      zvgFrameOpen(void);
 extern void     zvgFrameClose(void);
+extern int      zvgGetOption(char *option, char *val_buf, uint32_t val_buf_size);
 extern void     zvgFrameSetRGB15(uint8_t red, uint8_t green, uint8_t blue);
 extern void     zvgFrameSetClipWin(int xMin, int yMin, int xMax, int yMax);
 extern uint32_t zvgFrameVector(int xStart, int yStart, int xEnd, int yEnd);
 extern uint32_t zvgFrameSend(void);
+extern void     zvgBanner(void);
 
 #ifdef __cplusplus
 }

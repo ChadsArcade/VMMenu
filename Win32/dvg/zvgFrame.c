@@ -22,16 +22,19 @@
 #endif
 
 #include "zvgFrame.h"
+#include "jsmn.h"
 //#include "timer.h"
 
-#define ARRAY_SIZE(a)   (sizeof(a)/sizeof((a)[0]))
-#define CMD_BUF_SIZE    0x20000
-#define FLAG_COMPLETE   0x0
-#define FLAG_RGB        0x1
-#define FLAG_XY         0x2
-#define FLAG_EXIT       0x7
-#define FLAG_FRAME      0x4
-#define FLAG_QUALITY    0x3
+#define ARRAY_SIZE(a)           (sizeof(a)/sizeof((a)[0]))
+#define CMD_BUF_SIZE            0x20000
+#define FLAG_COMPLETE           0x0
+#define FLAG_RGB                0x1
+#define FLAG_XY                 0x2
+#define FLAG_EXIT               0x7
+#define FLAG_FRAME              0x4
+#define FLAG_QUALITY            0x3
+#define FLAG_CMD                0x5
+#define FLAG_CMD_GET_DVG_INFO   0x1
 
 #define DVG_RES_MIN        0
 #define DVG_RES_MAX        4095
@@ -65,6 +68,8 @@ static char    s_serial_dev[128];
 static int     s_xmin, s_xmax;
 static int     s_ymin, s_ymax;
 extern char    DVGPort[15];
+static char    s_json_buf[512];
+static int     s_json_length;
 
 enum portErrCode
 {  errOk = 0,           // no error (must be set to 0)
@@ -196,6 +201,28 @@ static int serial_write(void *buf, uint32_t size)
 
 
 /******************************************************************
+   Read from the serial port
+*******************************************************************/
+static int serial_read(void *buf, uint32_t size)
+{
+    int result = -1;
+#ifdef __WIN32__
+    DWORD read;
+    if (ReadFile(s_serial_fd, buf, size, &read, NULL))
+    {
+        result = read;
+    }
+#else
+    result = read(s_serial_fd, buf, size);
+    if (result != (int)size) {
+        printf("DVG: read error %d \n", result);
+    }
+#endif
+    return result > 0;
+}
+
+
+/******************************************************************
    Close the serial port
 *******************************************************************/
 static int serial_close()
@@ -268,7 +295,7 @@ static int serial_send()
 /******************************************************************
    Function to compute region code for a point(x, y)
 *******************************************************************/
-uint32_t compute_code(int32_t x, int32_t y)
+static uint32_t compute_code(int32_t x, int32_t y)
 {
     // initialized as being inside
     uint32_t code = 0;
@@ -291,7 +318,7 @@ uint32_t compute_code(int32_t x, int32_t y)
    (such as starwars) generate coordinates outside the view window,
    so we need to clip them here.
 *******************************************************************/
-uint32_t line_clip(int32_t *pX1, int32_t *pY1, int32_t *pX2, int32_t *pY2)
+static uint32_t line_clip(int32_t *pX1, int32_t *pY1, int32_t *pX2, int32_t *pY2)
 {
    int32_t x = 0, y = 0, x1, y1, x2, y2;
    uint32_t accept, code1, code2, code_out;
@@ -382,6 +409,73 @@ uint32_t line_clip(int32_t *pX1, int32_t *pY1, int32_t *pX2, int32_t *pY2)
    return accept;
 }
 
+/******************************************************************
+   Get DVG Info
+*******************************************************************/
+static void get_dvg_info()
+{
+    uint32_t cmd;
+    uint8_t cmd_buf[4];
+
+    if (s_json_length) {
+        return;
+    }
+    cmd = (FLAG_CMD << 29) | FLAG_CMD_GET_DVG_INFO;
+    cmd_buf[0] = cmd >> 24;
+    cmd_buf[1] = cmd >> 16;
+    cmd_buf[2] = cmd >> 8;
+    cmd_buf[3] = cmd >> 0;
+    serial_write(cmd_buf, 4);
+    serial_read(&cmd, sizeof(cmd));
+    serial_read(&s_json_length, sizeof(s_json_length));
+    s_json_length = MIN(s_json_length, sizeof(s_json_buf) - 1);
+    serial_read(s_json_buf, s_json_length);
+}
+
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+    if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
+        strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+        return 0;
+    }
+    return -1;
+}
+
+
+/******************************************************************
+   Get DVG Option
+*******************************************************************/
+int zvgGetOption(char *option, char *val_buf, uint32_t val_buf_size)
+{
+    int result = -1;
+    jsmntok_t t[128];
+    jsmn_parser p;
+    int         r, i;
+
+    get_dvg_info();
+    jsmn_init(&p);
+    r = jsmn_parse(&p, s_json_buf, strlen(s_json_buf), t, ARRAY_SIZE(t));
+    if (r < 0) {
+        printf("Error - Failed to parse JSON: %d\n", r);
+        goto END;
+    }
+    if (r < 1 || t[0].type != JSMN_OBJECT) {
+        printf("Error - JSON object expected.\n");
+        goto END;
+    }
+    for (i = 1; i < r; i++) {
+        if (jsoneq(s_json_buf, &t[i], option) == 0) {
+            int  size;
+            size = t[i + 1].end - t[i + 1].start + 1;
+            size = MIN(size, val_buf_size);
+            strncpy(val_buf, s_json_buf + t[i + 1].start, size);
+            val_buf[size - 1] = 0;
+            result = 0;
+            break;
+        }
+    }
+END:
+    return result;
+}
 
 /******************************************************************
    Print any error messages
@@ -549,4 +643,19 @@ uint32_t zvgFrameSend(void)
 {
     serial_send();
     return 0;
+}
+
+
+/*****************************************************************************
+* Read and display DVG settings
+*****************************************************************************/
+void zvgBanner(void)
+{
+   char value[16];
+   if (zvgGetOption("version",   value, sizeof(value)) == 0) printf("Firmware   : %s\n", value);
+   if (zvgGetOption("flipx",     value, sizeof(value)) == 0) printf("Flip X     : %s\n", value);
+   if (zvgGetOption("flipy",     value, sizeof(value)) == 0) printf("Flip Y     : %s\n", value);
+   if (zvgGetOption("swapxy",    value, sizeof(value)) == 0) printf("Swap XY    : %s\n", value);
+   if (zvgGetOption("bwDisplay", value, sizeof(value)) == 0) printf("B&W Monitor: %s\n", value);
+   if (zvgGetOption("crtSpeed",  value, sizeof(value)) == 0) printf("CRT Speed  : %s\n", value);
 }

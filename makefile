@@ -19,7 +19,7 @@
 
 CC = gcc
 LINK = gcc
-CFLAGS= -W -Wall -O2 -s -g -ggdb3
+CFLAGS= -W -Wall -O2 -s -g -ggdb3 -Wno-missing-braces
 OBJ_DIR =obj
 
 # Set the default target bulld here if not specified
@@ -31,6 +31,7 @@ ifeq ($(target),linux)
    VPATH=VMMSrc iniparser Linux Linux/zvg VMMSDL
    INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Linux/zvg -I./iniparser -I./VMMSDL
    LIBS= `sdl2-config --libs` -lSDL2 -lSDL2_mixer -lm
+   CFLAGS += -DZEKTORZVG -Wno-missing-field-initializers
    EXEC = vmmenu
    RM = rm -f
    RMDIR = rm -rf
@@ -46,7 +47,8 @@ ifeq ($(target),linux)
           $(OBJ_DIR)/dictionary.o \
           $(OBJ_DIR)/LinuxVMM.o \
           $(OBJ_DIR)/VMM-SDL.o \
-          $(OBJ_DIR)/vchars.o \
+          $(OBJ_DIR)/hershey_font.o \
+          $(OBJ_DIR)/vmmenu_font.o \
           $(OBJ_DIR)/gamelist.o \
           $(OBJ_DIR)/editlist.o
 endif
@@ -55,6 +57,7 @@ ifeq ($(target),linuxdvg)
    VPATH=VMMSrc iniparser Linux Win32/dvg VMMSDL
    INC = `sdl2-config --cflags` -I./VMMSrc -I./Linux -I./Win32/dvg -I./iniparser -I./VMMSDL
    LIBS= `sdl2-config --libs` -lSDL2 -lSDL2_mixer -lm
+   CFLAGS += -DUSBDVG -Wno-missing-field-initializers
    EXEC = vmmenu
    RM = rm -f
    RMDIR = rm -rf
@@ -66,7 +69,8 @@ ifeq ($(target),linuxdvg)
           $(OBJ_DIR)/dictionary.o \
           $(OBJ_DIR)/LinuxVMM.o \
           $(OBJ_DIR)/VMM-SDL.o \
-          $(OBJ_DIR)/vchars.o \
+          $(OBJ_DIR)/hershey_font.o \
+          $(OBJ_DIR)/vmmenu_font.o \
           $(OBJ_DIR)/gamelist.o \
           $(OBJ_DIR)/editlist.o
 endif
@@ -75,6 +79,7 @@ ifeq ($(target),Win32)
    VPATH=VMMSrc iniparser Win32 Win32/dvg VMMSDL
    INC = -IC:/mingw_dev_lib/include/SDL2 -I./VMMSrc -I./Win32/dvg -I./iniparser -I./Win32 -I./VMMSDL
    LIBS = -LC:\mingw_dev_lib\lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_mixer -lm
+   CFLAGS += -DUSBDVG -Wno-missing-field-initializers
    EXEC = vmmenu.exe
    RM = del
    RMDIR = cmd /c rd /s /q
@@ -86,7 +91,8 @@ ifeq ($(target),Win32)
 	       $(OBJ_DIR)/dictionary.o \
 	       $(OBJ_DIR)/WinVMM.o \
 	       $(OBJ_DIR)/VMM-SDL.o \
-			 $(OBJ_DIR)/vchars.o \
+          $(OBJ_DIR)/hershey_font.o \
+          $(OBJ_DIR)/vmmenu_font.o \
 	       $(OBJ_DIR)/gamelist.o \
           $(OBJ_DIR)/editlist.o
 endif
@@ -95,6 +101,7 @@ ifeq ($(target),DOSAud)
    VPATH=VMMSrc iniparser DOS DOS/zvg
    INC = -IC:\djgpp\seal-1.07\src -I./DOS/zvg -I./DOS -I./iniparser -I./VMMSrc
    LIBS = -LC:\djgpp\seal-1.07\lib\DOS -laudio
+   CFLAGS += -DZEKTORZVG
    EXEC = svmmenu.exe
    RM = del
    RMDIR = cmd /c rd /s /q
@@ -109,7 +116,8 @@ ifeq ($(target),DOSAud)
 	       $(OBJ_DIR)/iniparser.o \
 	       $(OBJ_DIR)/dictionary.o \
 	       $(OBJ_DIR)/DOSvmmSL.o \
-	       $(OBJ_DIR)/vchars.o \
+          $(OBJ_DIR)/hershey_font.o \
+          $(OBJ_DIR)/vmmenu_font.o \
 	       $(OBJ_DIR)/gamelist.o \
           $(OBJ_DIR)/editlist.o
 endif
@@ -117,6 +125,7 @@ ifeq ($(target),DOS)
    $(info Building for DOS)
    VPATH=VMMSrc iniparser DOS DOS/zvg
    INC = -I./DOS/zvg -I./DOS -I./iniparser -I./VMMSrc
+   CFLAGS += -DZEKTORZVG
    EXEC = vmmenu.exe
    RM = del
    RMDIR = cmd /c rd /s /q
@@ -131,7 +140,8 @@ ifeq ($(target),DOS)
 	       $(OBJ_DIR)/iniparser.o \
 	       $(OBJ_DIR)/dictionary.o \
 	       $(OBJ_DIR)/DOSvmm.o \
-	       $(OBJ_DIR)/vchars.o \
+          $(OBJ_DIR)/hershey_font.o \
+          $(OBJ_DIR)/vmmenu_font.o \
 	       $(OBJ_DIR)/gamelist.o \
           $(OBJ_DIR)/editlist.o
 endif

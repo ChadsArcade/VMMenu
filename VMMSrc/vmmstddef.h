@@ -121,7 +121,7 @@ enum options {
    o_ucase,
    o_togpnm,
    o_cpanel,
-   o_redozvg,
+   o_font,
    o_mouse,
    o_msens,
    o_mrevX,

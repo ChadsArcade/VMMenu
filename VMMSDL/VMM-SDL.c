@@ -90,8 +90,10 @@ void startZVG(void)
 
    #ifdef _DVGTIMER_H_
       printf(">>> DVG Hardware Version using port: %s <<<\n",DVGPort);
+      ZVGPresent = 2;      
    #else
       printf(">>> ZVG Hardware Version <<<");
+      ZVGPresent = 1;
    #endif
    error = zvgFrameOpen();         // initialize ZVG/DVG
    if (error)
@@ -105,6 +107,11 @@ void startZVG(void)
       tmrSetFrameRate(FRAMES_PER_SEC);
       zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
    }
+
+   #ifdef USBDVG
+      if (ZVGPresent == 2) zvgBanner();
+   #endif
+
    InitialiseSDL(1);
 }
 
@@ -289,10 +296,11 @@ void FrameSendSDL()
    }
    timenow = SDL_GetTicks();
    duration = (timenow-timestart);
-   //printf("Time: %i\t| Loop duration: %i\t| Wait time: %i\t| Vector Count: %i\t| SetColour Count: %i\n", timenow, duration, fps_ms-duration, vector_count, colour_sets);
-   if (!ZVGPresent)
+   //printf("Start: %i\t| Time: %i\t| Loop duration: %i\t| Wait time: %i  \t| FPS ms: %i\t| VC: %i\t| CC: %i\n", timestart, timenow, duration, fps_ms-duration, fps_ms, vector_count, colour_sets);
+   //if (!ZVGPresent)
    {
-      if ((duration < fps_ms) && ((fps_ms-duration)>0)) SDL_Delay(fps_ms-duration);
+      if (duration < fps_ms) SDL_Delay(fps_ms-duration);
+      //if ((duration < fps_ms) && ((fps_ms-duration)>0)) SDL_Delay(fps_ms-duration);
    }
    timestart=SDL_GetTicks();
    vector_count=0;
@@ -539,10 +547,10 @@ void RunGame(char *gameargs)
    CloseSDL(0);                        // Close windows etc but don't quit SDL
    if (ZVGPresent)
    {
-      if (optz[o_redozvg])
-      {
+      //if (optz[o_redozvg])
+      //{
          zvgFrameClose();              // Close the ZVG
-      }
+      //}
    }
    #if defined(linux) || defined(__linux)
       sprintf(command, "./vmm.sh \"%s\"", gameargs);
@@ -551,7 +559,8 @@ void RunGame(char *gameargs)
    #endif
    printf("Launching: [%s]\n", command);
    err = system(command);
-   if (optz[o_redozvg] && ZVGPresent)  // Re-open the ZVG if MAME closed it
+   //if (optz[o_redozvg] && ZVGPresent)  // Re-open the ZVG if MAME closed it
+   if (ZVGPresent)                     // Re-open the ZVG if MAME closed it
    {
       err = zvgFrameOpen();            // initialize everything
       if (err)

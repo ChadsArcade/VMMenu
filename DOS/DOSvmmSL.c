@@ -285,7 +285,8 @@ void ShutdownAll(void)
 {
    CloseSEAL();
    setLEDs(GetModifierStatus());             // restore correct LED status
-   if (ZVGPresent && optz[o_redozvg])
+   //if (ZVGPresent && optz[o_redozvg])
+   if (ZVGPresent)
    {
       zvgFrameClose();                       // fix up all the ZVG stuff
    }
@@ -340,15 +341,16 @@ void RunGame(char *gameargs)
    
    if (ZVGPresent)
    {
-      if (optz[o_redozvg])
-      {
+      //if (optz[o_redozvg])
+      //{
          zvgFrameClose();              // Close the ZVG
-      }
+      //}
    }
    sprintf(command, "./vmm.bat %s", gameargs);
    printf("Launching: [%s]\n", command);
    err = system(command);
-   if (optz[o_redozvg] && ZVGPresent)  // Re-open the ZVG if MAME closed it
+   //if (optz[o_redozvg] && ZVGPresent)  // Re-open the ZVG if MAME closed it
+   if (ZVGPresent)                     // Re-open the ZVG if MAME closed it
    {
       err = zvgFrameOpen();            // initialize everything
       if (err)

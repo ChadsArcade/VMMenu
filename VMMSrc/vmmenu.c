@@ -64,6 +64,15 @@
 *                    DOS SEAL build should work with no sound if no soundcard found
 *                    Game list code cleanup, max games in list is now a define
 *
+* 26-Oct-20 v1.8b1   Added Hershey font
+*                    Rewrote text printing routine
+*                    Converted original font to new format
+*                    Font now selectable in settings
+*                    Removed re-open ZVG option (it does this regardless)
+*
+* 27-Oct-20 v1.8b2   Set simple font for text heavy settings screens as ZVG
+*                    has a buffer overflow otherwise. Plus it speeds things up.
+*
 ***********************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +87,9 @@
 #include "editlist.h"
 #include "zvgFrame.h"
 
+#include "hershey_font.h"
+//#include "vector_font.h"
+
 //OS Specific Headers
 #if defined(linux) || defined(__linux)
    #include "LinuxVMM.h"
@@ -91,45 +103,50 @@
    #include "DOSvmm.h"
 #endif
 
+#define l_align   1
+#define c_align   2
+#define r_align   3
+
 /****Function declarations***/
-void     PrintString(char*, int, int, int, float, float, int);   // prints a string of characters
-point    fnrotate(int, float, float, float, float);              // rotate a point given number of degrees
-void     drawshape(vObject);                                     // draw shape pointed to by vObject
-vObject  updateobject(vObject);                                  // update position and rotation of a vector object
-void     drawborders(int, int, int, int, int, int, int);         // draw borders around edge of screen
-char*    ucase(char*);                                           // convert string to uppercase
-vObject  intro(void);                                            // Intro logo animation
-vObject  make_asteroid(void);                                    // define an asteroid
-vObject  make_sega(void);                                        // define sega logo
-vObject  make_cinematronics(void);                               // define cinematronics logo
-vObject  make_atari(void);                                       // define atari logo
-vObject  make_centuri(void);                                     // define centuri logo
-vObject  make_vbeam(void);                                       // define vectorbeam logo
-vObject  make_midway(void);                                      // define midway logo
-vObject  make_vectrex(void);                                     // define vectrex logo
-int      reallyescape(void);                                     // See if you really want to quit
-void     author(int);                                            // Print author info
-int      credits(void);                                          // print credits
-vStar    make_star(void);                                        // define a star
-vStar    updatestar(vStar);                                      // update a star object
-void     drawstar(vStar);                                        // Draw a star
-void     showstars();                                            // Display all the stars on screen
-void     getsettings(void);                                      // get settings from ini file
-void     writeinival(char*, int, int, int);                      // write a value to the cfg file
-void     writecfg(void);                                         // write the cfg file to the dictionary
-int      getcolour(const char*);                                 // Get colour value from cfg as an int
-void     pressakey(int, int);                                    // Message to escape from screen saver to menu
-void     GetRGBfromColour(int, int*, int*, int*);                // Get R, G and B components of a passed colour
-g_node*  GetRandomGame(m_node *);                                // Selects a random game from the list
-void     PlayAttractGame(m_node *gameslist);                     // get a random game name and add attract mode args
-void     PrintPointer(int mx, int my);                           // Print mouse pointer at current mouse position
-void     SetOptions(void);                                       // Lets user edit various in-menu options
-void     EditGamesList(void);                                    // Show or hide games
-void     EditColours(void);                                      // Settings page letting you edit menu colours
-void     drawbox(int, int, int, int, int, int);                  // xmin, ymin, xmax, ymax, colout, intensity
-void     TestPatterns(void);                                     // Monitor Test Patterns
-void     BrightnessBars(int, int, int, int);
-int      numofgames(m_node *);
+void     PrintString(char*, int, int, int, float, float, int, int, int);   // prints a string of characters
+int      StringPixelLength(char *, float, int);                            // Calculate pixel length of a string
+point    fnrotate(int, float, float, float, float);                        // rotate a point given number of degrees
+void     drawshape(vObject);                                               // draw shape pointed to by vObject
+vObject  updateobject(vObject);                                            // update position and rotation of a vector object
+void     drawborders(int, int, int, int, int, int, int);                   // draw borders around edge of screen
+char*    ucase(char*);                                                     // convert string to uppercase
+vObject  intro(void);                                                      // Intro logo animation
+vObject  make_asteroid(void);                                              // define an asteroid
+vObject  make_sega(void);                                                  // define sega logo
+vObject  make_cinematronics(void);                                         // define cinematronics logo
+vObject  make_atari(void);                                                 // define atari logo
+vObject  make_centuri(void);                                               // define centuri logo
+vObject  make_vbeam(void);                                                 // define vectorbeam logo
+vObject  make_midway(void);                                                // define midway logo
+vObject  make_vectrex(void);                                               // define vectrex logo
+int      reallyescape(void);                                               // See if you really want to quit
+void     author(int);                                                      // Print author info
+int      credits(void);                                                    // print credits
+vStar    make_star(void);                                                  // define a star
+vStar    updatestar(vStar);                                                // update a star object
+void     drawstar(vStar);                                                  // Draw a star
+void     showstars();                                                      // Display all the stars on screen
+void     getsettings(void);                                                // get settings from ini file
+void     writeinival(char*, int, int, int);                                // write a value to the cfg file
+void     writecfg(void);                                                   // write the cfg file to the dictionary
+int      getcolour(const char*);                                           // Get colour value from cfg as an int
+void     pressakey(int, int);                                              // Message to escape from screen saver to menu
+void     GetRGBfromColour(int, int*, int*, int*);                          // Get R, G and B components of a passed colour
+g_node*  GetRandomGame(m_node *);                                          // Selects a random game from the list
+void     PlayAttractGame(m_node *gameslist);                               // get a random game name and add attract mode args
+void     PrintPointer(int mx, int my);                                     // Print mouse pointer at current mouse position
+void     SetOptions(void);                                                 // Lets user edit various in-menu options
+void     EditGamesList(void);                                              // Show or hide games
+void     EditColours(void);                                                // Settings page letting you edit menu colours
+void     drawbox(int, int, int, int, int, int);                            // xmin, ymin, xmax, ymax, colour, intensity
+void     TestPatterns(void);                                               // Monitor Test Patterns
+void     BrightnessBars(int, int, int, int);                               // Prints brightness bars on screen
+int      numofgames(m_node *);                                             // Count the number of games in the tree
 
 // Global variables (there are quite a few...)
 
@@ -161,7 +178,7 @@ m_node       *vectorgames;
 g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 unsigned int man_menu;
 
-char         auth1[] = "VMMenu 1.7, Chad Gray";
+char         auth1[] = "VMMenu 1.8b2, Chad Gray";
 char         auth2[] = "ChadsArcade@Gmail.com";
 
 #define      maxgamesonlist 13          // Must be ODD and (ideally) > 5 else you don't get the scroll effect
@@ -376,11 +393,11 @@ int main(int argc, char *argv[])
             /*** Keys when in any menu ***/
             if (cc == keyz[k_options])
             {
-               SetOptions();                 // Go to Settings page
-               gamenum = 1;
-               sel_game       = vectorgames->firstgame;
-               sel_clone      = sel_game;
-               man_menu       = 1;
+               SetOptions();                                               // Go to Settings page
+               gamenum     = 1;
+               sel_game    = vectorgames->firstgame;
+               sel_clone   = sel_game;
+               man_menu    = 1;
             }
             if (cc == keyz[k_menu])          man_menu = !man_menu;         // Toggle between manufacturer and game menus
             if (cc == keyz[k_random])        RunGame(GetRandomGame(vectorgames)->clone);
@@ -479,31 +496,33 @@ int main(int argc, char *argv[])
             setcolour(colours[c_col][c_sman], colours[c_int][c_sman]);
          else
             setcolour(colours[c_col][c_man], colours[c_int][c_man]);
-         if (!optz[o_togpnm]) PrintString(mytext, 0, 300, 0, 12, 12, 0);                     // manufacturer name, smaller if prev/next shown
-         else PrintString(mytext, 0, 300, 0, 8+(4*(1-man_menu)), 8+(4*(1-man_menu)), 0);
+         //if (!optz[o_togpnm]) PrintString(mytext, 0, 300, 0, 12, 12, 0, c_align, optz[o_font]);            // manufacturer name, smaller if prev/next shown
+         //else PrintString(mytext, 0, 300, 0, 8+(4*(1-man_menu)), 8+(4*(1-man_menu)), 0, c_align, optz[o_font]);
+         PrintString(mytext, 0, 300, 0, 16, 16, 0, c_align, optz[o_font]);            // manufacturer name, smaller if prev/next shown
+         int pixel_length = StringPixelLength(mytext, 18, optz[o_font]);
 
          setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
          if (man_menu)                                                                       // Print Arrow pointing to games list, or...
-            PrintString(">", 0, 220, 270, 6, 6, 0);
+            PrintString("<", 0, 200, 90, 10, 10, 0, l_align, optz[o_font]);
          else                                                                                // Print Arrow pointing to manufacturer list
-            PrintString(">", 0, 210, 90, 6, 6, 0);
+            PrintString(">", 0, 200, 90, 10, 10, 0, l_align, optz[o_font]);
 
          if ((totgames>maxgamesonlist) && gamenum<(totgames- ((maxgamesonlist-1)/2) ))       // print a down arrow if there are games off the bottom
-            PrintString(">", 0, -330, 270, 6, 6, 0);
+            PrintString("<", 0, -350, 90, 10, 10, 0, l_align, optz[o_font]);
 
          // print the next and previous manufacturers at the sides and arrows
          if (man_menu)
          {
-            PrintString("<", -((strlen(mytext)*(36-(12*optz[o_togpnm])))/2) - 40, 300, 0, 7, 7, 0);
-            PrintString(">", ((strlen(mytext)*(36-(12*optz[o_togpnm])))/2) + 20, 300, 0, 7, 7, 0);
+            PrintString("< ", -pixel_length/2, 300, 0, 10, 10, 0, r_align, optz[o_font]);
+            PrintString(" >", pixel_length/2, 300, 0, 10, 10, 0, l_align, optz[o_font]);
 
             if (optz[o_togpnm])
             {
                setcolour(colours[c_col][c_pnman], colours[c_int][c_pnman]);
                strcpy(mytext, vectorgames->pmanuf->name);         // Print previous manufacturer name
-               PrintString(mytext, -(xmax-((strlen(mytext)*7)+40)), 300, 0, 6, 6, 0);
+               PrintString(mytext, -xmax + 30, 300, 0, 5, 5, 0, l_align, optz[o_font]);
                strcpy(mytext, vectorgames->nmanuf->name);         // print next manufacturer name
-               PrintString(mytext, xmax-((strlen(mytext)*7)+40), 300, 0, 6, 6, 0);
+               PrintString(mytext, xmax-30, 300, 0, 5, 5, 0, r_align, optz[o_font]);
             }
          }
 
@@ -580,14 +599,14 @@ int main(int argc, char *argv[])
          {
             strcpy(mytext, vectorgames->name);         // print manufacturer name in text
             setcolour(vcyan, EDGE_BRI-4);
-            PrintString(mytext, -(xmax-80), 0, 90, 14, width*14, 90);
-            PrintString(mytext, xmax-80, 0, 270, 14, width*14, 270);
+            PrintString(mytext, -(xmax-80), 0, 90, 14, width*14, 90, c_align, optz[o_font]);
+            PrintString(mytext, xmax-80, 0, 270, 14, width*14, 270, c_align, optz[o_font]);
             //setcolour(vcyan, EDGE_BRI-8);
-            //PrintString(mytext, -(xmax-82), 2, 90, 14, width*14, 90);
-            //PrintString(mytext, xmax-82, 2, 270, 14, width*14, 270);
+            //PrintString(mytext, -(xmax-82), 2, 90, 14, width*14, 90, c_align);
+            //PrintString(mytext, xmax-82, 2, 270, 14, width*14, 270, c_align);
             //setcolour(vcyan, EDGE_BRI-12);
-            //PrintString(mytext, -(xmax-84), 4, 90, 14, width*14, 90);
-            //PrintString(mytext, xmax-84, 4, 270, 14, width*14, 270);
+            //PrintString(mytext, -(xmax-84), 4, 90, 14, width*14, 90, c_align);
+            //PrintString(mytext, xmax-84, 4, 270, 14, width*14, 270, c_align);
          }
 
          // Now print the games list menu
@@ -627,18 +646,19 @@ int main(int argc, char *argv[])
                if (sel_game->nclone)
                {
                   setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
-                  PrintString(">", ((strlen(mytext)*3*gamesize)/2) + 3*gamesize, top, 0, gamesize-1, gamesize-1, 0);  // Arrows right showing there are clones
-                  PrintString("<", -((strlen(mytext)*3*gamesize)/2) - 6*gamesize, top, 0, gamesize-1, gamesize-1, 0); // Arrowa left showing there are clones
+                  int pixel_length = StringPixelLength(mytext, gamesize, optz[o_font]);
+                  PrintString(" >", pixel_length/2, top, 0, gamesize, gamesize, 0, l_align, optz[o_font]);  // Arrow right showing there are clones
+                  PrintString("< ", -pixel_length/2, top, 0, gamesize, gamesize, 0, r_align, optz[o_font]); // Arrow left showing there are clones
                }
                setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
-               PrintString(mytext, 0, top, 0, gamesize, gamesize, 0);            // This prevent needless "setcolour" calls per loop
+               PrintString(mytext, 0, top, 0, gamesize, gamesize, 0, c_align, optz[o_font]);   // This prevent needless "setcolour" calls per loop
                setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
             }
             else
             {
                if (strstr(mytext, " (") != NULL)
                   mytext[strstr(mytext, " (") - mytext] = 0;                     // ... and strip off version info
-               PrintString(mytext, 0, top, 0, gamesize, gamesize, 0);
+               PrintString(mytext, 0, top, 0, gamesize, gamesize, 0, c_align, optz[o_font]);
             }
             gamelist_root = gamelist_root->next;
             top -= 35;
@@ -678,64 +698,121 @@ int main(int argc, char *argv[])
 
 
 /*******************************************************************
- Print a string of text on screen centred around position x,y
- Scale factor x,y
+ Calculate the pixel length of the string
+ Read through string and add each char width
+********************************************************************/
+int StringPixelLength(char *text, float xScale, int font)
+{
+   int num_chars, pixel_length, c;
+   const hershey_char_t * f;
+
+   if (optz[o_ucase]) ucase(text);
+   pixel_length = 0;
+   num_chars = strlen(text);
+   for (c=0; c < num_chars; c++)
+   {
+      if (font == 1)
+      {
+        f = &hershey_simplex[(text[c]) - ' '];
+      }
+      else
+      {
+        f = &vector_simplex[(text[c]) - ' '];
+      }
+      pixel_length = pixel_length + (f->width);
+   }
+   pixel_length = pixel_length * (xScale * 0.15);
+   return pixel_length;
+}
+
+
+/*******************************************************************
+ Print a string of text on screen aligned around position x,y
  Characters rotated by charangle
+ Scale factor x,y
  along a line rotated by lineangle
+ aligned left, centre or right
  
  Todo: add flags to allow for left/right aligned?
 ********************************************************************/
-void PrintString(char *text, int xpos, int ypos, int charangle, float xScale, float yScale, int lineangle)
+void PrintString(char *text, int xpos, int ypos, int charangle, float xScale, float yScale, int lineangle, int alignment, int font)
 {
-   int ii, vv, length;
-   int x1, y1, x2, y2, width = 2;      // width = max width of a character
-   float  x_delta, y_delta, textx, texty, halfstring;
+   int c, i, num_chars, pixel_length;
+   int x1, y1, x2, y2;
    point line_start, line_end, cvs, cve;
-   vShape printchar;
-   xScale = xScale/(width/2);
+   float textx, texty, halfstring;
+   const hershey_char_t * f;
+   char  mytext[100];
+   
+   strcpy(mytext, text);
+   if (optz[o_ucase]) ucase(mytext);
+   
+   pixel_length = StringPixelLength(mytext, xScale, font);
+   num_chars = strlen(mytext);
 
+   xScale = (xScale * 0.15);
+   yScale = (yScale * 0.15);
+  
    // calculate halfway point of string to centre it around given x position
-   length = strlen(text);
-   halfstring = (length * (width + 1) * xScale) / 2;      // char width + 1px space
+   halfstring = pixel_length / 2;
 
    // Calculate the start and endpoints of the line we are writing on
    // and then rotate the line about the centre point.
-   line_start   = fnrotate(lineangle, xpos - halfstring, ypos, xpos, ypos);
-   line_end     = fnrotate(lineangle, xpos + halfstring, ypos, xpos, ypos);
+   // We can use the length to calculate the start X position and L, R or centre align the text
+   switch (alignment)
+   {
+      case l_align:   // Left aligned
+         line_start = fnrotate(lineangle, xpos, ypos, xpos, ypos);
+         line_end   = fnrotate(lineangle, xpos + 2*halfstring, ypos, xpos, ypos);
+         break;
+      case r_align:   // Right aligned
+         line_start = fnrotate(lineangle, xpos - 2*halfstring, ypos, xpos, ypos);
+         line_end   = fnrotate(lineangle, xpos, ypos, xpos, ypos);
+         break;
+      default:        //Centred
+         line_start = fnrotate(lineangle, xpos - halfstring, ypos, xpos, ypos);
+         line_end   = fnrotate(lineangle, xpos + halfstring, ypos, xpos, ypos);
+   }
 
-   // The difference between start and end X and Y values divided by the number of chars
-   // gives us the increment in x and y to the print position of the next character
-   x_delta = (line_end.x - line_start.x) / length;
-   y_delta = (line_end.y - line_start.y) / length;
+   #if DEBUG
+   drawvector(line_start, line_end, 0, 0);         // For testing, draw the line the text will be printed along
+   #endif
 
    // Set the character print position to the beginning of the line.
-   // Adjust X/Y else the first char's centre is on the endpoint
-   textx = line_start.x + (x_delta / 2);
-   texty = line_start.y + (y_delta / 2);
+   textx = line_start.x;
+   texty = line_start.y; 
 
-#if DEBUG
-   drawvector(line_start, line_end, 0, 0);         // For testing, draw the line the text will be printed along
-#endif
-
-   // loop for each character in the string
-   for (ii=0;ii<length;ii++)
+   // Loop through the string and print each character
+   for (c=0; c<num_chars; c++)
    {
-      if (optz[o_ucase]) printchar = fnGetChar(toupper(text[ii]));
-      else printchar = fnGetChar(text[ii]);
-
-      //Loop for each vector in the character
-      for (vv=0;vv<printchar.size;vv+=4)
+      if (font == 1)
       {
-         x1 = printchar.array[vv+0] -(width/2);    // -1 to move origin to centre of char (total width = 2)
-         y1 = printchar.array[vv+1] -2;            // -2 to move origin to centre of char (total height = 4)
-         x2 = printchar.array[vv+2] -(width/2);    // This positions the characters through the centre of the line
-         y2 = printchar.array[vv+3] -2;            // rather than *on* it which makes rotation work correctly
-         cvs = fnrotate(charangle, x1 * xScale, y1 * yScale, 0, 0);
-         cve = fnrotate(charangle, x2 * xScale, y2 * yScale, 0, 0);
-         drawvector(cvs, cve, textx, texty);
+        f = &hershey_simplex[(mytext[c]) - ' '];
       }
-      textx += x_delta;
-      texty += y_delta;
+      else
+      {
+        f = &vector_simplex[(mytext[c]) - ' '];
+      }
+      if (f->count > 0)
+      {
+         x1 = f->points[0];
+         y1 = f->points[1] - 11;                    // We take away 11 as this is half of the height of the character, to centre the rotation
+         for (i=1; i<f->count; i++)                 // number of points
+         {
+            x2 = f->points[i*2 + 0];                // Read next x co-ordinate
+            y2 = f->points[i*2 + 1] - 11;           // Read next y co-ordinate
+            if ((x1 != -1) && (x2 != -1))           // If not moving position, we draw a vector
+            {
+               cvs = fnrotate(charangle, x1 * xScale, y1 * yScale, 0, 0);
+               cve = fnrotate(charangle, x2 * xScale, y2 * yScale, 0, 0);
+               drawvector(cvs, cve, textx, texty);
+            }
+            x1 = x2;
+            y1 = y2;
+         }
+      }
+      textx = textx + (cos(lineangle*(M_PI/180)) * (f->width*xScale));
+      texty = texty + (sin(lineangle*(M_PI/180)) * (f->width*xScale));
    }
 }
 
@@ -1120,10 +1197,10 @@ int reallyescape(void)
       drawborders(200, 80, -200, -80, 1, 1, vwhite);
       sprintf(timeout, "%i", 30 -(timer/60));
       setcolour(vblue, EDGE_BRI);
-      PrintString("Press quit again to exit", 0, 40, 0, 5, 5, 0);
-      PrintString("Any other key to return", 0, 0, 0, 5, 5, 0);
+      PrintString("Press quit again to exit", 0, 40, 0, 6, 6, 0, c_align, optz[o_font]);
+      PrintString("Any other key to return", 0, 0, 0, 6, 6, 0, c_align, optz[o_font]);
       setcolour(vcyan, EDGE_NRM);
-      PrintString(timeout, 0, -40, 0, 5, 5, 0);
+      PrintString(timeout, 0, -40, 0, 6, 6, 0, c_align, optz[o_font]);
       sendframe();
       timer++;
       cc=getkey();
@@ -1440,9 +1517,9 @@ void author(int bright)
 {
    if (bright > 25) bright = 25;
    setcolour(vwhite, bright);
-   PrintString(auth1, xmax-170, -(ymax-45), 0, 4, 4, 0);
+   PrintString(auth1, xmax-200, -(ymax-45), 0, 6, 6, 0, c_align, 1);
    setcolour(vwhite, (bright/1.5));
-   PrintString(auth2, xmax-170, -(ymax-25), 0, 4, 4, 0);
+   PrintString(auth2, xmax-200, -(ymax-25), 0, 6, 6, 0, c_align, 1);
 }
 
 
@@ -1456,7 +1533,7 @@ void pressakey(int x, int y)
    if (y < (-ymax + 65))   y = -ymax + 65;   // stay off bottom few lines - don't clash with (c) text
    if (y > (ymax - 20))    y = ymax - 20;
    setcolour(vyellow, EDGE_NRM);
-   PrintString("PRESS ANY CONTROL FOR MENU", x, y, 0, 4, 4, 0);
+   PrintString("PRESS ANY CONTROL FOR MENU", x, y, 0, 4, 4, 0, c_align, optz[o_font]);
 }
 
 
@@ -1486,14 +1563,31 @@ int credits(void)
    int count = 0;
    int scale, start, finish, l;
    int breakout = 0;
-   int bnw = 0; //(ZvgIO.envMonitor & MONF_BW) && ZVGPresent;    // Black'n'White monitor
+   int mono = 0; //(ZvgIO.envMonitor & MONF_BW) && ZVGPresent;    // Black'n'White monitor
    char credits[lines][60];
 
+   #ifdef USBDVG
+   if (ZVGPresent == 2)
+   {
+      char value[16];
+      if (zvgGetOption("bwDisplay", value, sizeof(value)) == 0)
+      {
+         //printf("Is Mono: %s\n", value);
+         mono = (strcmp(value, "true") == 0);
+      }
+   }
+   #else
+   if (ZVGPresent == 1)
+   {
+      mono = (ZvgIO.envMonitor & MONF_BW);
+   }
+   #endif
+   
 #ifdef _DVGTIMER_H_
    strcpy(credits[0], "DVG Vector Mame Menu, Chad Gray 2011-2020");
    strcpy(credits[1], " ");
    strcpy(credits[2], "Thanks go to the following");
-   strcpy(credits[3], "Mario Montminy and Fred Konopaska for the USB-DVG");
+   strcpy(credits[3], "Mario Montminy & Fred Konopaska for the USB-DVG");
    strcpy(credits[4], "The MAME team");
    strcpy(credits[5], "Ian Boffin for the original menu and artwork");
    strcpy(credits[6], "Danny Pearson and Barry Shilmover for testing");
@@ -1533,7 +1627,7 @@ int credits(void)
          else                                 // in display time
          {
             angle=0;
-            scale=5;
+            scale=6;
             bright=18;
             x=0;
          }
@@ -1541,11 +1635,11 @@ int credits(void)
          if (t>start)
          {
             //printf("t: %d Line: %d value: %d Colour: %s\n", t, l, (((t/2)%7)+l)%7, cols[(((t/2)%7)+l)%7]);
-            if (bnw) colour = (l%7);
+            if (mono) colour = (l%7);
             else colour = ((((t+l)%31)+1)/4)%7;
             //printf("%d ", colour);
             setcolour( colour, bright);
-            PrintString(credits[l], x, top - l*60, angle, scale, scale, angle);
+            PrintString(credits[l], x, top - l*60, angle, scale, scale, angle, c_align, 0);
          }
       }
       author(EDGE_BRI);
@@ -1580,18 +1674,18 @@ int credits(void)
          else                                 // in display time
          {
             angle=0;
-            scale=5;
+            scale=6;
             bright=18;
             x=0;
          }
          if ((t==finish) && (l!=1)) playsound(NewScale());
          if (t>start)
          {
-            if (bnw) colour = (l%7);
+            if (mono) colour = (l%7);
             else colour = ((((t+l)%31)+1)/4)%7;
             // colour = ((((t+l)%31)+1)/4)%7;
             setcolour( colour, bright);
-            PrintString(credits[l], x, top - l*60, angle, scale, scale, angle);
+            PrintString(credits[l], x, top - l*60, angle, scale, scale, angle, c_align, 0);
          }
       }
       author(EDGE_BRI);
@@ -1713,12 +1807,12 @@ void getsettings(void)
    optz[o_ucase]     = iniparser_getboolean(ini, "interface:caps", 0);
    optz[o_togpnm]    = iniparser_getboolean(ini, "interface:showpnm", 0);
    optz[o_cpanel]    = iniparser_getint(ini,     "interface:paneltype", 0);       // 0 Buttons, 1 Joystick, 2 Spinner
-   optz[o_redozvg]   = iniparser_getboolean(ini, "interface:reopenzvg", 1);
+   optz[o_font]      = iniparser_getboolean(ini, "interface:font", 0);
    optz[o_dovga]     = iniparser_getboolean(ini, "interface:rendervga", 0);
    optz[o_attmode]   = iniparser_getboolean(ini, "interface:attractmode", 0);
-   optz[o_fontsize]  = iniparser_getint(ini,     "interface:fontsize", 6);
-   if (optz[o_fontsize] < 4) optz[o_fontsize] = 4;
-   if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
+   optz[o_fontsize]  = iniparser_getint(ini,     "interface:fontsize", 5);
+   if (optz[o_fontsize] < 1) optz[o_fontsize] = 1;
+   if (optz[o_fontsize] > 9) optz[o_fontsize] = 9;
    optz[o_borders]   = iniparser_getboolean(ini, "interface:borders", 1);
    optz[o_volume]    = iniparser_getint(ini,     "interface:volume", 64);
       
@@ -1856,7 +1950,7 @@ void writecfg()
    writeinival("interface:caps",                optz[o_ucase], 1, 3);
    writeinival("interface:showpnm",             optz[o_togpnm], 1, 3);
    writeinival("interface:paneltype",           optz[o_cpanel], 1, 0);
-   writeinival("interface:reopenzvg",           optz[o_redozvg], 1, 3);
+   writeinival("interface:font",                optz[o_font], 1, 0);
    writeinival("interface:rendervga",           optz[o_dovga], 0, 3);
    writeinival("interface:attractmode",         optz[o_attmode], 0, 3);
    writeinival("interface:fontsize",            optz[o_fontsize], 1, 0);
@@ -1997,7 +2091,7 @@ void PrintPointer(int mx, int my)
 {
    //printf("m_x: %d m_y: %d\n", mx, my);
    setcolour(6, 25); // white, Bright
-   PrintString(">", mx, my, 135, 8, 4, 0);
+   PrintString(">", mx, my, 135, 8, 4, 0, c_align, optz[o_font]);
 }
 
 
@@ -2007,12 +2101,14 @@ void PrintPointer(int mx, int my)
 void SetOptions(void)
 {
    int   cc = 0, top, cursor = 0, options;
+   int   col1 = -300, col2 = 160;
    int   optx = 0, opty = 0, timer = 0, LEDtimer=0;
    int   lastkey = keyz[k_options], spacing = 42;
    point p1, p2;
    char  buffer[10];
    
    setLEDs(0);
+   //mousefound=0; //For Testing
    while ((cc != keyz[k_options] && cc != keyz[k_quit] && cc != START2) && timer < 1800)
    {
       timer++;
@@ -2048,59 +2144,67 @@ void SetOptions(void)
       }
       if (optz[o_stars]) showstars();
 
-      top = 385;//372; //330;
+      top = 385;
       options = 12;
 
       setcolour(vwhite, 25);
-      PrintString(">", -150 - (7*4*optz[o_fontsize])-4, (top-((cursor+1)*spacing)), 0, optz[o_fontsize]-2, optz[o_fontsize], 0); // 7 * 4 =  7 chars * width
-
-      // Screen rotation
-      top-=spacing;
-      setcolour(vwhite, 15);
-      if (cursor == 0)   setcolour(vwhite, 25);
-      PrintString("Rotation         ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_rot] == 0) strcpy(buffer,"0        ");
-      if (optz[o_rot] == 1) strcpy(buffer,"90       ");
-      if (optz[o_rot] == 2) strcpy(buffer,"180      ");
-      if (optz[o_rot] == 3) strcpy(buffer,"270      ");
-      PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (cursor == 0)   setcolour(vwhite, 15);
-
-      // Stars
-      top-=spacing;
-      if (cursor == 1)   setcolour(vwhite, 25);      // Set the colour to bright if we're at this option
-      PrintString("Stars            ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString(optz[o_stars] == 1 ? "yes      " : "no       ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (cursor == 1)   setcolour(vwhite, 15);      // Doing this prevents having to reset the colour for every option 
-
-      // Caps
-      top-=spacing;
-      if (cursor == 2)   setcolour(vwhite, 25);
-      PrintString("All Caps         ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString((optz[o_ucase] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (cursor == 2)   setcolour(vwhite, 15);
-
-      // Show Prev and Next
-      top-=spacing;
-      if (cursor == 3)   setcolour(vwhite, 25);
-      PrintString("Show Prev/Next   ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString((optz[o_togpnm] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (cursor == 3)   setcolour(vwhite, 15);
+      PrintString(">", -320, (top-((cursor+1)*spacing)), 0, optz[o_fontsize]-2, optz[o_fontsize], 0, r_align, 0);
 
       // Control Panel Type
       top-=spacing;
+      setcolour(vwhite, 15);
+      if (cursor == 0)   setcolour(vwhite, 25);
+      PrintString("Control Panel", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (optz[o_cpanel] == 0) PrintString("Buttons", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (optz[o_cpanel] == 1) PrintString("Joystick", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (optz[o_cpanel] == 2) PrintString("Spinner", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (cursor == 0)   setcolour(vwhite, 15);
+
+      // Screen rotation
+      top-=spacing;
+      if (cursor == 1)   setcolour(vwhite, 25);
+      PrintString("Rotation", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (optz[o_rot] == 0) strcpy(buffer,"0");
+      if (optz[o_rot] == 1) strcpy(buffer,"90");
+      if (optz[o_rot] == 2) strcpy(buffer,"180");
+      if (optz[o_rot] == 3) strcpy(buffer,"270");
+      PrintString(buffer, col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (cursor == 1)   setcolour(vwhite, 15);
+
+      // Stars
+      top-=spacing;
+      if (cursor == 2)   setcolour(vwhite, 25);      // Set the colour to bright if we're at this option
+      PrintString("Stars", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      PrintString(optz[o_stars] == 1 ? "yes" : "no", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (cursor == 2)   setcolour(vwhite, 15);      // Doing this prevents having to reset the colour for every option
+
+      // Font Selection
+      top-=spacing;
+      if (cursor == 3)   setcolour(vwhite, 25);
+      PrintString("Font", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      if (optz[o_font] == 0)
+      {
+         PrintString("Classic", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      }
+      else
+      {
+         PrintString("Hershey", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 1);
+      }
+      if (cursor == 3)   setcolour(vwhite, 15);
+
+      // Caps
+      top-=spacing;
       if (cursor == 4)   setcolour(vwhite, 25);
-      PrintString("Control Panel    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_cpanel] == 0) PrintString("Buttons  ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_cpanel] == 1) PrintString("Joystick ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      if (optz[o_cpanel] == 2) PrintString("Spinner  ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("All Caps", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      PrintString((optz[o_ucase] == 1 ? "yes" : "no"), col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
       if (cursor == 4)   setcolour(vwhite, 15);
 
-      // Reopen ZVG - this can probably be removed actually... just reopen it regardless
+      // Font Size
       top-=spacing;
       if (cursor == 5)   setcolour(vwhite, 25);
-      PrintString("Reopen ZVG       ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString((optz[o_redozvg] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Font Size", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      sprintf(buffer, "%u", optz[o_fontsize]-4);
+      PrintString(buffer, col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
       if (cursor == 5)   setcolour(vwhite, 15);
 
       // Mouse/Spinner options
@@ -2109,43 +2213,43 @@ void SetOptions(void)
          options+=1;                  // Mouse found so we have an extra option to consider
          top-=spacing;
          if (cursor == 6)   setcolour(vwhite, 25);
-         PrintString("Optical Control  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-         if (optz[o_mouse] == 0) strcpy(buffer,"None     ");
+         PrintString("Optical Control", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+         if (optz[o_mouse] == 0) strcpy(buffer,"None");
          if (optz[o_mouse] == 1) strcpy(buffer,"X-Spinner");
          if (optz[o_mouse] == 2) strcpy(buffer,"Y-Spinner");
          if (optz[o_mouse] == 3) strcpy(buffer,"Trackball");
-         PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+         PrintString(buffer, col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
          if (cursor == 6)   setcolour(vwhite, 15);
 
          if (optz[o_mouse])
          {
-            options+=3;               // Mouse set to true so there are 3 (was 4, 5) more mouse settings
+            options+=3;               // Mouse set to true so there are 3 more mouse settings
             top-=spacing;
-            p1.x = -136-(26*optz[o_fontsize]);
-            p1.y = top + 20;
+            p1.x = col1+2*optz[o_fontsize]-5;
+            p1.y = top + 22;
             p2.x = p1.x;
-            p2.y = top - (2*spacing); // options-1 * spacing
+            p2.y = top - (2*spacing)-2;
             drawvector(p1, p2, 0, 0);
 
             // Reverse X Axis
             if (cursor == 7)   setcolour(vwhite, 25);
-            PrintString("- Reverse X Axis  ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-            PrintString((optz[o_mrevX] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            PrintString("- Reverse X Axis", col1+2*optz[o_fontsize]-8, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+            PrintString((optz[o_mrevX] == 1 ? "yes" : "no"), col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
             if (cursor == 7)   setcolour(vwhite, 15);
 
             // Reverse Y Axis
             top-=spacing;
             if (cursor == 8)   setcolour(vwhite, 25);
-            PrintString("- Reverse Y Axis  ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-            PrintString((optz[o_mrevY] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            PrintString("- Reverse Y Axis", col1+2*optz[o_fontsize]-8, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+            PrintString((optz[o_mrevY] == 1 ? "yes" : "no"), col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
             if (cursor == 8)   setcolour(vwhite, 15);
 
             // Mouse Sensitivity
             top-=spacing;
             if (cursor == 9)   setcolour(vwhite, 25);
-            PrintString("- Sensitivity     ", -133, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-            sprintf(buffer, "%-9i", optz[o_msens]);
-            PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            PrintString("- Sensitivity", col1+2*optz[o_fontsize]-8, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+            sprintf(buffer, "%i", optz[o_msens]);
+            PrintString(buffer, col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
             if (cursor == 9)   setcolour(vwhite, 15);
          }
       }
@@ -2153,61 +2257,60 @@ void SetOptions(void)
       // Edit Games List
       top-=spacing;
       if (cursor == options - 6)   setcolour(vwhite, 25);
-      PrintString("Show/Hide Games  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Show/Hide Games", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      PrintString( ">", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
       if (cursor == options - 6)   setcolour(vwhite, 15);
 
       // Edit Menu Colours
       top-=spacing;
       if (cursor == options - 5)   setcolour(vwhite, 25);
-      PrintString("Edit Menu Colours", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Edit Menu Colours", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      PrintString( ">", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
       if (cursor == options - 5)   setcolour(vwhite, 15);
 
       // Monitor Test Patterns
       top-=spacing;
       if (cursor == options - 4)   setcolour(vwhite, 25);
-      PrintString("Test Patterns    ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString( ">        ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Test Patterns", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      PrintString( ">", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
       if (cursor == options - 4)   setcolour(vwhite, 15);
 
-      // Font Size
+      // Show Prev and Next
       top-=spacing;
       if (cursor == options - 3)   setcolour(vwhite, 25);
-      PrintString("Font Size        ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      sprintf(buffer, "%-9i", optz[o_fontsize]);
-      PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Show Prev/Next", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      PrintString((optz[o_togpnm] == 1 ? "yes" : "no"), col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
       if (cursor == options - 3)   setcolour(vwhite, 15);
 
       // Borders
       top-=spacing;
       if (cursor == options - 2)   setcolour(vwhite, 25);
-      PrintString("Borders          ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      PrintString((optz[o_borders] == 1 ? "yes      " : "no       "), 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Borders", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      PrintString((optz[o_borders] == 1 ? "yes" : "no"), col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
       if (cursor == options - 2)   setcolour(vwhite, 15);
 
       // Sounds
       top-=spacing;
       if (cursor == options - 1)   setcolour(vwhite, 25);
-      PrintString("Sounds / Volume  ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      sprintf(buffer, "%-9i", optz[o_volume]);
-      PrintString(optz[o_volume] > 0 ? buffer : "Off      ", 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Sounds/Volume", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      sprintf(buffer, "%i", optz[o_volume]);
+      PrintString(optz[o_volume] > 0 ? buffer : "Off", col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
 
       if (mousefound && optz[o_mouse])
       {
          setcolour(vyellow, 25);
-         PrintString("X", optx, ymax-12, 0, 10, 5, 0);
-         PrintString("X", optx, -ymax+12, 0, 10, 5, 0);
-         PrintString("X", xmax-12, opty, 0, 10, 5, 0);
-         PrintString("X", -xmax+12, opty, 0, 10, 5, 0);
+         PrintString("X", optx, ymax-12, 0, 10, 5, 0, c_align, 0);
+         PrintString("X", optx, -ymax+12, 0, 10, 5, 0, c_align, 0);
+         PrintString("X", xmax-12, opty, 0, 10, 5, 0, c_align, 0);
+         PrintString("X", -xmax+12, opty, 0, 10, 5, 0, c_align, 0);
        }
 
       // Print Keycode
       top=-ymax+50;
       setcolour(vgreen, 20);
-      PrintString("Last keycode     ", -150, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
-      sprintf(buffer,"0x%04x   ",lastkey);
-      PrintString(buffer, 250, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Last keycode", col1, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
+      sprintf(buffer,"0x%04x",lastkey);
+      PrintString(buffer, col2, top, 0, optz[o_fontsize], optz[o_fontsize], 0, l_align, 0);
 
       if (cc) lastkey = cc;                        // Record keypress
       if (cc) timer = 0;                           // Reset timer if we pressed something
@@ -2223,57 +2326,24 @@ void SetOptions(void)
       }
       switch (cursor)
       {
-         case 0:     // rotate screen through 90 degrees
+         case 0:     // Control Panel Type, 0=Buttons (e.g. Asteroids), 1=Joystick, 2=Spinner (e.g. Tempest)
          {
-            if (cc == keyz[k_nclone]) optz[o_rot] = ((optz[o_rot]+1)%4);
-            if (cc == keyz[k_pclone])
+            if (cc == keyz[k_nclone])
             {
-               optz[o_rot]--;
-               if (optz[o_rot] < 0) optz[o_rot] = 3;
+               optz[o_cpanel] = ((optz[o_cpanel]+1)%3);
+               if (optz[o_cpanel] == 2 && !mousefound) (optz[o_cpanel] = 0); // You can't select spinner if no mouse was found
             }
-            if (cc == keyz[k_start]) optz[o_rot] = 0;
-            if ((optz[o_rot] == 1) || (optz[o_rot] == 3))
-            {
-               xmax = Y_MAX;
-               ymax = X_MAX;
-            }
-            else
-            {
-               xmax = X_MAX;
-               ymax = Y_MAX;
-            }
-            break;
-         }
-         case 1:     // Stars
-         {
-            if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_stars] = !optz[o_stars];
-            if (cc == keyz[k_start]) optz[o_stars]   = 0;
-            break;
-         }
-
-         case 2:     // Upper/Lower case
-         {
-            if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_ucase] = !optz[o_ucase];
-            if (cc == keyz[k_start]) optz[o_ucase] = 0;
-            break;
-         }
-
-         case 3:     // Prev/Next manufacturer names
-         {
-            if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_togpnm] = !optz[o_togpnm];
-            if (cc == keyz[k_start]) optz[o_togpnm] = 0;
-            break;
-         }
-
-         case 4:     // Control Panel Type, 0=Buttons (e.g. Asteroids), 1=Joystick, 2=Spinner (e.g. Tempest)
-         {
-            if (cc == keyz[k_nclone]) optz[o_cpanel] = ((optz[o_cpanel]+1)%3);
             if (cc == keyz[k_pclone])
             {
                optz[o_cpanel]--;
                if (optz[o_cpanel] < 0) optz[o_cpanel] = 2;
+               if (optz[o_cpanel] == 2 && !mousefound) (optz[o_cpanel] = 1); // You can't select spinner if no mouse was found
             }
-            if (cc == keyz[k_start]) optz[o_cpanel] = 0;    // Set default if you press START1
+            if (cc == keyz[k_start])
+            {
+               if (optz[o_cpanel] > 0) optz[o_cpanel] = 0;    // Set default if you press START1
+               else                    optz[o_cpanel] = 1;    // Set default if you press START1
+            }
             if (optz[o_cpanel] == 0)      // Asteroids style control panel
             {
                keyz[k_pman]   = LEFT;     // "Left"
@@ -2294,20 +2364,75 @@ void SetOptions(void)
             }
             if (optz[o_cpanel] == 2)      // Tempest style control panel
             {
-               keyz[k_pman]   = FIRE;     // "Left"  = Fire
-               keyz[k_nman]   = THRUST;   // "Right" = Thrust / Super Zapper
-               keyz[k_pclone] = FIRE;     // "Left"  = Fire
-               keyz[k_nclone] = THRUST;   // "Right" = Thrust / Super Zapper
-               keyz[k_pgame]  = UP;       // "Up"    = Spinner CCW
-               keyz[k_ngame]  = DOWN;     // "Down"  = Spinner CW
+               if (mousefound)
+               {
+                  keyz[k_pman]   = FIRE;     // "Left"  = Fire
+                  keyz[k_nman]   = THRUST;   // "Right" = Thrust / Super Zapper
+                  keyz[k_pclone] = FIRE;     // "Left"  = Fire
+                  keyz[k_nclone] = THRUST;   // "Right" = Thrust / Super Zapper
+                  keyz[k_pgame]  = UP;       // "Up"    = Spinner CCW
+                  keyz[k_ngame]  = DOWN;     // "Down"  = Spinner CW
+                  if (optz[o_mouse] == 0 ) (optz[o_mouse] = 1);
+               }
             }
             break;
          }
 
-         case 5:     // re-open ZVG
+         case 1:     // rotate screen through 90 degrees
          {
-            if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_redozvg] = !optz[o_redozvg];
-            if (cc == keyz[k_start]) optz[o_redozvg] = 0;
+            if (cc == keyz[k_nclone]) optz[o_rot] = ((optz[o_rot]+1)%4);
+            if (cc == keyz[k_pclone])
+            {
+               optz[o_rot]--;
+               if (optz[o_rot] < 0) optz[o_rot] = 3;
+            }
+            if (cc == keyz[k_start]) optz[o_rot] = 0;
+            if ((optz[o_rot] == 1) || (optz[o_rot] == 3))
+            {
+               xmax = Y_MAX;
+               ymax = X_MAX;
+            }
+            else
+            {
+               xmax = X_MAX;
+               ymax = Y_MAX;
+            }
+            break;
+         }
+
+         case 2:     // Stars
+         {
+            if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_stars] = !optz[o_stars];
+            if (cc == keyz[k_start]) optz[o_stars]   = 0;
+            break;
+         }
+
+         case 3:     // Font Selection
+         {
+            if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_font] = !optz[o_font];
+            if (cc == keyz[k_start]) optz[o_font] = 0;
+            break;
+         }
+
+         case 4:     // Upper/Lower case
+         {
+            if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_ucase] = !optz[o_ucase];
+            if (cc == keyz[k_start]) optz[o_ucase] = 0;
+            break;
+         }
+
+         case 5:     // Font Size
+         {
+            if (cc == keyz[k_pclone])
+            {
+               optz[o_fontsize]--;
+               if (optz[o_fontsize] < 5) optz[o_fontsize] = 5;
+            }
+            if (cc == keyz[k_nclone])
+            {
+               optz[o_fontsize]++;
+               if (optz[o_fontsize] > 8) optz[o_fontsize] = 8;
+            }
             break;
          }
 
@@ -2320,6 +2445,16 @@ void SetOptions(void)
                if (optz[o_mouse] < 0) optz[o_mouse] = 3;
             }
             if (cc == keyz[k_start]) optz[o_mouse] = 0;
+            if (optz[o_mouse] == 0 && optz[o_cpanel] == 2)   // If you have said there is no optical control but cpanel was spinner, set cpanel to buttons
+            {
+               optz[o_cpanel] = 0;
+               keyz[k_pman]   = LEFT;     // "Left"
+               keyz[k_nman]   = RIGHT;    // "Right"
+               keyz[k_pclone] = LEFT;     // "Left"
+               keyz[k_nclone] = RIGHT;    // "Right"
+               keyz[k_pgame]  = THRUST;   // "Up"
+               keyz[k_ngame]  = FIRE;     // "Down"
+            }
             MouseX = 0;
             MouseY = 0;
             break;
@@ -2360,13 +2495,16 @@ void SetOptions(void)
                mdy=0;
             }
             if (cc == keyz[k_start]) optz[o_msens] = 30;
+            break;
          }
       }
+
       // From here the options number can change depending on whether mouse settings are active, so we can't use switch/case...
       if (cursor == options-6)   // Edit Games List
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditGamesList();
       }
+
       if (cursor == options-5)   // Edit Menu Colours
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) EditColours();
@@ -2376,23 +2514,17 @@ void SetOptions(void)
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) TestPatterns();
       }
-      if (cursor == options-3)   // Font Size
+
+      if (cursor == options-3)   // Prev/Next manufacturer names
       {
-         if (cc == keyz[k_pclone])
-         {
-            optz[o_fontsize]--;
-            if (optz[o_fontsize] < 4) optz[o_fontsize] = 4;
-         }
-         if (cc == keyz[k_nclone])
-         {
-            optz[o_fontsize]++;
-            if (optz[o_fontsize] > 7) optz[o_fontsize] = 7;
-         }
+         if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_togpnm] = !optz[o_togpnm];
+         if (cc == keyz[k_start]) optz[o_togpnm] = 0;
       }
+
       if (cursor == options-2)   // Borders
       {
          if (cc == keyz[k_pclone] || cc == keyz[k_nclone]) optz[o_borders] = !optz[o_borders];
-         if (cc == keyz[k_start]) optz[o_borders]   = 1;
+         if (cc == keyz[k_start]) optz[o_borders] = 1;
       }
       if (cursor == options-1)   // Sound Volume
       {
@@ -2430,7 +2562,8 @@ void   EditGamesList(void)
 
    MouseX = 0;
    MouseY = 0;
-   maxlen = maxlen - 5*(optz[o_fontsize] - 3); // remove 5 more chars per font increase
+   //maxlen = maxlen - 5*(optz[o_fontsize] - 3); // remove 5 more chars per font increase
+   maxlen = maxlen - 4*(optz[o_fontsize]-3); // remove 1 char per font increase
 
    list_root = build_games_list();
    list_cursor = list_root;
@@ -2500,39 +2633,41 @@ void   EditGamesList(void)
                gamename[j] = list_print->desc[j+descindex];
             }
             setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
-            PrintString(gamename, 60, top, 0, optz[o_fontsize]+1, optz[o_fontsize]+1, 0);
+            PrintString(gamename, 60, top, 0, optz[o_fontsize]+1, optz[o_fontsize]+1, 0, c_align, 0);
             sprintf(manufname, "(%s)", list_print->manuf);
-            PrintString(">       ", -300, top, 0, 5, 7, 0);
-            PrintString("O", -305, top, 0, 16, 8, 0);
+            PrintString(">       ", -300, top, 0, 5, 7, 0, c_align, 0);
+            PrintString("{", -305, top, 0, 13, 13, 0, c_align, 0);
             setcolour(c_hide, 25);
-            //PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 5.5, 7, 0);
-            PrintString((list_print->hidden == 1 ? "         " : "    #    "), -307, top, 0, 6, 7, 0);
+            //PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 5.5, 7, 0, c_align, 0);
+            PrintString((list_print->hidden == 1 ? " " : "}"), -307, top, 0, 7, 7, 0, c_align, 0);
             list_active=list_print;
             i_gameinc=-i_gameinc;
             if (startgame)
             {
                setcolour(vwhite, 20);
-               PrintString("|", -245, top-4, 0, 5*width, 5, 0);   // | = coin graphic
+               PrintString("|", -245, top-4, 0, 12*width, 12, 0, c_align, 1);   // | = coin graphic
+               PrintString("10p", -245, top-4, 0, 2*width, 5, 3, c_align, 1);   // | = coin graphic
             }
          }
          else
          {
             setcolour(vwhite, i_game);
             //setcolour(vwhite, colours[c_int][c_glist]);
-            PrintString("O", -305, top, 0, 13, 6, 0);
+            PrintString("{", -305, top, 0, 10, 10, 0, c_align, 0);
 
             //setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
             setcolour(colours[c_col][c_glist], i_game);
-            PrintString(gamename, 60, top, 0, optz[o_fontsize], optz[o_fontsize], 0);
+            PrintString(gamename, 60, top, 0, optz[o_fontsize], optz[o_fontsize], 0, c_align, 0);
 
             setcolour(c_hide, i_game);
-            //PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 4, 5, 0);
-            PrintString((list_print->hidden == 1 ? "         " : "    #    "), -307, top, 0, 4, 5, 0);
+            //PrintString((list_print->hidden == 1 ? "   HIDE  " : "   SHOW  "), -305, top, 0, 4, 5, 0, c_align, 0);
+            PrintString((list_print->hidden == 1 ? " " : "}"), -307, top, 0, 4, 5, 0, c_align, 0);
             i_game+=i_gameinc;
             if (startgame)
             {
                setcolour(vwhite, i_game);
-               PrintString("|", -255, top-3, 0, 3*width, 3, 0);   // | = coin graphic
+               PrintString("|", -255, top-3, 0, 8*width, 8, 0, c_align, 1);   // | = coin graphic
+               PrintString("10p", -255, top-3, 0, 2*width, 3, 3, c_align, 1);   // | = coin graphic
             }
          }
          list_print=list_print->next;
@@ -2540,9 +2675,9 @@ void   EditGamesList(void)
          startgame=0;
       }
       setcolour(vwhite, 20);
-      PrintString(manufname, 60, -ymax+120, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString(manufname, 60, -ymax+120, 0, optz[o_fontsize], optz[o_fontsize], 0, c_align, 0);
       setcolour(vgreen, 20);
-      PrintString("Set/clear autorun game with 1P Start", 0, -ymax+80, 0, optz[o_fontsize], optz[o_fontsize], 0);
+      PrintString("Set/clear autorun game with 1P Start", 0, -ymax+80, 0, optz[o_fontsize], optz[o_fontsize], 0, c_align, 0);
 
       cc=getkey();
       if (cc)
@@ -2616,6 +2751,7 @@ void   EditGamesList(void)
    sel_game       = vectorgames->firstgame;
    sel_clone      = sel_game;
    man_menu       = 1;
+   
 }
 
 
@@ -2661,17 +2797,17 @@ void EditColours(void)
 
       if (index==1)  setcolour(colours[c_col][c_sman], colours[c_int][c_sman]);
       else           setcolour(colours[c_col][c_man], colours[c_int][c_man]);
-      PrintString("Maker", 0, 300, 0, 12, 12, 0);
+      PrintString("Maker", 0, 300, 0, 12, 12, 0, c_align, 0);
 
       setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
-      PrintString(">", 0, 220, 270, 6, 6, 0);
+      PrintString(">", 0, 220, 270, 6, 6, 0, l_align, 0);
       setcolour(colours[c_col][c_arrow], colours[c_int][c_arrow]);
-      PrintString("<", -150, 300, 0, 7, 7, 0);
-      PrintString(">", 125, 300, 0, 7, 7, 0);
+      PrintString("<", -150, 300, 0, 7, 7, 0, c_align, 0);
+      PrintString(">", 125, 300, 0, 7, 7, 0, c_align, 0);
 
       setcolour(colours[c_col][c_pnman], colours[c_int][c_pnman]);
-      PrintString("Prev", -(xmax-100), 300, 0, 6, 6, 0);
-      PrintString("Next", xmax-100, 300, 0, 6, 6, 0);
+      PrintString("Prev", -(xmax-100), 300, 0, 6, 6, 0, c_align, 0);
+      PrintString("Next", xmax-100, 300, 0, 6, 6, 0, c_align, 0);
 
       top=150;
       for (games=1; games<10; games++)
@@ -2679,12 +2815,12 @@ void EditColours(void)
          if (games == 5)
          {
             setcolour(colours[c_col][c_sgame], colours[c_int][c_sgame]);
-            PrintString("Selected Game", 0, top, 0, 5, 5, 0);
+            PrintString("Selected Game", 0, top, 0, 6, 6, 0, c_align, 0);
          }
          else
          {
             setcolour(colours[c_col][c_glist], colours[c_int][c_glist]);
-            PrintString("Game List Item", 0, top, 0, 4, 4, 0);
+            PrintString("Game List Item", 0, top, 0, 5, 5, 0, c_align, 0);
          }
          top -= 35;
       }
@@ -2759,7 +2895,7 @@ void EditColours(void)
             drawbox(-100-(curscol/3), 250-(curscol/3), 100+(curscol/3), 350+(curscol/3), vwhite, curscol);
             item_col=colours[c_col][c_man];
             item_int=colours[c_int][c_man];
-            strcpy(desc, "Manufacturer (Non-selected) ");
+            strcpy(desc, "Manufacturer (Non-selected)");
             break;
          }
          case 1:   // Manufacturer - Selected
@@ -2767,7 +2903,7 @@ void EditColours(void)
             drawbox(-100-(curscol/3), 250-(curscol/3), 100+(curscol/3), 350+(curscol/3), vwhite, curscol);
             item_col=colours[c_col][c_sman];
             item_int=colours[c_int][c_sman];
-            strcpy(desc, "Manufacturer (Selected)     ");
+            strcpy(desc, "Manufacturer (Selected)");
             break;
          }
          case 2:   // Arrows
@@ -2777,7 +2913,7 @@ void EditColours(void)
             drawbox(105-(curscol/3), 265-(curscol/3), 175+(curscol/3), 335+(curscol/3), vwhite, curscol);
             item_col=colours[c_col][c_arrow];
             item_int=colours[c_int][c_arrow];
-            strcpy(desc, "Arrows                      ");
+            strcpy(desc, "Arrows");
             break;
          }
          case 3:   // Prev/Next
@@ -2786,7 +2922,7 @@ void EditColours(void)
             drawbox(-(xmax-170)+(curscol/3), 260-(curscol/3), -(xmax-30)-(curscol/3), 340+(curscol/3), vwhite, curscol);
             item_col=colours[c_col][c_pnman];
             item_int=colours[c_int][c_pnman];
-            strcpy(desc, "Prev/Next Manufacturer      ");
+            strcpy(desc, "Prev/Next Manufacturer");
             break;
          }
          case 4:   // Games List
@@ -2795,7 +2931,7 @@ void EditColours(void)
             drawbox(-130+(curscol/3), 180-(curscol/3), 130-(curscol/3), 30-(curscol/3), vwhite, curscol);
             item_col=colours[c_col][c_glist];
             item_int=colours[c_int][c_glist];
-            strcpy(desc, "Games List (Non-selected)   ");
+            strcpy(desc, "Games List (Non-selected)");
             break;
          }
          case 5:   // Selected Game
@@ -2803,7 +2939,7 @@ void EditColours(void)
             drawbox(-130+(curscol/3), 30-(curscol/3), 130-(curscol/3), (curscol/3)-12, vwhite, curscol);
             item_col=colours[c_col][c_sgame];
             item_int=colours[c_int][c_sgame];
-            strcpy(desc, "Games List (Selected)       ");
+            strcpy(desc, "Games List (Selected)");
             break;
          }
          case 6:   // Asteroids
@@ -2813,19 +2949,19 @@ void EditColours(void)
             item_col=colours[c_col][c_asts];
             if (item_col==99990) item_col=7;
             item_int=colours[c_int][c_asts];
-            strcpy(desc, "Asteroids                   ");
+            strcpy(desc, "Asteroids");
          }
       }
 
       setcolour(vwhite, 25);
-      PrintString("< >", -345, -ymax+165, 90, 4, 6, 90);
+      PrintString("< >", -345, -ymax+165, 90, 4, 6, 90, c_align, 0);
       setcolour(vwhite, 20);
 
-      PrintString("Menu Item", -245, -ymax+170, 0, 6, 6, 0);
+      PrintString("Menu Item", -245, -ymax+170, 0, 6, 6, 0, c_align, 0);
       setcolour(vyellow, 25-curscol);
-      PrintString(desc, 100, -ymax+170, 0, 6, 6, 0);   // Print the name of the selected menu item
+      PrintString(desc, -150, -ymax+170, 0, 6, 6, 0, l_align, 0);   // Print the name of the selected menu item
       setcolour(vwhite, 20);
-      PrintString("P1 Start toggles editing colour/intensity", 0, -ymax+130, 0, 6, 6, 0);
+      PrintString("P1 Start toggles editing colour/intensity", 0, -ymax+130, 0, 6, 6, 0, c_align, 0);
 
       sprintf(colval,"<  %i >",item_col);
       sprintf(intval,"<  %i >",item_int);
@@ -2834,16 +2970,16 @@ void EditColours(void)
       if (!ci_toggle)
       {
          setcolour(vgreen, 25);
-         PrintString("Colour value:      ", -40, -ymax+75, 0, 6, 6, 0);
+         PrintString("Colour value:", -40, -ymax+75, 0, 6, 6, 0, c_align, 0);
          setcolour(vwhite, 25);
-         PrintString(colval, 150, -ymax+75, 0, 6, 6, 0);
+         PrintString(colval, 150, -ymax+75, 0, 6, 6, 0, c_align, 0);
       }
       else
       {
          setcolour(vmagenta, 25);
-         PrintString("Intensity value:   ", -40, -ymax+75, 0, 6, 6, 0);
+         PrintString("Intensity value:", -40, -ymax+75, 0, 6, 6, 0, c_align, 0);
          setcolour(vwhite, 25);
-         PrintString(intval, 150, -ymax+75, 0, 6, 6, 0);
+         PrintString(intval, 150, -ymax+75, 0, 6, 6, 0, c_align, 0);
       }
       sendframe();
    }
@@ -2895,24 +3031,50 @@ void TestPatterns()
    char* a_cnames[7] = { "W", "R", "G", "B", "M", "C", "Y"};
    int mono = 0; //(ZvgIO.envMonitor & MONF_BW); // && ZVGPresent;    // Black & White monitor
    point start, end;
+   
+   #ifdef USBDVG
+   if (ZVGPresent == 2)
+   {
+      char value[16];
+      if (zvgGetOption("bwDisplay", value, sizeof(value)) == 0)
+      {
+         //printf("Is Mono: %s\n", value);
+         mono = (strcmp(value, "true") == 0);
+      }
+   }
+   #else
+   if (ZVGPresent == 1)
+   {
+      mono = (ZvgIO.envMonitor & MONF_BW);
+   }
+   #endif
+
    while (cc != keyz[k_quit] && cc != keyz[k_options] && cc != START2)
    {
       timer++;
       if ((timer%60 == 5) || (timer%60 == 35)) setLEDs(timer%60 <30 ? C_LED : N_LED);
 
       cc=getkey();
-      if (cc == keyz[k_pclone]) if (--col < 0) col = 6;
-      if (cc == keyz[k_nclone]) if (++col > 6) col = 0;
+      if (!mono)
+      {
+         if (cc == keyz[k_pclone]) if (--col < 0) col = 6;
+         if (cc == keyz[k_nclone]) if (++col > 6) col = 0;
+      }
+      else col = 6;
       if (cc == keyz[k_pgame])  if (--pattern < 0) pattern=5;
       if (cc == keyz[k_ngame])  if (++pattern > 5) pattern=0;
       if (cc == keyz[k_start]) showchars = !showchars;
-      //if (cc == START2) mono = !mono;        // For test purposes
+      if (cc == HYPSPACE) mono = !mono;        // For test purposes
 
+      if (showchars)
+      {
+         setcolour(col, EDGE_NRM);
+         PrintString("0123456789-+()*ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0, -ymax+64, 0, 6, 6, 0, c_align, optz[o_font]);
+      }
       rotation = optz[o_rot];
       optz[o_rot] = 0;
-      //setcolour(col, EDGE_NRM);
       drawbox(X_MIN, Y_MIN, X_MAX, Y_MAX, col, EDGE_NRM);
-
+      
       switch (pattern)
       {
 
@@ -3022,8 +3184,8 @@ void TestPatterns()
                for(x=0;x<7;x++)
                {
                   BrightnessBars(-240, 180-(60*x), 48, a_cols[x]);
-                  PrintString(a_cnames[x], -280, 180-(60*x), 0, 12, 12, 0);
-                  PrintString(a_cnames[x],  280, 180-(60*x), 0, 12, 12, 0);
+                  PrintString(a_cnames[x], -280, 180-(60*x), 0, 12, 12, 0, c_align, optz[o_font]);
+                  PrintString(a_cnames[x],  280, 180-(60*x), 0, 12, 12, 0, c_align, optz[o_font]);
                }
             }
             break;
@@ -3070,7 +3232,6 @@ void TestPatterns()
       optz[o_rot] = rotation;
       // Draw character set on all screens if 1P Start was pressed
       //setcolour(col, EDGE_NRM);
-      if (showchars) PrintString("0123456789-+()*ABCDEFGHIJKLMNOPQRSTUVWXYZ",0 , -ymax+64, 0, 6, 6, 0);
 
       sendframe();
    }
@@ -3122,4 +3283,5 @@ int numofgames(m_node *manlist)
    }
    return total;
 }
+
 
