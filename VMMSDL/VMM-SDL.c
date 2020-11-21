@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <SDL.h>
+#include <SDL_gamecontroller.h>
 #include "vmmstddef.h"
 #include "VMM-SDL.h"
 #if defined(linux) || defined(__linux)
@@ -64,6 +65,10 @@ Mix_Chunk      *aNuke     = NULL;
 #define		fps     60
 #define		fps_ms  1000/fps
 
+#define MAX_CONTROLLERS  8
+
+SDL_GameController* s_controllers[MAX_CONTROLLERS];
+static int s_controller_cnt;
 
 /******************************************************************
    Start up the DVG if poss and use SDL if necessary
@@ -125,13 +130,46 @@ void InitialiseSDL(int start)
    /* Initialise SDL */
    if (start)
    {
-      if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0)
+      if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER ) < 0)
       {
          fprintf( stderr, "Could not initialise SDL: %s\n", SDL_GetError() );
          exit( -1 );
       }
       //else printf("SDL Initialised\n");
    }
+
+   for (int i = 0; i < SDL_NumJoysticks(); i++)
+   {
+      if (SDL_IsGameController(i))
+      {
+         //printf("Found game controller %d\n", i);
+         SDL_GameController* pad = SDL_GameControllerOpen(i);
+         if (pad)
+         {
+            int added = 0;
+            if (SDL_GameControllerGetAttached(pad))
+            {
+               if (s_controller_cnt < MAX_CONTROLLERS)
+               {
+                   //printf("Attached game controller %d\n", i);
+                   printf("Game controller attached: %s\n", SDL_GameControllerName(pad));
+                   s_controllers[s_controller_cnt++] = pad;
+                   added = 1;
+               }
+            }
+            if (!added)
+            {
+               SDL_GameControllerClose(pad);
+            }
+         }
+      }
+   }
+   if (s_controller_cnt)
+   {
+      SDL_GameControllerEventState(SDL_ENABLE);
+   }
+
+
    // Create SDL Window
    WINDOW_WIDTH=((WINDOW_HEIGHT/3)*4); // try to make the window 4:3
    WINDOW_SCALE=(768.0/WINDOW_HEIGHT);
@@ -185,6 +223,7 @@ void InitialiseSDL(int start)
    if (!aNuke)     printf( "[\033[01;33mX\033[0m] Failed to load sample ./VMMsnd/nuke1.wav\n" );
 
    Mix_Volume(-1, optz[o_volume]);
+
 }
 
 
@@ -234,6 +273,12 @@ void playsound(int picksound)
 ********************************************************************/
 void CloseSDL(int done)
 {
+   for (int i = 0 ; i < s_controller_cnt ; i++)
+   {
+      SDL_GameControllerClose(s_controllers[i]);
+      s_controllers[i] = NULL;
+   }
+   s_controller_cnt = 0;
    SDL_SetWindowGrab(window, SDL_FALSE);
    SDL_ShowCursor(SDL_ENABLE);
    SDL_DestroyWindow(window);
@@ -370,6 +415,9 @@ int getkey(void)
       //printf("Event: %d\n", event.type);
       switch(event.type)
       {
+      	case SDL_CONTROLLERBUTTONDOWN:
+            key = 0x55550000 | (event.cbutton.which << 8) | event.cbutton.button;
+            break;
          case SDL_MOUSEMOTION:
             mdx += event.motion.xrel;
             mdy += event.motion.yrel;

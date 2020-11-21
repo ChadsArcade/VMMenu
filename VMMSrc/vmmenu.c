@@ -65,13 +65,17 @@
 *                    Game list code cleanup, max games in list is now a define
 *
 * 26-Oct-20 v1.8b1   Added Hershey font
-*                    Rewrote text printing routine
-*                    Converted original font to new format
-*                    Font now selectable in settings
+*                    Rewrote text printing routine. 
+*                    Todo: Make a structure for text and the many attributes it can have(?)
+*                    Converted original font to new font format
+*                    Font is now selectable in settings
 *                    Removed re-open ZVG option (it does this regardless)
 *
 * 27-Oct-20 v1.8b2   Set simple font for text heavy settings screens as ZVG
 *                    has a buffer overflow otherwise. Plus it speeds things up.
+*
+* 21-Nov-20 v1.9     Added Joypad support (Mario Montminy)
+*                    Improvements to the USB-DVG driver (Mario Montminy)
 *
 ***********************************************************************************/
 #include <stdio.h>
@@ -178,7 +182,7 @@ m_node       *vectorgames;
 g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
 unsigned int man_menu;
 
-char         auth1[] = "VMMenu 1.8b2, Chad Gray";
+char         auth1[] = "VMMenu 1.9, Chad Gray";
 char         auth2[] = "ChadsArcade@Gmail.com";
 
 #define      maxgamesonlist 13          // Must be ODD and (ideally) > 5 else you don't get the scroll effect
@@ -2105,7 +2109,7 @@ void SetOptions(void)
    int   optx = 0, opty = 0, timer = 0, LEDtimer=0;
    int   lastkey = keyz[k_options], spacing = 42;
    point p1, p2;
-   char  buffer[10];
+   char  buffer[15];
    
    setLEDs(0);
    //mousefound=0; //For Testing

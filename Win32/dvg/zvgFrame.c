@@ -31,14 +31,11 @@
 #define FLAG_RGB                0x1
 #define FLAG_XY                 0x2
 #define FLAG_EXIT               0x7
-#define FLAG_FRAME              0x4
-#define FLAG_QUALITY            0x3
 #define FLAG_CMD                0x5
 #define FLAG_CMD_GET_DVG_INFO   0x1
 
-#define DVG_RES_MIN        0
-#define DVG_RES_MAX        4095
-#define DVG_RENDER_QUALITY 5
+#define DVG_RES_MIN             0
+#define DVG_RES_MAX             4095
 
 #define CONVX(x)        ((((x) - X_MIN) * DVG_RES_MAX) / (X_MAX - X_MIN))
 #define CONVY(y)        ((((y) - Y_MIN) * DVG_RES_MAX) / (Y_MAX - Y_MIN))
@@ -52,10 +49,12 @@
 #define RIGHT  2
 #define LEFT   1
 
+extern int g_debug;
+
+
 static int     s_cmd_offs;
 static uint8_t s_cmd_buf[CMD_BUF_SIZE];
 static uint8_t s_last_r, s_last_g, s_last_b;
-static int     s_vector_length;
 static int     s_last_x;
 static int     s_last_y;
 #if defined(linux) || defined(__linux)
@@ -79,29 +78,23 @@ enum portErrCode
    errOpenDevice        // Could not open the DVG
 };
 
-
-/******************************************************************
-   Calculate the length of a vector from the start and end points
-*******************************************************************/
-static int vector_length(int x0, int y0, int x1, int y1)
-{
-    int dx, dy, len;
-    dx = x1 - x0;
-    dy = y1 - y0;
-    len = (uint32_t)sqrt((dx * dx) + (dy * dy));
-    return len;
-}
-
-
 /******************************************************************
    Reset command
 *******************************************************************/
-static void cmd_reset()
+static void cmd_reset(uint32_t initial)
 {
-    s_cmd_offs = 4;
-    s_vector_length = 0;
-    s_last_x = s_last_y = INT_MIN;
-    s_last_r = s_last_g = s_last_b = 0;
+   uint32_t i, cnt;
+   s_cmd_offs = 0;
+   s_last_x = s_last_y = INT_MIN;
+   s_last_r = s_last_g = s_last_b = 0;
+   // Special sync pattern
+   cnt = 8;
+   if (initial) {
+      cnt = 512;
+   }
+   for (i = 0 ; i < cnt ; i++) {
+      s_cmd_buf[s_cmd_offs++] = 0xc0 | (i & 0x3);
+   }
 }
 
 
@@ -157,7 +150,7 @@ static int serial_open()
    #else                   // Linux Code
       struct termios attr;
 
-      s_serial_fd = open(s_serial_dev, O_RDWR | O_NOCTTY | O_SYNC, 0666);
+      s_serial_fd = open(s_serial_dev, O_RDWR | O_NOCTTY);
       if (s_serial_fd < 0)
       {
          zvgError(errOpenCom);
@@ -173,7 +166,7 @@ static int serial_open()
       result = 0;
    #endif
    END:
-   cmd_reset();
+   cmd_reset(1);
    return result;
 }
 
@@ -183,19 +176,26 @@ static int serial_open()
 *******************************************************************/
 static int serial_write(void *buf, uint32_t size)
 {
-   int result = -1;
-   #ifdef __WIN32__
-      DWORD written;
-      if (WriteFile(s_serial_fd, buf,  size, &written, NULL))
-      {
-         result = written;
-      }
-   #else
-      result = write(s_serial_fd, buf, size);
-      if (result != (int)size) {
-         printf("DVG: write error %d \n", result);
-      }
-   #endif
+   int result = -1, written;
+   uint32_t chunk, total;
+
+    total = size;
+    while (size) {
+        chunk = MIN(size, 1024);
+#ifdef __WIN32__
+        WriteFile(s_serial_fd, buf,  chunk, (DWORD *)&written, NULL);
+#else
+        written = write(s_serial_fd, buf, chunk);
+#endif
+        if (written != (int)chunk) {
+            printf("DVG: write error %d \n", written);
+            goto END;
+        }
+        buf  += chunk;
+        size -= chunk;
+    }
+    result = total;
+END:
    return result > 0;
 }
 
@@ -257,37 +257,15 @@ static int serial_close()
 static int serial_send()
 {
    int      result = -1;
-   uint32_t cmd, chunk, size, offset;
-
-   cmd = (FLAG_FRAME << 29) | s_vector_length;
-   s_cmd_buf[0] = cmd >> 24;
-   s_cmd_buf[1] = cmd >> 16;
-   s_cmd_buf[2] = cmd >>  8;
-   s_cmd_buf[3] = cmd >>  0;
-
-   cmd = (FLAG_QUALITY << 29) | DVG_RENDER_QUALITY;
-   s_cmd_buf[s_cmd_offs++] = cmd >> 24;
-   s_cmd_buf[s_cmd_offs++] = cmd >> 16;
-   s_cmd_buf[s_cmd_offs++] = cmd >>  8;
-   s_cmd_buf[s_cmd_offs++] = cmd >>  0;
+   uint32_t cmd;
 
    cmd = (FLAG_COMPLETE << 29);
    s_cmd_buf[s_cmd_offs++] = cmd >> 24;
    s_cmd_buf[s_cmd_offs++] = cmd >> 16;
    s_cmd_buf[s_cmd_offs++] = cmd >>  8;
    s_cmd_buf[s_cmd_offs++] = cmd >>  0;
-   size = s_cmd_offs;
-   //printf("Buffer: %i\n",size); 
-   
-   offset = 0;
-   while (size)
-   {
-      chunk   = MIN(size, 1024);
-      result  = serial_write(&s_cmd_buf[offset], chunk);
-      size   -= chunk;
-      offset += chunk;
-   }
-   cmd_reset();
+   result = serial_write(s_cmd_buf, s_cmd_offs);
+   cmd_reset(0);
    return result;
 }
 
@@ -604,10 +582,8 @@ uint32_t zvgFrameVector( int xStart, int yStart, int xEnd, int yEnd)
          ys = 0;
       }
 
-      s_vector_length += vector_length(s_last_x, s_last_y, xs, ys);
-      s_vector_length += vector_length(xs, ys, xe, ye);
 
-      if ((xStart != s_last_x) || (yStart != s_last_y))
+      if ((xs != s_last_x) || (ys != s_last_y))
       {
          blank = 1;
          cmd = (FLAG_XY << 29) | ((blank & 0x1) << 28) | ((xs & 0x3fff) << 14) | (ys & 0x3fff);
