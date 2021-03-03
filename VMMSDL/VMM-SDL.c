@@ -426,6 +426,12 @@ int getkey(void)
             key = event.key.keysym.scancode;
             //printf("Key: %X\n", key);
             break;
+	 case SDL_JOYAXISMOTION:
+           if (event.jaxis.axis ==0 && event.jaxis.value <-3200) key = keyz[k_pclone];	//Joystick X-Axis left  Using 3200 as deadzone. Note:applies to all joysticks.
+           if (event.jaxis.axis ==0 && event.jaxis.value >3200) key = keyz[k_nclone];   //Jostick X-Axis right
+           if (event.jaxis.axis ==1 && event.jaxis.value <-3200) key = keyz[k_pgame];	//Joystick Y-Axis down
+           if (event.jaxis.axis ==1 && event.jaxis.value >3200) key = keyz[k_ngame];	//Joystick Y-Axis up
+            break;	      	      
          default:
             break;
       }
