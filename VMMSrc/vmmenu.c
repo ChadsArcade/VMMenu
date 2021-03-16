@@ -177,6 +177,7 @@ extern int   MouseX, MouseY;
 int          ZVGPresent = 1;
 int          SDL_VC, SDL_VB;            // colour and brightness for SDL vectors
 int          mousefound=0;
+int          jsdeadzone=32000;          //Joystick deadzone 
 
 m_node       *vectorgames;
 g_node       *gamelist_root = NULL, *sel_game = NULL, *sel_clone = NULL;
@@ -1840,6 +1841,7 @@ void getsettings(void)
    optz[o_mrevY]     = iniparser_getboolean(ini, "controls:reverseyaxis", 0);
    optz[o_mpoint]    = iniparser_getboolean(ini, "controls:pointer", 0);
    if (optz[o_msens] < 1) optz[o_msens] = 1;
+   jsdeadzone        = iniparser_getint(ini, "controls:jsdeadzone", 32000);    //Get joystick deadzone value if present, otherwise default it to 32000
 
    // key bindings - global keys
    keyz[k_menu]      = iniparser_getint(ini, "keys:k_togglemenu", HYPSPACE);
@@ -1973,6 +1975,7 @@ void writecfg()
    writeinival("controls:reversexaxis",         optz[o_mrevX], optz[o_mouse], 3);
    writeinival("controls:reverseyaxis",         optz[o_mrevY], optz[o_mouse], 3);
    writeinival("controls:pointer",              optz[o_mpoint], 0, 3);
+   writeinival("controls:jsdeadzone",           jsdeadzone, 0, 0);
 
    // write the key bindings
    writeinival("keys:k_togglemenu",             keyz[k_menu], 1, 1);
