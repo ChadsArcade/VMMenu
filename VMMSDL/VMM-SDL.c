@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <SDL.h>
 #include <SDL_gamecontroller.h>
+#include <SDL_joystick.h>
 #include "vmmstddef.h"
 #include "VMM-SDL.h"
 #if defined(linux) || defined(__linux)
@@ -39,6 +40,7 @@ extern int     mousefound;
 extern char    DVGPort[15];
 uint32_t       timestart = 0, timenow, duration;
 int            vector_count=0, colour_sets=0;
+extern int 	   jsdeadzone;
 
 enum vsounds
 {
@@ -69,6 +71,8 @@ Mix_Chunk      *aNuke     = NULL;
 
 SDL_GameController* s_controllers[MAX_CONTROLLERS];
 static int s_controller_cnt;
+SDL_Joystick* s_joysticks[MAX_CONTROLLERS];
+static int s_joystick_cnt;
 
 /******************************************************************
    Start up the DVG if poss and use SDL if necessary
@@ -130,7 +134,7 @@ void InitialiseSDL(int start)
    /* Initialise SDL */
    if (start)
    {
-      if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER ) < 0)
+      if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) < 0)
       {
          fprintf( stderr, "Could not initialise SDL: %s\n", SDL_GetError() );
          exit( -1 );
@@ -163,12 +167,38 @@ void InitialiseSDL(int start)
             }
          }
       }
+	if (!SDL_IsGameController(i))  //Not a SDL_GameController, but still a SDL_Joystick so open it!
+      {
+         SDL_Joystick* joy = SDL_JoystickOpen(i);
+         if (joy)
+         {
+            int added = 0;
+            if (SDL_JoystickGetAttached(joy))
+            {
+               if (s_joystick_cnt < MAX_CONTROLLERS)
+               {
+                   //printf("Attached game controller %d\n", i);
+                   printf("Joystick attached: %s\n", SDL_JoystickName(joy));
+				   printf("Joystick Deadzone: %d\n", jsdeadzone);
+                   s_joysticks[s_joystick_cnt++] = joy;
+                   added = 1;
+               }
+            }
+            if (!added)
+            {
+               SDL_JoystickClose(joy);
+            }
+         }
+      }
    }
    if (s_controller_cnt)
    {
       SDL_GameControllerEventState(SDL_ENABLE);
    }
-
+ if (s_joystick_cnt)
+   {
+      SDL_JoystickEventState(SDL_ENABLE);
+   }
 
    // Create SDL Window
    WINDOW_WIDTH=((WINDOW_HEIGHT/3)*4); // try to make the window 4:3
@@ -279,6 +309,13 @@ void CloseSDL(int done)
       s_controllers[i] = NULL;
    }
    s_controller_cnt = 0;
+   for (int i = 0 ; i < s_joystick_cnt ; i++)
+   {
+      SDL_JoystickClose(s_joysticks[i]);
+      s_joysticks[i] = NULL;
+   }
+   s_joystick_cnt = 0;
+  
    SDL_SetWindowGrab(window, SDL_FALSE);
    SDL_ShowCursor(SDL_ENABLE);
    SDL_DestroyWindow(window);
@@ -415,7 +452,7 @@ int getkey(void)
       //printf("Event: %d\n", event.type);
       switch(event.type)
       {
-      	case SDL_CONTROLLERBUTTONDOWN:
+      	 case SDL_CONTROLLERBUTTONDOWN:     
             key = 0x55550000 | (event.cbutton.which << 8) | event.cbutton.button;
             break;
          case SDL_MOUSEMOTION:
@@ -426,12 +463,15 @@ int getkey(void)
             key = event.key.keysym.scancode;
             //printf("Key: %X\n", key);
             break;
-	 case SDL_JOYAXISMOTION:
-           if (event.jaxis.axis ==0 && event.jaxis.value <-3200) key = keyz[k_pclone];	//Joystick X-Axis left  Using 3200 as deadzone. Note:applies to all joysticks.
-           if (event.jaxis.axis ==0 && event.jaxis.value >3200) key = keyz[k_nclone];   //Jostick X-Axis right
-           if (event.jaxis.axis ==1 && event.jaxis.value <-3200) key = keyz[k_pgame];	//Joystick Y-Axis down
-           if (event.jaxis.axis ==1 && event.jaxis.value >3200) key = keyz[k_ngame];	//Joystick Y-Axis up
-            break;	      	      
+         case SDL_JOYAXISMOTION:
+           if (event.jaxis.axis ==0 && event.jaxis.value <-jsdeadzone) key = keyz[k_pclone]; //Joystick X-Axis left.  Use defined deadzone value.  Note:applies to all joysticks.
+           if (event.jaxis.axis ==0 && event.jaxis.value >jsdeadzone) key = keyz[k_nclone];  //Joystick X-Axis right
+           if (event.jaxis.axis ==1 && event.jaxis.value <-jsdeadzone) key = keyz[k_pgame];	 //Joystick Y-Axis down
+           if (event.jaxis.axis ==1 && event.jaxis.value >jsdeadzone) key = keyz[k_ngame];	 //Joystick Y-Axis up
+            break;
+		case SDL_JOYBUTTONDOWN:
+            key = 0x55550000 | (event.jbutton.which << 8) | event.jbutton.button;
+            break;	
          default:
             break;
       }
