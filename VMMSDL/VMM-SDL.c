@@ -113,7 +113,7 @@ void startZVG(void)
    }
    else
    {
-      if (ZVGPresent !- 2) 
+      if (ZVGPresent != 2) 
           tmrSetFrameRate(FRAMES_PER_SEC);
       zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
    }
