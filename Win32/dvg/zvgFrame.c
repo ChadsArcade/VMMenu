@@ -490,8 +490,8 @@ void zvgError(uint32_t err)
 int zvgFrameOpen(void)
 {
    int result = errOpenDevice;
-   //tmrInit();                   // initialize timers
-   //tmrSetFrameRate(60);         // set the frame rate
+   tmrInit();                   // initialize timers
+   tmrSetFrameRate(45);         // set the frame rate
    strncpy(s_serial_dev, DVGPort, ARRAY_SIZE(s_serial_dev) - 1);
    s_serial_dev[ARRAY_SIZE(s_serial_dev) - 1] = 0;
    result = serial_open();

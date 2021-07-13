@@ -316,8 +316,25 @@ int main(int argc, char *argv[])
 
    if (autostart)
    {
-      printf("\nAutostart configured to run \"%s\"...\n", autogame);
-      RunGame(autogame);
+       int autostart_allowed = 1;
+       if (ZVGPresent == 2) 
+       {
+            char value[64];
+            // Override with game chosen on USB-DVG.
+            if (zvgGetOption("defaultGame", value, sizeof(value)) == 0) {
+                if (!strcmp(value, "none")) {
+                    autostart_allowed = 0;
+                }
+                else {
+                    strncpy(autogame, value, sizeof(autogame) - 1);
+                }
+            }
+        }
+        if (autostart_allowed) 
+        {
+            printf("\nAutostart configured to run \"%s\"...\n", autogame);
+            RunGame(autogame);
+        }
    }
    // If we exit the auto started game, or aren't autostarting, lets go with the menu intro and loop
 

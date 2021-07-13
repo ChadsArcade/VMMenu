@@ -60,7 +60,8 @@ long long int tmrReadTimer(void)
     }
 	
 	#else
-	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time_now);
+	clock_gettime(CLOCK_MONOTONIC, &time_now);
+
 	#endif
 	thetime = (long long int)((time_now.tv_sec * frequency) + (time_now.tv_nsec));
 

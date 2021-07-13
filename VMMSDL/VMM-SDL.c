@@ -113,7 +113,8 @@ void startZVG(void)
    }
    else
    {
-      tmrSetFrameRate(FRAMES_PER_SEC);
+      if (ZVGPresent !- 2) 
+          tmrSetFrameRate(FRAMES_PER_SEC);
       zvgFrameSetClipWin( X_MIN, Y_MIN, X_MAX, Y_MAX);
    }
 
@@ -452,8 +453,8 @@ int getkey(void)
       //printf("Event: %d\n", event.type);
       switch(event.type)
       {
-      	 case SDL_CONTROLLERBUTTONDOWN:     
-            key = 0x55550000 | (event.cbutton.which << 8) | event.cbutton.button;
+      	case SDL_CONTROLLERBUTTONDOWN:
+            key = 0x55550000 | event.cbutton.button;
             break;
          case SDL_MOUSEMOTION:
             mdx += event.motion.xrel;
@@ -529,7 +530,7 @@ int sendframe(void)
    unsigned int   err=0;
    if (ZVGPresent)
    {
-      //tmrWaitForFrame();      // wait for next frame time
+      tmrWaitForFrame();      // wait for next frame time
       //printf("Sending frame to DVG...");
       err = zvgFrameSend();     // send next frame
       //printf(" frame sent.\n");
