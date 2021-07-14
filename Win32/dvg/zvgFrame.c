@@ -566,7 +566,7 @@ uint32_t zvgFrameVector( int xStart, int yStart, int xEnd, int yEnd)
       ye = CONVY(yEnd);
 
       if (xs > DVG_RES_MAX)
-      {
+      {        
          xs = DVG_RES_MAX;
       }
       if (xs < 0)
@@ -574,12 +574,29 @@ uint32_t zvgFrameVector( int xStart, int yStart, int xEnd, int yEnd)
          xs = 0;
       }
       if (ys > DVG_RES_MAX)
-      {
+      {   
          ys = DVG_RES_MAX;
       }
       if (ys < 0)
-      {
+      {         
          ys = 0;
+      }
+
+      if (xe > DVG_RES_MAX)
+      {      
+         xe = DVG_RES_MAX;
+      }
+      if (xe < 0)
+      {         
+         xe = 0;
+      }
+      if (ye > DVG_RES_MAX)
+      {           
+         ye = DVG_RES_MAX;
+      }
+      if (ye < 0)
+      {           
+         ye = 0;
       }
 
 
