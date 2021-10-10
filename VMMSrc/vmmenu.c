@@ -316,8 +316,25 @@ int main(int argc, char *argv[])
 
    if (autostart)
    {
-      printf("\nAutostart configured to run \"%s\"...\n", autogame);
-      RunGame(autogame);
+       int autostart_allowed = 1;
+       if (ZVGPresent == 2) 
+       {
+            char value[64];
+            // Override with game chosen on USB-DVG.
+            if (zvgGetOption("defaultGame", value, sizeof(value)) == 0) {
+                if (!strcmp(value, "none")) {
+                    autostart_allowed = 0;
+                }
+                else {
+                    strncpy(autogame, value, sizeof(autogame) - 1);
+                }
+            }
+        }
+        if (autostart_allowed) 
+        {
+            printf("\nAutostart configured to run \"%s\"...\n", autogame);
+            RunGame(autogame);
+        }
    }
    // If we exit the auto started game, or aren't autostarting, lets go with the menu intro and loop
 
@@ -1003,7 +1020,7 @@ char* ucase(char *str)
 vObject intro(void)
 {
    vObject   mame;
-   int      count;
+   int      count, iter;
    float      bright = EDGE_NRM;
 
    // x from 0 to 390   (3rd vector of E) centre 195
@@ -1035,6 +1052,11 @@ vObject intro(void)
    mame.inc.y = 0;         // don't move
    mame.angle = 180;         // normal orientation
    mame.theta = -6;        // rotate clockwise 3 degrees per increment
+   iter = 150;
+   if (ZVGPresent == 2) {
+       mame.theta = -8;    // 
+       iter = 112;
+   }
    mame.cent.x = 195;      // defines centre of logo
    mame.cent.y = 55;       // centre of logo (rotation origin)
    mame.colour = vcyan;
@@ -1046,7 +1068,7 @@ vObject intro(void)
    playsound(0);
    
    // Zoom from 0 to x1.5 whilst rotating clockwise through 720 degrees
-   for (count=0;count<150;count++)
+   for (count=0;count<iter;count++)
    {
       drawshape(mame);
       mame = updateobject(mame);

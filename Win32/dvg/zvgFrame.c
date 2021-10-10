@@ -490,8 +490,8 @@ void zvgError(uint32_t err)
 int zvgFrameOpen(void)
 {
    int result = errOpenDevice;
-   //tmrInit();                   // initialize timers
-   //tmrSetFrameRate(60);         // set the frame rate
+   tmrInit();                   // initialize timers
+   tmrSetFrameRate(45);         // set the frame rate
    strncpy(s_serial_dev, DVGPort, ARRAY_SIZE(s_serial_dev) - 1);
    s_serial_dev[ARRAY_SIZE(s_serial_dev) - 1] = 0;
    result = serial_open();
@@ -566,7 +566,7 @@ uint32_t zvgFrameVector( int xStart, int yStart, int xEnd, int yEnd)
       ye = CONVY(yEnd);
 
       if (xs > DVG_RES_MAX)
-      {
+      {        
          xs = DVG_RES_MAX;
       }
       if (xs < 0)
@@ -574,12 +574,29 @@ uint32_t zvgFrameVector( int xStart, int yStart, int xEnd, int yEnd)
          xs = 0;
       }
       if (ys > DVG_RES_MAX)
-      {
+      {   
          ys = DVG_RES_MAX;
       }
       if (ys < 0)
-      {
+      {         
          ys = 0;
+      }
+
+      if (xe > DVG_RES_MAX)
+      {      
+         xe = DVG_RES_MAX;
+      }
+      if (xe < 0)
+      {         
+         xe = 0;
+      }
+      if (ye > DVG_RES_MAX)
+      {           
+         ye = DVG_RES_MAX;
+      }
+      if (ye < 0)
+      {           
+         ye = 0;
       }
 
 
